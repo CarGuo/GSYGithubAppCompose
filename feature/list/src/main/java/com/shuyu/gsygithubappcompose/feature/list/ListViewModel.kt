@@ -2,6 +2,7 @@ package com.shuyu.gsygithubappcompose.feature.list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.shuyu.gsygithubappcompose.core.common.util.StringResourceProvider
 import com.shuyu.gsygithubappcompose.core.network.config.NetworkConfig
 import com.shuyu.gsygithubappcompose.core.ui.components.toRepositoryDisplayData
 import com.shuyu.gsygithubappcompose.data.repository.RepositoryRepository
@@ -14,11 +15,13 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.shuyu.gsygithubappcompose.core.common.R
 
 @HiltViewModel
 class ListViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val reposRepository: RepositoryRepository,
+    private val stringResourceProvider: StringResourceProvider,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ListUIState())
@@ -65,33 +68,46 @@ class ListViewModel @Inject constructor(
             )
 
             val resultFlow = when (listType) {
+                CommonListDataType.REPOSITORIES -> {
+                    reposRepository.getUserRepos(userName!!, loadPage, "pushed")
+                }
+
                 CommonListDataType.FOLLOWER -> {
                     userRepository.getFollowers(userName!!, loadPage)
                 }
-                CommonListDataType.FOLLOWED -> {
+
+                CommonListDataType.FOLLOWING, CommonListDataType.FOLLOWED -> {
                     userRepository.getFollowing(userName!!, loadPage)
                 }
+
                 CommonListDataType.USER_REPOS -> {
                     reposRepository.getUserRepos(userName!!, loadPage, "pushed")
                 }
-                CommonListDataType.REPO_STAR -> {
+
+                CommonListDataType.STARGAZERS, CommonListDataType.REPO_STAR -> {
                     reposRepository.getRepoStargazers(userName!!, repoName!!, loadPage)
                 }
+
                 CommonListDataType.USER_STAR -> {
                     reposRepository.getUserStaredRepos(userName!!, loadPage, "updated")
                 }
-                CommonListDataType.REPO_WATCHER -> {
+
+                CommonListDataType.WATCHERS, CommonListDataType.REPO_WATCHER -> {
                     reposRepository.getRepoWatchers(userName!!, repoName!!, loadPage)
                 }
-                CommonListDataType.REPO_FORK -> {
+
+                CommonListDataType.FORKS, CommonListDataType.REPO_FORK -> {
                     reposRepository.getRepoForks(userName!!, repoName!!, loadPage)
                 }
+
                 CommonListDataType.TOPICS -> {
                     reposRepository.searchRepos("topic:${userName}", loadPage, "stars", "desc")
                 }
+
                 CommonListDataType.USER_ORGS -> {
                     userRepository.getOrgs(userName!!, loadPage)
                 }
+
                 else -> {
                     null
                 }
@@ -101,10 +117,8 @@ class ListViewModel @Inject constructor(
                 result.onSuccess { data ->
                     val mappedData = when (listType) {
                         CommonListDataType.USER_ORGS -> data.map { (it as? com.shuyu.gsygithubappcompose.core.network.model.Organization)?.toUser() }
-                        CommonListDataType.USER_REPOS,
-                        CommonListDataType.USER_STAR,
-                        CommonListDataType.REPO_FORK,
-                        CommonListDataType.TOPICS -> data.map { (it as? com.shuyu.gsygithubappcompose.core.network.model.Repository)?.toRepositoryDisplayData() }
+                        CommonListDataType.REPOSITORIES, CommonListDataType.USER_REPOS, CommonListDataType.USER_STAR, CommonListDataType.FORKS, CommonListDataType.REPO_FORK, CommonListDataType.TOPICS -> data.map { (it as? com.shuyu.gsygithubappcompose.core.network.model.Repository)?.toRepositoryDisplayData() }
+
                         else -> data
                     }
 
@@ -114,22 +128,51 @@ class ListViewModel @Inject constructor(
                     page = loadPage + 1
 
                     val title = when (listType) {
-                        CommonListDataType.FOLLOWER -> "$userName followers"
-                        CommonListDataType.FOLLOWED -> "$userName following"
-                        CommonListDataType.USER_REPOS -> "$userName repos"
-                        CommonListDataType.REPO_STAR -> "$repoName stagers"
-                        CommonListDataType.USER_STAR -> "$userName star"
-                        CommonListDataType.REPO_WATCHER -> "$repoName watchers"
-                        CommonListDataType.REPO_FORK -> "$repoName forks"
-                        CommonListDataType.TOPICS -> "$userName topics"
-                        CommonListDataType.USER_ORGS -> "$userName orgs"
+                        CommonListDataType.REPOSITORIES -> stringResourceProvider.getString(
+                            R.string.list_repositories, userName ?: ""
+                        )
+
+                        CommonListDataType.FOLLOWER -> stringResourceProvider.getString(
+                            R.string.list_followers, userName ?: ""
+                        )
+
+                        CommonListDataType.FOLLOWING, CommonListDataType.FOLLOWED -> stringResourceProvider.getString(
+                            R.string.list_following, userName ?: ""
+                        )
+
+                        CommonListDataType.USER_REPOS -> stringResourceProvider.getString(
+                            R.string.list_repos, userName ?: ""
+                        )
+
+                        CommonListDataType.STARGAZERS, CommonListDataType.REPO_STAR -> stringResourceProvider.getString(
+                            R.string.list_stargazers, repoName ?: ""
+                        )
+
+                        CommonListDataType.USER_STAR -> stringResourceProvider.getString(
+                            R.string.list_star, userName ?: ""
+                        )
+
+                        CommonListDataType.WATCHERS, CommonListDataType.REPO_WATCHER -> stringResourceProvider.getString(
+                            R.string.list_watchers, repoName ?: ""
+                        )
+
+                        CommonListDataType.FORKS, CommonListDataType.REPO_FORK -> stringResourceProvider.getString(
+                            R.string.list_forks, repoName ?: ""
+                        )
+
+                        CommonListDataType.TOPICS -> stringResourceProvider.getString(
+                            R.string.list_topics, userName ?: ""
+                        )
+
+                        CommonListDataType.USER_ORGS -> stringResourceProvider.getString(
+                            R.string.list_orgs, userName ?: ""
+                        )
+
                         else -> ""
                     }
 
                     _uiState.value = _uiState.value.copy(
-                        list = newList,
-                        hasMore = data.size == NetworkConfig.PER_PAGE,
-                        title = title
+                        list = newList, hasMore = data.size == NetworkConfig.PER_PAGE, title = title
                     )
                 }
                 result.onFailure { e ->
@@ -138,9 +181,7 @@ class ListViewModel @Inject constructor(
                     )
                 }
                 _uiState.value = _uiState.value.copy(
-                    isPageLoading = false,
-                    isRefreshing = false,
-                    isLoadingMore = false
+                    isPageLoading = false, isRefreshing = false, isLoadingMore = false
                 )
             }?.launchIn(viewModelScope)
         }
