@@ -8,7 +8,7 @@
 - 存放 `DataStore<Preferences>` 和用户 token 等，另外多语言文本（/res/values/ 和 /res/values-zh-rCN）和图片资源等公共资源也放在这个模块
 
 ### core/ui
-- 存放所有自定义控件，主题，颜色等相关内容，特别注意，下拉刷新和加载更多控件需要统一使用 GSYPullRefresh
+- 存放所有自定义控件，主题，颜色等相关内容，特别注意，下拉刷新和加载更多控件需要统一使用 GSYPullRefresh, 目前有 `GSYGeneralLoadState`, `GSYPullRefresh`, `GSYTopAppBar`, `GSYNavigator`, `GSYNavHost`, `GSYLoadingDialog` 等通用 UI 组件
 
 ### core/network
 - 是网络请求模块 ，网络数据的实体都在这个模块的 model/ 目录下，接口地址是 api/ 下的 GitHubApiService，同时也有 config 配置，比如  PAGE_SIZE
@@ -25,7 +25,7 @@
 
 ## 一个常规页面模块结构
 
-最重要的一点， import 某个 class 的时候，要确定这个路径是否存在和正确，比如 `BaseUiStat`e 和  `BaseViewModel` 的路径是：
+最重要的一点， import 某个 class 的时候，要确定这个路径是否存在和正确，比如 `BaseUiState` 和  `BaseViewModel` 的路径是：
 ```
 import com.shuyu.gsygithubappcompose.data.repository.vm.BaseUiState
 import com.shuyu.gsygithubappcompose.data.repository.vm.BaseViewModel
@@ -46,7 +46,7 @@ import com.shuyu.gsygithubappcompose.data.repository.vm.BaseViewModel
   *   `entity/`: 存放数据库实体。
 *   **`core/ui` 模块**:
   *   存放所有自定义控件，主题，颜色等相关内容。
-  *   提供 `GSYGeneralLoadState`, `GSYPullRefresh`, `GSYTopAppBar`, `GSYNavigator`, `GSYNavHost` 等通用 UI 组件。
+  *   提供 `GSYGeneralLoadState`, `GSYPullRefresh`, `GSYTopAppBar`, `GSYNavigator`, `GSYNavHost`, `GSYLoadingDialog` 等通用 UI 组件。
 *   **`core/common` 模块**:
   *   存放 `DataStore<Preferences>` 和用户 token 等。
   *   多语言文本（`/res/values/` 和 `/res/values-zh-rCN`）和图片资源等公共资源。
@@ -173,7 +173,7 @@ import com.shuyu.gsygithubappcompose.data.repository.vm.BaseViewModel
 *   **数据加载逻辑**:
   *   **`loadData` 方法**: 覆盖 `BaseViewModel` 中的 `loadData` 方法，实现具体的数据获取逻辑。
     *   参数 `initialLoad`, `isRefresh`, `isLoadMore` 用于区分加载类型。
-    *   使用 `launchDataLoadWithUser` (或 `launchDataLoad`) 包装数据加载协程，它会处理加载状态的更新。
+    *   使用 `launchDataLoadWithUser` (或 `launchDataLoad`) 包装数据加载协程，它会处理加载状态的更新，分页通过 pageToLoad -> 获取， `launchDataLoad(initialLoad, isRefresh, isLoadMore) { pageToLoad -> ····`
     *   调用 `xxxRepository` 的方法获取数据。
     *   通过 `repoResult.data.fold` 处理成功和失败情况。
     *   成功时，调用 `handleResult` 更新 `uiState` 中的数据列表、分页信息等。

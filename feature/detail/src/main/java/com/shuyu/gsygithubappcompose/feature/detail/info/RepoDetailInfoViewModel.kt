@@ -1,5 +1,6 @@
 package com.shuyu.gsygithubappcompose.feature.detail.info
 
+import androidx.lifecycle.viewModelScope
 import com.shuyu.gsygithubappcompose.core.common.datastore.UserPreferencesDataStore
 import com.shuyu.gsygithubappcompose.core.common.util.StringResourceProvider
 import com.shuyu.gsygithubappcompose.core.network.model.RepositoryDetailModel
@@ -32,6 +33,7 @@ data class RepoDetailInfoUiState(
     val repoName: String? = null,
     val selectedItemType: RepoDetailItemType = RepoDetailItemType.EVENT, // New state for selected item type
     val isSwitchingItemType: Boolean = false, // New state to prevent multiple requests when switching
+    val isLoadingDialog: Boolean = false,
     override val isPageLoading: Boolean = false,
     override val isRefreshing: Boolean = false,
     override val isLoadingMore: Boolean = false,
@@ -84,7 +86,6 @@ class RepoDetailInfoViewModel @Inject constructor(
     override fun loadData(initialLoad: Boolean, isRefresh: Boolean, isLoadMore: Boolean) {
         val owner = _uiState.value.owner
         val repoName = _uiState.value.repoName
-        val currentPage = _uiState.value.currentPage
         val selectedItemType = _uiState.value.selectedItemType
 
         if (owner == null || repoName == null) {
@@ -98,7 +99,7 @@ class RepoDetailInfoViewModel @Inject constructor(
             return
         }
 
-        launchDataLoad(initialLoad, isRefresh, isLoadMore) {
+        launchDataLoad(initialLoad, isRefresh, isLoadMore) { pageToLoad ->
             // This 'this' refers to the CoroutineScope provided by launchDataLoad
             val scopeForAsync = this
 
@@ -113,7 +114,7 @@ class RepoDetailInfoViewModel @Inject constructor(
                         // After fetching repo detail, fetch events or commits based on selectedItemType
                         scopeForAsync.launch {
                             fetchItems(
-                                owner, repoName, currentPage, isLoadMore, selectedItemType
+                                owner, repoName, pageToLoad, isLoadMore, selectedItemType
                             )
                         }
                     }, onFailure = { exception ->
@@ -220,6 +221,51 @@ class RepoDetailInfoViewModel @Inject constructor(
             })
         }
     }
+
+    fun starRepo(owner: String, repo: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoadingDialog = true) }
+            val isStarred = _uiState.value.repoDetail?.viewerHasStarred ?: false
+            repositoryRepository.starRepo(owner, repo, !isStarred)
+                .flowOn(Dispatchers.IO)
+                .collectLatest {
+                    _uiState.update { it.copy(isLoadingDialog = false) }
+                    if (it) {
+                        refresh()
+                    }
+                }
+        }
+    }
+
+    fun forkRepo(owner: String, repo: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoadingDialog = true) }
+            repositoryRepository.forkRepo(owner, repo)
+                .flowOn(Dispatchers.IO)
+                .collectLatest {
+                    _uiState.update { it.copy(isLoadingDialog = false) }
+                    if (it.data.isSuccess) {
+                        refresh()
+                    }
+                }
+        }
+    }
+
+    fun watchRepo(owner: String, repo: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoadingDialog = true) }
+            val isWatched = _uiState.value.repoDetail?.viewerSubscription == "SUBSCRIBED"
+            repositoryRepository.watchRepo(owner, repo, !isWatched)
+                .flowOn(Dispatchers.IO)
+                .collectLatest {
+                    _uiState.update { it.copy(isLoadingDialog = false) }
+                    if (it) {
+                        refresh()
+                    }
+                }
+        }
+    }
+
 
     // Public functions to trigger refresh and load more, leveraging BaseViewModel's functionality.
     fun refreshRepoDetailInfo() {

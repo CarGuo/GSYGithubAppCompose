@@ -168,6 +168,41 @@ class RepositoryRepository @Inject constructor(
         }
     }
 
+    fun starRepo(owner: String, repo: String, star: Boolean): Flow<Boolean> = flow {
+        try {
+            if (star) {
+                apiService.starRepository(owner, repo)
+            } else {
+                apiService.unstarRepository(owner, repo)
+            }
+            emit(true)
+        } catch (e: Exception) {
+            emit(false)
+        }
+    }
+
+    fun forkRepo(owner: String, repo: String): Flow<RepositoryResult<Repository>> = flow {
+        try {
+            val response = apiService.createFork(owner, repo)
+            emit(RepositoryResult(Result.success(response), DataSource.NETWORK, true))
+        } catch (e: Exception) {
+            emit(RepositoryResult(Result.failure(e), DataSource.NETWORK, true))
+        }
+    }
+
+    fun watchRepo(owner: String, repo: String, watch: Boolean): Flow<Boolean> = flow {
+        try {
+            if (watch) {
+                apiService.watchRepository(owner, repo)
+            } else {
+                apiService.unwatchRepository(owner, repo)
+            }
+            emit(true)
+        } catch (e: Exception) {
+            emit(false)
+        }
+    }
+
     fun getCachedTrendingRepositories(limit: Int = 30): Flow<List<RepositoryEntity>> {
         return repositoryDao.getTrendingRepositories(limit)
     }

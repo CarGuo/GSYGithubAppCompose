@@ -19,6 +19,7 @@ import com.shuyu.gsygithubappcompose.core.network.model.User
 import com.shuyu.gsygithubappcompose.core.network.model.UserSearchResponse
 import com.shuyu.gsygithubappcompose.core.network.model.TrendingRepoModel
 import okhttp3.ResponseBody
+import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -34,7 +35,7 @@ import retrofit2.http.Query
  * GitHub API service
  */
 interface GitHubApiService {
-    
+
     /**
      * Exchange OAuth code for access token
      */
@@ -45,7 +46,7 @@ interface GitHubApiService {
         @Query("client_secret") clientSecret: String,
         @Query("code") code: String
     ): AccessToken
-    
+
     /**
      * Get authenticated user
      */
@@ -53,7 +54,7 @@ interface GitHubApiService {
     suspend fun getAuthenticatedUser(
         @Header("Authorization") token: String
     ): User
-    
+
     /**
      * Get user by username
      */
@@ -61,7 +62,7 @@ interface GitHubApiService {
     suspend fun getUser(
         @Path("username") username: String
     ): User
-    
+
     /**
      * Get user received events
      */
@@ -586,5 +587,23 @@ interface GitHubApiService {
         @Query("since") since: String,
         @Query("languageType") languageType: String?
     ): List<TrendingRepoModel>
+
+    @PUT("user/starred/{owner}/{repo}")
+    suspend fun starRepo(
+        @Path("owner") owner: String,
+        @Path("repo") repo: String
+    ): Unit
+
+    @POST("repos/{owner}/{repo}/forks")
+    suspend fun forkRepo(
+        @Path("owner") owner: String,
+        @Path("repo") repo: String
+    ): Repository
+
+    @PUT("user/subscriptions/{owner}/{repo}")
+    suspend fun watchRepo(
+        @Path("owner") owner: String,
+        @Path("repo") repo: String
+    ): Unit
 
 }
