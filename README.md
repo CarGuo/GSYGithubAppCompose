@@ -1,16 +1,16 @@
 ![](./logo.png)
 
-## 一款Android原生的开源Github客户端App，提供更丰富的功能，更好体验，旨在更好的日常管理和维护个人Github，提供更好更方便的驾车体验～～Σ(￣。￣ﾉ)ﾉ。项目使用`Retrofit2 + RxJava2 + Dagger2 + DataBinding + LiveData + Navigation` 等，MVVM 配合 Android JetPack，涉及各种常用控件、 `AIDL` 、 `CMake`,提供丰富的同款对比：
+## 一款 Android 原生的开源 Github 客户端 App，提供更丰富的功能，更好体验，旨在更好的日常管理和维护个人 Github，提供更好更方便的驾车体验～～Σ(￣。￣ﾉ)ﾉ，项目采用 Jetpack Compose 开发，并提供丰富的同款对比：
 
-* ### 同款Flutter版 （ https://github.com/CarGuo/GSYGithubAppFlutter ）
+* ### 同款 Flutter 版 （ https://github.com/CarGuo/GSYGithubAppFlutter ）
 * ### 同款 Kotlin View 版 （ https://github.com/CarGuo/GSYGithubAppKotlin ）
-* ### 同款ReactNative版 （ https://github.com/CarGuo/GSYGithubApp ）
-* ### 同款Weex版 （ https://github.com/CarGuo/GSYGithubAppWeex ）
+* ### 同款 ReactNative 版 （ https://github.com/CarGuo/GSYGithubApp ）
+* ### 同款 Weex 版 （ https://github.com/CarGuo/GSYGithubAppWeex ）
 * ### [如果克隆太慢或者图片看不到，可尝试从码云地址下载](https://gitee.com/CarGuo/GSYGithubAppCompose)
 
-| 公众号   | 掘金     |  知乎    |  CSDN   |   简书   
-|---------|---------|--------- |---------|---------|
-| GSYTech  |  [点我](https://juejin.im/user/582aca2ba22b9d006b59ae68/posts)    |   [点我](https://www.zhihu.com/people/carguo)       |   [点我](https://blog.csdn.net/ZuoYueLiang)  |   [点我](https://www.jianshu.com/u/6e613846e1ea)  
+| 公众号   | 掘金                                                          |  知乎    |  CSDN   |   简书   
+|---------|-------------------------------------------------------------|--------- |---------|---------|
+| GSYTech  | [点我](https://juejin.cn/user/582aca2ba22b9d006b59ae68/posts) |   [点我](https://www.zhihu.com/people/carguo)       |   [点我](https://blog.csdn.net/ZuoYueLiang)  |   [点我](https://www.jianshu.com/u/6e613846e1ea)  
 
 ![公众号](http://img.cdn.guoshuyu.cn/WeChat-Code)
 
