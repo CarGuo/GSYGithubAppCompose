@@ -19,7 +19,7 @@ import com.shuyu.gsygithubappcompose.core.common.R
 fun GSYOptionDialog(
     options: List<String>,
     onDismiss: () -> Unit,
-    onOptionSelected: (String) -> Unit
+    onOptionSelected: (Int) -> Unit
 ) {
     val cancelText = stringResource(id = R.string.cancel)
     val newOptions = options + cancelText
@@ -31,14 +31,14 @@ fun GSYOptionDialog(
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
         ) {
             Column {
-                newOptions.forEach { option ->
+                newOptions.forEachIndexed { index, option ->
                     Text(
                         text = option,
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
                                 if (option != cancelText) {
-                                    onOptionSelected(option)
+                                    onOptionSelected(index)
                                 } else {
                                     onDismiss()
                                 }
