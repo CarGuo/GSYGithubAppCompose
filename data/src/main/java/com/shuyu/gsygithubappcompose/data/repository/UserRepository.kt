@@ -7,6 +7,7 @@ import com.shuyu.gsygithubappcompose.core.database.dao.UserDao
 import com.shuyu.gsygithubappcompose.core.database.entity.UserEntity
 import com.shuyu.gsygithubappcompose.core.network.api.GitHubApiService
 import com.shuyu.gsygithubappcompose.core.network.model.Event
+import com.shuyu.gsygithubappcompose.core.network.model.Organization
 import com.shuyu.gsygithubappcompose.core.network.model.User
 import com.shuyu.gsygithubappcompose.core.network.model.UserSearchResponse
 import com.shuyu.gsygithubappcompose.data.repository.mapper.toEntity
@@ -114,6 +115,30 @@ class UserRepository @Inject constructor(
 
     suspend fun searchUsers(query: String, page: Int = 1): UserSearchResponse {
         return apiService.searchUsers(query, page = page)
+    }
+
+    fun getFollowers(userName: String, page: Int): Flow<Result<List<User>>> = flow {
+        try {
+            emit(Result.success(apiService.getUserFollowers(userName, page)))
+        } catch (e: Exception) {
+            emit(Result.failure(e))
+        }
+    }
+
+    fun getFollowing(userName: String, page: Int): Flow<Result<List<User>>> = flow {
+        try {
+            emit(Result.success(apiService.getUserFollowing(userName, page)))
+        } catch (e: Exception) {
+            emit(Result.failure(e))
+        }
+    }
+
+    fun getOrgs(userName: String, page: Int): Flow<Result<List<Organization>>> = flow {
+        try {
+            emit(Result.success(apiService.getUserOrganizations(userName, page)))
+        } catch (e: Exception) {
+            emit(Result.failure(e))
+        }
     }
 
     private fun <T, R> getFromCacheAndNetwork(
