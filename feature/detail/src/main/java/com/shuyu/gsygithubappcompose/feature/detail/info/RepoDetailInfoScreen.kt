@@ -1,5 +1,6 @@
 package com.shuyu.gsygithubappcompose.feature.detail.info
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -18,6 +19,7 @@ import com.shuyu.gsygithubappcompose.core.ui.components.EventItem
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYLoadingDialog
 import com.shuyu.gsygithubappcompose.core.ui.components.SegmentedButton
 import com.shuyu.gsygithubappcompose.core.common.R
+import com.shuyu.gsygithubappcompose.core.ui.LocalNavigator
 import com.shuyu.gsygithubappcompose.data.repository.vm.BaseScreen
 import com.shuyu.gsygithubappcompose.feature.detail.LocalRepoOwner
 import com.shuyu.gsygithubappcompose.feature.detail.LocalRepoName
@@ -30,6 +32,7 @@ fun RepoDetailInfoScreen(
     val uiState by viewModel.uiState.collectAsState()
     val owner = LocalRepoOwner.current
     val name = LocalRepoName.current
+    val navigator = LocalNavigator.current
 
     LaunchedEffect(owner, name) {
         viewModel.loadRepoDetailInfo(owner, name)
@@ -88,10 +91,17 @@ fun RepoDetailInfoScreen(
                 items(uiState.repoDetailList) { item ->
                     when (item) {
                         is RepoDetailListItem.EventItem -> {
-                            EventItem(event = item.event)
+                            if (uiState.selectedItemType == RepoDetailItemType.EVENT) {
+                                EventItem(event = item.event)
+                            }
                         }
+
                         is RepoDetailListItem.CommitItem -> {
-                            CommitItem(commit = item.commit)
+                            if (uiState.selectedItemType == RepoDetailItemType.COMMIT) {
+                                CommitItem(commit = item.commit, modifier = Modifier.clickable {
+                                    navigator.navigate("push_detail/${owner}/${name}/${item.commit.sha}")
+                                })
+                            }
                         }
                     }
                 }

@@ -32,26 +32,21 @@ import com.shuyu.gsygithubappcompose.core.common.R
 
 @Composable
 fun CommitItem(
-    commit: RepoCommit,
-    modifier: Modifier = Modifier,
-    onCommitClick: (RepoCommit) -> Unit = {}
+    commit: RepoCommit, modifier: Modifier = Modifier,
 ) {
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-            .border(BorderStroke(1.dp, MaterialTheme.colorScheme.outline), RoundedCornerShape(8.dp)),
+    Card(modifier = modifier
+        .fillMaxWidth()
+        .padding(horizontal = 16.dp, vertical = 8.dp)
+        .border(
+            BorderStroke(1.dp, MaterialTheme.colorScheme.outline), RoundedCornerShape(8.dp)
+        ),
         shape = RoundedCornerShape(8.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { onCommitClick(commit) }
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)) {
+        Row(modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically) {
             AsyncImage(
                 model = commit.author?.avatarUrl ?: commit.committer?.avatarUrl,
                 contentDescription = "",

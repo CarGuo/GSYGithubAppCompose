@@ -4,6 +4,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import com.shuyu.gsygithubappcompose.core.common.R
 import java.text.SimpleDateFormat
@@ -14,12 +15,14 @@ import kotlin.math.abs
 @Composable
 fun RelativeTimeText(
     dateString: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    color: Color = MaterialTheme.colorScheme.primary,
 ) {
     val relativeTime = getRelativeTimeSpanString(dateString)
     Text(
         text = relativeTime,
         style = MaterialTheme.typography.bodySmall,
+        color = color,
         modifier = modifier
     )
 }

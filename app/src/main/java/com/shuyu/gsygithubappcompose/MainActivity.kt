@@ -18,6 +18,7 @@ import com.shuyu.gsygithubappcompose.feature.issue.IssueScreen
 import com.shuyu.gsygithubappcompose.feature.login.LoginScreen
 import com.shuyu.gsygithubappcompose.feature.profile.PersonScreen
 import com.shuyu.gsygithubappcompose.feature.profile.ProfileScreen
+import com.shuyu.gsygithubappcompose.feature.push.PushDetailScreen
 import com.shuyu.gsygithubappcompose.feature.search.SearchScreen
 import com.shuyu.gsygithubappcompose.feature.trending.TrendingScreen
 import com.shuyu.gsygithubappcompose.feature.welcome.WelcomeScreen
@@ -95,6 +96,13 @@ class MainActivity : ComponentActivity() {
                             repoName = repoName,
                             issueNumber = issueNumber
                         )
+                    }
+
+                    composable("push_detail/{owner}/{repoName}/{sha}") { backStackEntry ->
+                        val owner = backStackEntry.arguments?.getString("owner") ?: ""
+                        val repoName = backStackEntry.arguments?.getString("repoName") ?: ""
+                        val sha = backStackEntry.arguments?.getString("sha") ?: ""
+                        PushDetailScreen()
                     }
                 }
             }

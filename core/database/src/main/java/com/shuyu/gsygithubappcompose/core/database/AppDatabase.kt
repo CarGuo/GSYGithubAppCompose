@@ -3,11 +3,13 @@ package com.shuyu.gsygithubappcompose.core.database
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import com.shuyu.gsygithubappcompose.core.database.converter.Converters
 import com.shuyu.gsygithubappcompose.core.database.dao.CommitDao
 import com.shuyu.gsygithubappcompose.core.database.dao.EventDao
 import com.shuyu.gsygithubappcompose.core.database.dao.FileContentDao
 import com.shuyu.gsygithubappcompose.core.database.dao.IssueDao
 import com.shuyu.gsygithubappcompose.core.database.dao.IssueCommentDao
+import com.shuyu.gsygithubappcompose.core.database.dao.PushCommitDao
 import com.shuyu.gsygithubappcompose.core.database.dao.ReadmeDao
 import com.shuyu.gsygithubappcompose.core.database.dao.RepositoryDao
 import com.shuyu.gsygithubappcompose.core.database.dao.RepositoryDetailDao
@@ -19,6 +21,7 @@ import com.shuyu.gsygithubappcompose.core.database.entity.EventEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.FileContentEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.IssueEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.IssueCommentEntity
+import com.shuyu.gsygithubappcompose.core.database.entity.PushCommitEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.ReadmeEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.RepositoryDetailEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.RepositoryEntity
@@ -38,12 +41,13 @@ import com.shuyu.gsygithubappcompose.core.database.entity.UserEntity
         FileContentEntity::class,
         IssueEntity::class,
         IssueCommentEntity::class,
-        ReadmeEntity::class
+        ReadmeEntity::class,
+        PushCommitEntity::class
     ],
-    version = 50,
+    version = 52,
     exportSchema = false
 )
-@TypeConverters(DateConverter::class)
+@TypeConverters(DateConverter::class, Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
     abstract fun repositoryDao(): RepositoryDao
@@ -56,6 +60,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun issueDao(): IssueDao
     abstract fun issueCommentDao(): IssueCommentDao
     abstract fun readmeDao(): ReadmeDao
+    abstract fun pushCommitDao(): PushCommitDao
 
     fun clearAllData() {
         clearAllTables()

@@ -8,6 +8,7 @@ import com.shuyu.gsygithubappcompose.core.database.dao.EventDao
 import com.shuyu.gsygithubappcompose.core.database.dao.FileContentDao
 import com.shuyu.gsygithubappcompose.core.database.dao.IssueCommentDao
 import com.shuyu.gsygithubappcompose.core.database.dao.IssueDao
+import com.shuyu.gsygithubappcompose.core.database.dao.PushCommitDao
 import com.shuyu.gsygithubappcompose.core.database.dao.ReadmeDao
 import com.shuyu.gsygithubappcompose.core.database.dao.RepositoryDao
 import com.shuyu.gsygithubappcompose.core.database.dao.RepositoryDetailDao
@@ -99,5 +100,11 @@ object DatabaseModule {
     @Singleton
     fun provideIssueCommentDao(database: AppDatabase): IssueCommentDao {
         return database.issueCommentDao()
+    }
+
+    @Provides
+    @Singleton
+    fun providePushCommitDao(database: AppDatabase): PushCommitDao {
+        return database.pushCommitDao()
     }
 }
