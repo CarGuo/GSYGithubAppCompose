@@ -9,7 +9,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.shuyu.gsygithubappcompose.core.common.R
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYGeneralLoadState
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYPullRefresh
@@ -17,16 +16,28 @@ import com.shuyu.gsygithubappcompose.core.ui.components.GSYSearchInput
 import com.shuyu.gsygithubappcompose.core.ui.components.IssueItem
 import com.shuyu.gsygithubappcompose.core.ui.components.SegmentedButton
 import com.shuyu.gsygithubappcompose.data.repository.vm.BaseScreen
+import kotlinx.coroutines.flow.collectLatest
+import com.shuyu.gsygithubappcompose.feature.detail.LocalRepoOwner
+import com.shuyu.gsygithubappcompose.feature.detail.LocalRepoName
+import com.shuyu.gsygithubappcompose.feature.detail.LocalRepoDetailIssueViewModel
 
 @Composable
 fun RepoDetailIssueScreen(
-    userName: String, repoName: String, viewModel: RepoDetailIssueViewModel = hiltViewModel()
 ) {
+    val viewModel = LocalRepoDetailIssueViewModel.current
     val uiState by viewModel.uiState.collectAsState()
+    val owner = LocalRepoOwner.current
+    val repoName = LocalRepoName.current
 
-    LaunchedEffect(userName, repoName) {
-        viewModel.setRepoInfo(userName, repoName)
+    LaunchedEffect(owner, repoName) {
+        viewModel.setRepoInfo(owner, repoName)
         viewModel.doInitialLoad()
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.refreshTrigger.collectLatest { // Use collectLatest to handle rapid emissions
+            viewModel.doInitialLoad()
+        }
     }
 
     BaseScreen(viewModel = viewModel) {

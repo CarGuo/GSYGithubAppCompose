@@ -17,22 +17,26 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYGeneralLoadState
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYPullRefresh
 import com.shuyu.gsygithubappcompose.core.ui.LocalNavigator
 import com.shuyu.gsygithubappcompose.data.repository.vm.BaseScreen
 import java.net.URLEncoder
+import com.shuyu.gsygithubappcompose.feature.detail.LocalRepoOwner
+import com.shuyu.gsygithubappcompose.feature.detail.LocalRepoName
+import com.shuyu.gsygithubappcompose.feature.detail.LocalRepoDetailFileViewModel
 
 @Composable
 fun RepoDetailFileScreen(
-    userName: String, repoName: String, viewModel: RepoDetailFileViewModel = hiltViewModel()
 ) {
+    val viewModel = LocalRepoDetailFileViewModel.current
     val uiState by viewModel.uiState.collectAsState()
     val navigator = LocalNavigator.current
+    val owner = LocalRepoOwner.current
+    val repoName = LocalRepoName.current
 
-    LaunchedEffect(userName, repoName) {
-        viewModel.setRepoInfo(userName, repoName)
+    LaunchedEffect(owner, repoName) {
+        viewModel.setRepoInfo(owner, repoName)
         viewModel.doInitialLoad()
     }
 
@@ -66,7 +70,7 @@ fun RepoDetailFileScreen(
                             if (file.type == "dir") {
                                 viewModel.navigateToPath(file.path)
                             } else if (!isImageOrArchive(file.name)) {
-                                navigator.navigate("file_code/$userName/$repoName/${URLEncoder.encode(file.path, "UTF-8")}")
+                                navigator.navigate("file_code/$owner/$repoName/${URLEncoder.encode(file.path, "UTF-8")}")
                             }
                         })
                     }

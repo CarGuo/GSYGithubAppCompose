@@ -19,14 +19,17 @@ import com.shuyu.gsygithubappcompose.core.ui.components.GSYLoadingDialog
 import com.shuyu.gsygithubappcompose.core.ui.components.SegmentedButton
 import com.shuyu.gsygithubappcompose.core.common.R
 import com.shuyu.gsygithubappcompose.data.repository.vm.BaseScreen
+import com.shuyu.gsygithubappcompose.feature.detail.LocalRepoOwner
+import com.shuyu.gsygithubappcompose.feature.detail.LocalRepoName
+import com.shuyu.gsygithubappcompose.feature.detail.LocalRepoDetailInfoViewModel
 
 @Composable
 fun RepoDetailInfoScreen(
-    owner: String,
-    name: String,
-    viewModel: RepoDetailInfoViewModel
 ) {
+    val viewModel = LocalRepoDetailInfoViewModel.current
     val uiState by viewModel.uiState.collectAsState()
+    val owner = LocalRepoOwner.current
+    val name = LocalRepoName.current
 
     LaunchedEffect(owner, name) {
         viewModel.loadRepoDetailInfo(owner, name)

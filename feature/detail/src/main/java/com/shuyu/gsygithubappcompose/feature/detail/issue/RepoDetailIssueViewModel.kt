@@ -1,6 +1,7 @@
 package com.shuyu.gsygithubappcompose.feature.detail.issue
 
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewModelScope
 import com.shuyu.gsygithubappcompose.core.common.util.StringResourceProvider
 import com.shuyu.gsygithubappcompose.core.network.model.Issue
 import com.shuyu.gsygithubappcompose.data.repository.IssueRepository
@@ -9,6 +10,9 @@ import com.shuyu.gsygithubappcompose.data.repository.vm.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.update
 import javax.inject.Inject
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.launch
 
 data class RepoDetailIssueUiState(
     val owner: String? = null,
@@ -46,6 +50,9 @@ class RepoDetailIssueViewModel @Inject constructor(
     }
 ) {
 
+    private val _refreshTrigger = MutableSharedFlow<Unit>()
+    val refreshTrigger = _refreshTrigger.asSharedFlow()
+
     fun setRepoInfo(owner: String, repoName: String) {
         _uiState.update { it.copy(owner = owner, repoName = repoName) }
     }
@@ -57,6 +64,12 @@ class RepoDetailIssueViewModel @Inject constructor(
     fun onIssueStateChanged(state: String) {
         _uiState.update { it.copy(issueState = state) }
         refresh()
+    }
+
+    fun triggerRefresh() {
+        viewModelScope.launch {
+            _refreshTrigger.emit(Unit)
+        }
     }
 
     override fun loadData(initialLoad: Boolean, isRefresh: Boolean, isLoadMore: Boolean) {

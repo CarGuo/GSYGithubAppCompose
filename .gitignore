@@ -11,3 +11,4 @@ local.properties
 /core/*/build/*
 /feature/*/build/*
 /data/build/*
+.kotlin/
