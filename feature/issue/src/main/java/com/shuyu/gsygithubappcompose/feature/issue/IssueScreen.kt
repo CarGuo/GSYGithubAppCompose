@@ -41,6 +41,7 @@ import com.shuyu.gsygithubappcompose.core.ui.components.GSYMarkdownText
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYPullRefresh
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYTopAppBar
 import com.shuyu.gsygithubappcompose.core.ui.components.RelativeTimeText
+import com.shuyu.gsygithubappcompose.core.ui.components.getRelativeTimeSpanString
 
 @Composable
 fun IssueScreen(
@@ -136,13 +137,18 @@ fun IssueHeader(issue: Issue) {
             Spacer(modifier = Modifier.height(8.dp))
             IssueBody(issue = issue)
             issue.closedAt?.let { closedAt ->
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.Bottom
+                ) {
                     Text(
                         text = stringResource(
-                            R.string.closed_by_at, issue.user?.login ?: "", ""
+                            R.string.closed_by_at,
+                            issue.user?.login ?: "",
+                            getRelativeTimeSpanString(closedAt)
                         ), fontSize = 12.sp
                     )
-                    RelativeTimeText(dateString = issue.closedAt!!)
                 }
             }
         }
