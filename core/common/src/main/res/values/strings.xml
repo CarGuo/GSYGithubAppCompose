@@ -63,6 +63,9 @@
     <string name="all">All</string>
     <string name="open">Open</string>
     <string name="closed">Closed</string>
+    <string name="repo_detail_action_star">Star</string>
+    <string name="repo_detail_action_watch">Watch</string>
+    <string name="repo_detail_action_fork">Fork</string>
     
     <!-- Common -->
     <string name="loading">Loading...</string>
