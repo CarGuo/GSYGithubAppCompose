@@ -71,11 +71,7 @@ fun CommitItem(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 commit.commit.committer?.date?.let { date ->
-                    Text(
-                        text = date,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    RelativeTimeText(date)
                 }
             }
         }

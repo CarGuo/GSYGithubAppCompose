@@ -1,5 +1,7 @@
 package com.shuyu.gsygithubappcompose.feature.push
 
+import android.net.Uri
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,6 +37,7 @@ import coil.compose.AsyncImage
 import com.shuyu.gsygithubappcompose.core.common.R
 import com.shuyu.gsygithubappcompose.core.network.model.CommitFile
 import com.shuyu.gsygithubappcompose.core.network.model.PushCommit
+import com.shuyu.gsygithubappcompose.core.ui.LocalNavigator
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYCardItem
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYGeneralLoadState
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYPullRefresh
@@ -77,7 +80,11 @@ fun PushDetailScreen(pushDetailViewModel: PushDetailViewModel = hiltViewModel())
                             }
                             pushCommit.files?.let { files ->
                                 items(files) { file ->
-                                    CommitFileItem(file = file)
+                                    CommitFileItem(
+                                        file = file,
+                                        owner = uiState.owner ?: "",
+                                        repoName = uiState.repoName ?: "",
+                                    )
                                 }
                             }
                         }
@@ -91,7 +98,6 @@ fun PushDetailScreen(pushDetailViewModel: PushDetailViewModel = hiltViewModel())
 @Composable
 fun PushDetailHeader(pushCommit: PushCommit) {
     GSYCardItem(
-        modifier = Modifier.fillMaxWidth(),
         backgroundColor = MaterialTheme.colorScheme.primaryContainer
     ) {
         Column(
@@ -184,28 +190,53 @@ fun PushDetailHeader(pushCommit: PushCommit) {
 }
 
 @Composable
-fun CommitFileItem(file: CommitFile) {
-    GSYCardItem(
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Row(
+fun CommitFileItem(file: CommitFile, owner: String, repoName: String) {
+    val navigator = LocalNavigator.current
+    val fullPath = file.filename ?: stringResource(R.string.unknown_file)
+    val lastSlashIndex = fullPath.lastIndexOf('/')
+    val path = if (lastSlashIndex > -1) fullPath.substring(0, lastSlashIndex) else ""
+    val name = if (lastSlashIndex > -1) fullPath.substring(lastSlashIndex + 1) else fullPath
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        if (path.isNotEmpty()) {
+            Text(
+                text = path,
+                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(start = 10.dp, end = 10.dp, bottom = 2.dp)
+            )
+        }
+        GSYCardItem(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(10.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .clickable {
+                    file.patch?.let { patch ->
+                        val encodedPath = Uri.encode(fullPath)
+                        val encodedPatch = Uri.encode(patch)
+                        navigator.navigate("file_code/$owner/$repoName/$encodedPath?dataText=$encodedPatch")
+
+                    }
+                },
         ) {
-            Icon(
-                imageVector = Icons.Default.Edit, // Placeholder icon
-                contentDescription = stringResource(R.string.file_icon),
-                tint = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.size(24.dp)
-            )
-            Text(
-                text = file.filename ?: stringResource(R.string.unknown_file),
-                fontSize = 16.sp,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(start = 10.dp)
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Edit, // Placeholder icon
+                    contentDescription = stringResource(R.string.file_icon),
+                    tint = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.size(24.dp)
+                )
+                Text(
+                    text = name,
+                    fontSize = 16.sp,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.padding(start = 10.dp)
+                )
+            }
         }
     }
 }

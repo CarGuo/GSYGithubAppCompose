@@ -200,6 +200,7 @@ interface GitHubApiService {
      */
     @GET("repos/{owner}/{repo}/commits/{sha}")
     suspend fun getRepositoryCommitInfo(
+        @Header("Accept") acceptHeader: String = "application/vnd.github.html",
         @Path("owner") reposOwner: String,
         @Path("repo") reposName: String,
         @Path("sha") sha: String
