@@ -53,6 +53,7 @@ dependencies {
     implementation(projects.feature.search)
     implementation(projects.feature.detail)
     implementation(projects.feature.code)
+    implementation(projects.feature.issue)
 
     // Core modules
     implementation(projects.core.ui)

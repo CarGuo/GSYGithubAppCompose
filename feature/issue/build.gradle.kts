@@ -2,10 +2,12 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.hilt)
 }
 
 android {
-    namespace = "com.shuyu.gsygithubappcompose.core.ui"
+    namespace = "com.shuyu.gsygithubappcompose.feature.issue"
     compileSdk = 36
 
     defaultConfig {
@@ -26,25 +28,27 @@ android {
 }
 
 dependencies {
-    implementation(libs.androidx.core.ktx)
-
+    implementation(projects.core.ui)
     implementation(projects.core.common)
-    implementation(projects.core.network)
+    implementation(projects.data)
+    
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    
     // Compose
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
-    api(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.navigation.compose)
-    
-    // Coil for image loading
-    api(libs.coil.compose)
+
+    // Hilt
+    implementation(libs.hilt.android)
+    implementation(libs.hilt.navigation.compose)
+    ksp(libs.hilt.compiler)
     
     debugImplementation(libs.androidx.compose.ui.tooling)
     testImplementation(libs.junit)
-
-    // MarkdownTwain
-    implementation(libs.twain)
 }

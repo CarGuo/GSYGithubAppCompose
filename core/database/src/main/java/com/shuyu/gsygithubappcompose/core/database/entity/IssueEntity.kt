@@ -5,7 +5,7 @@ import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "issue")
+@Entity(tableName = "issues")
 data class IssueEntity(
     @PrimaryKey
     val id: Long,
@@ -40,6 +40,8 @@ data class IssueEntity(
     val closedAt: String?,
     @ColumnInfo(name = "body")
     val body: String?,
+    @ColumnInfo(name = "body_html")
+    val bodyHtml: String?,
     @ColumnInfo(name = "html_url")
     val htmlUrl: String?,
     @ColumnInfo(name = "repository_url")
@@ -50,6 +52,4 @@ data class IssueEntity(
     val owner: String,
     @ColumnInfo(name = "repo_name")
     val repoName: String,
-    @ColumnInfo(name = "page")
-    val page: Int
 )

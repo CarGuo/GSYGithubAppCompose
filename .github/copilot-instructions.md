@@ -135,6 +135,8 @@ import com.shuyu.gsygithubappcompose.data.repository.vm.BaseViewModel
   *   导入 `import com.shuyu.gsygithubappcompose.core.ui.LocalNavigator`。
   *   通过 `val navigator = LocalNavigator.current` 获取导航器实例。
   *   使用 `navigator.navigate()` 或 `navigator.replace()` 进行页面跳转。
+*   **Toast**：
+  *   使用 `BaseScreen` 包裹页面内容，从而实现 Toast 展示功能，需要结合 `BaseViewModel`
 
 ### 3. `xxxViewModel.kt` 实现细节
 
