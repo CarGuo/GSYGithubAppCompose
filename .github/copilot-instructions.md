@@ -25,7 +25,11 @@
 
 ## 一个常规页面模块结构
 
-最重要的一点， import 某个 class 的时候，要确定这个路径是否存在和正确
+最重要的一点， import 某个 class 的时候，要确定这个路径是否存在和正确，比如 `BaseUiStat`e 和  `BaseViewModel` 的路径是：
+```
+import com.shuyu.gsygithubappcompose.data.repository.vm.BaseUiState
+import com.shuyu.gsygithubappcompose.data.repository.vm.BaseViewModel
+```
 
 ### 1. 模块职责划分
 
@@ -232,6 +236,8 @@
   *   创建新的 `Entity` 类。
   *   创建新的 `Dao` 接口。
   *   将新的 `Dao` 添加到 `DatabaseModule` 中提供。
+
+### 8.创建和使用包路径，不要出现类似 shuyu.gsygithubappcompose 这样的目录，要遵循 shuyu/gsygithubappcompose，目录不应该有 . 包名里的 . 实际格式 / 目录
 
 
 ## Hilt 使用注意避免：

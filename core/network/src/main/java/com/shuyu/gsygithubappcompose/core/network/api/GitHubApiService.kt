@@ -18,6 +18,7 @@ import com.shuyu.gsygithubappcompose.core.network.model.RepositorySearchResponse
 import com.shuyu.gsygithubappcompose.core.network.model.User
 import com.shuyu.gsygithubappcompose.core.network.model.UserSearchResponse
 import com.shuyu.gsygithubappcompose.core.network.model.TrendingRepoModel
+import okhttp3.ResponseBody
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -432,12 +433,13 @@ interface GitHubApiService {
     /**
      * Get README file
      */
+    @Headers("Accept: application/vnd.github.html")
     @GET("repos/{owner}/{repo}/readme")
     suspend fun getReadme(
         @Path("owner") reposOwner: String,
         @Path("repo") reposName: String,
         @Query("ref") branch: String? = null // branch or tag name
-    ): FileContent
+    ): ResponseBody
 
     /**
      * Check if following a user
