@@ -124,6 +124,17 @@ class RepositoryRepository @Inject constructor(
         }
     }
 
+    fun getRepositoryBranches(
+        owner: String, repoName: String, page: Int = 1
+    ): Flow<RepositoryResult<List<String>>> = flow {
+        try {
+            val response = apiService.getRepositoryBranches(owner, repoName, page)
+            emit(RepositoryResult(Result.success(response.map { it.name }), DataSource.NETWORK, true))
+        } catch (e: Exception) {
+            emit(RepositoryResult(Result.failure(e), DataSource.NETWORK, true))
+        }
+    }
+
     suspend fun getUserRepositories(username: String): Result<List<Repository>> {
         return try {
             val repos = apiService.getUserRepositories(username)
@@ -135,10 +146,11 @@ class RepositoryRepository @Inject constructor(
     }
 
     fun getRepoCommits(
-        owner: String, repoName: String, page: Int = 1
+        owner: String, repoName: String, page: Int = 1, branch: String? = null, defaultBranch: String? = null
     ): Flow<RepositoryResult<List<RepoCommit>>> = flow {
         var isDbEmpty = false
-        if (page == 1) {
+        // Only cache if it's the default branch and first page
+        if (page == 1 && branch == defaultBranch) {
             val cachedCommits = commitDao.getRepoCommits(owner, repoName).map { it.toRepoCommit() }
             isDbEmpty = cachedCommits.isEmpty()
             if (cachedCommits.isNotEmpty()) {
@@ -147,8 +159,8 @@ class RepositoryRepository @Inject constructor(
         }
 
         try {
-            val networkCommits = apiService.getRepositoryCommits(owner, repoName, page)
-            if (page == 1) {
+            val networkCommits = apiService.getRepositoryCommits(owner, repoName, page, branch = branch)
+            if (page == 1 && branch == defaultBranch) {
                 val commitEntities = networkCommits.map { it.toEntity(owner, repoName) }
                 commitDao.clearAndInsertRepoCommits(owner, repoName, commitEntities)
             }

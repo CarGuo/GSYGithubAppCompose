@@ -15,19 +15,22 @@ import com.shuyu.gsygithubappcompose.data.repository.vm.BaseScreen
 import com.shuyu.gsygithubappcompose.feature.detail.LocalRepoOwner
 import com.shuyu.gsygithubappcompose.feature.detail.LocalRepoName
 import com.shuyu.gsygithubappcompose.feature.detail.LocalRepoDetailReadmeViewModel
+import com.shuyu.gsygithubappcompose.feature.detail.LocalRepoDetailInfoViewModel
 
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
 fun RepoDetailReadmeScreen(
-    branch: String? = "main"
 ) {
     val viewModel = LocalRepoDetailReadmeViewModel.current
     val uiState by viewModel.uiState.collectAsState()
     val owner = LocalRepoOwner.current
     val repo = LocalRepoName.current
 
-    LaunchedEffect(owner, repo) {
-        viewModel.loadReadme(owner, repo, branch)
+    val repoDetailInfoViewModel = LocalRepoDetailInfoViewModel.current
+    val repoDetailInfoUiState by repoDetailInfoViewModel.uiState.collectAsState()
+
+    LaunchedEffect(owner, repo, repoDetailInfoUiState.selectedBranch, repoDetailInfoUiState.repoDetail?.defaultBranchRef) {
+        viewModel.loadReadme(owner, repo, repoDetailInfoUiState.selectedBranch, repoDetailInfoUiState.repoDetail?.defaultBranchRef)
     }
 
     BaseScreen(viewModel = viewModel) {
@@ -53,7 +56,7 @@ fun RepoDetailReadmeScreen(
                     }, update = { webView ->
                         uiState.readme?.let {
                             val baseUrl =
-                                if (branch == null) "https://raw.githubusercontent.com/$owner/$repo/" else "https://raw.githubusercontent.com/$owner/$repo/$branch/"
+                                if (uiState.branch == null) "https://raw.githubusercontent.com/$owner/$repo/" else "https://raw.githubusercontent.com/$owner/$repo/${uiState.branch}/"
                             val viewport =
                                 "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">"
                             val style =

@@ -96,5 +96,6 @@
     <string name="error_failed_to_load_repositories">Failed to load repositories</string>
     <string name="error_failed_to_load_repo_detail">Failed to load repository detail</string>
     <string name="error_failed_to_load_commits">Failed to load commits</string>
+    <string name="error_failed_to_load_branches">Failed to load branches</string>
     <string name="back">Back</string>
 </resources>

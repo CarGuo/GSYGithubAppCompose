@@ -15,13 +15,14 @@ data class RepoDetailReadmeUiState(
     val owner: String = "",
     val repo: String = "",
     val branch: String? = "main",
+    val defaultBranch: String? = null, // Added defaultBranch parameter
     val readme: String? = null,
     override val isPageLoading: Boolean = false,
     override val isRefreshing: Boolean = false,
     override val isLoadingMore: Boolean = false,
     override val error: String? = null,
-    override val hasMore: Boolean = false,
     override val currentPage: Int = 1,
+    override val hasMore: Boolean = false,
     override val loadMoreError: Boolean = false
 ) : BaseUiState
 
@@ -45,9 +46,9 @@ class RepoDetailReadmeViewModel @Inject constructor(
     }
 ) {
 
-    fun loadReadme(owner: String, repo: String, branch: String?) {
+    fun loadReadme(owner: String, repo: String, branch: String?, defaultBranch: String?) {
         _uiState.update {
-            it.copy(owner = owner, repo = repo, branch = branch)
+            it.copy(owner = owner, repo = repo, branch = branch, defaultBranch = defaultBranch)
         }
         doInitialLoad()
     }
@@ -62,7 +63,7 @@ class RepoDetailReadmeViewModel @Inject constructor(
             }
         }
 
-        readmeRepository.getReadme(uiState.value.owner, uiState.value.repo, uiState.value.branch)
+        readmeRepository.getReadme(uiState.value.owner, uiState.value.repo, uiState.value.branch, uiState.value.defaultBranch)
             .onEach { result ->
                 _uiState.update {
                     if (result.data.isSuccess) {

@@ -37,6 +37,8 @@ data class RepoDetailInfoUiState(
     val isSwitchingItemType: Boolean = false, // New state to prevent multiple requests when switching
     val isLoadingDialog: Boolean = false,
     val showMarkdownDialog: Boolean = false, // Added for the markdown dialog state
+    val branches: List<String> = emptyList(), // Added for branches list
+    val selectedBranch: String? = null, // Added for selected branch
     override val isPageLoading: Boolean = false,
     override val isRefreshing: Boolean = false,
     override val isLoadingMore: Boolean = false,
@@ -95,10 +97,18 @@ class RepoDetailInfoViewModel @Inject constructor(
         }
     }
 
+    fun setBranch(branch: String) {
+        if (_uiState.value.selectedBranch != branch) {
+            _uiState.update { it.copy(selectedBranch = branch) }
+            refresh() // Refresh data when branch changes
+        }
+    }
+
     override fun loadData(initialLoad: Boolean, isRefresh: Boolean, isLoadMore: Boolean) {
         val owner = _uiState.value.owner
         val repoName = _uiState.value.repoName
         val selectedItemType = _uiState.value.selectedItemType
+        val currentSelectedBranch = _uiState.value.selectedBranch
 
         if (owner == null || repoName == null) {
             if (initialLoad) {
@@ -121,12 +131,35 @@ class RepoDetailInfoViewModel @Inject constructor(
                 .collectLatest { repositoryResult ->
                     repositoryResult.data.fold(onSuccess = { fetchedRepoDetail ->
                         _uiState.update { currentState ->
-                            currentState.copy(repoDetail = fetchedRepoDetail)
+                            currentState.copy(
+                                repoDetail = fetchedRepoDetail,
+                                selectedBranch = currentState.selectedBranch ?: fetchedRepoDetail.defaultBranchRef
+                            )
                         }
+                        // Fetch branches
+                        scopeForAsync.launch {
+                            repositoryRepository.getRepositoryBranches(owner, repoName)
+                                .flowOn(Dispatchers.IO)
+                                .collectLatest { branchesResult ->
+                                    branchesResult.data.fold(
+                                        onSuccess = { branches ->
+                                            _uiState.update { it.copy(branches = branches) }
+                                        },
+                                        onFailure = { exception ->
+                                            updateErrorState(
+                                                exception,
+                                                isLoadMore,
+                                                stringResourceProvider.getString(R.string.error_failed_to_load_branches)
+                                            )
+                                        }
+                                    )
+                                }
+                        }
+
                         // After fetching repo detail, fetch events or commits based on selectedItemType
                         scopeForAsync.launch {
                             fetchItems(
-                                owner, repoName, pageToLoad, isLoadMore, selectedItemType
+                                owner, repoName, pageToLoad, isLoadMore, selectedItemType, currentSelectedBranch, fetchedRepoDetail.defaultBranchRef
                             )
                         }
                     }, onFailure = { exception ->
@@ -145,7 +178,9 @@ class RepoDetailInfoViewModel @Inject constructor(
         repoName: String,
         page: Int,
         isLoadMore: Boolean,
-        itemType: RepoDetailItemType
+        itemType: RepoDetailItemType,
+        branch: String?,
+        defaultBranch: String? // Added defaultBranch parameter
     ) {
         when (itemType) {
             RepoDetailItemType.EVENT -> {
@@ -176,7 +211,7 @@ class RepoDetailInfoViewModel @Inject constructor(
 
             RepoDetailItemType.COMMIT -> {
                 collectAndHandleRepoDetailListResult(
-                    repoFlow = repositoryRepository.getRepoCommits(owner, repoName, page),
+                    repoFlow = repositoryRepository.getRepoCommits(owner, repoName, page, branch, defaultBranch),
                     pageToLoad = page,
                     isRefresh = !isLoadMore, // If not load more, it's a refresh or initial load
                     initialLoad = false, // Handled by loadData
@@ -254,11 +289,24 @@ class RepoDetailInfoViewModel @Inject constructor(
             _uiState.update { it.copy(isLoadingDialog = true) }
             repositoryRepository.forkRepo(owner, repo)
                 .flowOn(Dispatchers.IO)
-                .collectLatest {
-                    _uiState.update { it.copy(isLoadingDialog = false) }
-                    if (it.data.isSuccess) {
-                        refresh()
-                    }
+                .collectLatest { result ->
+                    result.data.fold(
+                        onSuccess = {
+                            _uiState.update { it.copy(isLoadingDialog = false) }
+                            if (result.data.isSuccess) {
+                                refresh()
+                            }
+                        },
+                        onFailure = {
+                            _uiState.update { it.copy(isLoadingDialog = false) }
+                            updateErrorState(
+                                Exception("Failed to fork repo"),
+                                false,
+                                stringResourceProvider.getString(R.string.error_unknown)
+                            )
+                            _events.emit(RepoDetailInfoEvent.ShowToast(stringResourceProvider.getString(R.string.error_unknown)))
+                        }
+                    )
                 }
         }
     }
