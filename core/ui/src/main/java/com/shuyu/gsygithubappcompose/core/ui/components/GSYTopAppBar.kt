@@ -18,6 +18,7 @@ import com.shuyu.gsygithubappcompose.core.ui.LocalNavigator
 fun GSYTopAppBar(
     modifier: Modifier = Modifier,
     title: @Composable () -> Unit,
+    navigationIcon: @Composable (() -> Unit)? = null,
     showBackButton: Boolean = false,
     actions: @Composable (RowScope.() -> Unit)? = null
 ) {
@@ -25,7 +26,9 @@ fun GSYTopAppBar(
     TopAppBar(
         title = title,
         navigationIcon = {
-            if (showBackButton) {
+            if (navigationIcon != null) {
+                navigationIcon()
+            } else if (showBackButton) {
                 IconButton(onClick = { navigator.back() }) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -40,7 +43,8 @@ fun GSYTopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.primary,
             titleContentColor = MaterialTheme.colorScheme.onPrimary,
-            navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
+            navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
+            actionIconContentColor = MaterialTheme.colorScheme.onPrimary
         )
     )
 }
