@@ -30,7 +30,12 @@
     <string name="menu_personal_info">个人信息</string>
     <string name="menu_language">语言切换</string>
     <string name="menu_check_update">检查更新</string>
-    <string name="feedback_hint">您输入的反馈会变成 issue 提交到 GitHub 仓库！</string>
+    <string name="feedback_hint">您输入的反馈会变成 issue 提交到 GitHub 仓库，请尽量详细描述您遇到的问题或建议，谢谢！</string>
+    <string name="app_not_new_version">当前已是最新版本。</string>
+    <string name="update_dialog_title">发现新版本</string>
+    <string name="update_dialog_message">版本：%1$s\n\n%2$s</string>
+    <string name="app_cancel">取消</string>
+    <string name="app_ok">更新</string>
 
     <!-- 搜索页 -->
     <string name="nav_search">搜索</string>
@@ -109,6 +114,25 @@
     <string name="issue_locked">已锁定</string>
     <string name="edit">编辑</string>
     <string name="delete">删除</string>
+
+    <!-- Issue View Model Toasts -->
+    <string name="issue_comment_cannot_be_empty">评论不能为空</string>
+    <string name="issue_comment_added_successfully">评论添加成功</string>
+    <string name="issue_title_cannot_be_empty">标题不能为空</string>
+    <string name="issue_updated_successfully">Issue 更新成功</string>
+    <string name="issue_state_changed_to">Issue 状态已更改为 %s</string>
+    <string name="issue_unlocked_successfully">Issue 解锁成功</string>
+    <string name="issue_locked_successfully">Issue 锁定成功</string>
+    <string name="issue_comment_updated_successfully">评论更新成功</string>
+    <string name="issue_comment_deleted_successfully">评论删除成功</string>
+    <string name="error_failed_to_update_comment">更新评论失败</string>
+    <string name="error_failed_to_delete_comment">删除评论失败</string>
+    <string name="error_failed_to_add_comment">添加评论失败</string>
+    <string name="error_failed_to_change_issue_state">更改 Issue 状态失败</string>
+    <string name="error_failed_to_update_issue">更新 Issue 失败</string>
+    <string name="error_failed_to_unlock_issue">解锁 Issue 失败</string>
+    <string name="error_failed_to_lock_issue">锁定 Issue 失败</string>
+    <string name="error_missing_issue_info">缺少所有者、仓库名称或 Issue 编号</string>
 
     <!-- 通用 -->
     <string name="loading">加载中...</string>

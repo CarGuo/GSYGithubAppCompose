@@ -8,6 +8,7 @@ import com.shuyu.gsygithubappcompose.core.database.entity.RepositoryEntity
 import com.shuyu.gsygithubappcompose.core.network.api.GitHubApiService
 import com.shuyu.gsygithubappcompose.core.network.graphql.GetRepositoryDetailQuery
 import com.shuyu.gsygithubappcompose.core.network.model.Issue
+import com.shuyu.gsygithubappcompose.core.network.model.Release
 import com.shuyu.gsygithubappcompose.core.network.model.RepoCommit
 import com.shuyu.gsygithubappcompose.core.network.model.Repository
 import com.shuyu.gsygithubappcompose.core.network.model.RepositoryDetailModel
@@ -238,6 +239,17 @@ class RepositoryRepository @Inject constructor(
             val issue = mapOf("title" to title, "body" to body)
             val createdIssue = apiService.createIssue(owner, repo, issue)
             emit(RepositoryResult(Result.success(createdIssue), DataSource.NETWORK, true))
+        } catch (e: Exception) {
+            emit(RepositoryResult(Result.failure(e), DataSource.NETWORK, true))
+        }
+    }
+
+    fun getRepositoryReleases(
+        owner: String, repoName: String, page: Int = 1
+    ): Flow<RepositoryResult<List<Release>>> = flow {
+        try {
+            val releases = apiService.getRepositoryReleases(owner, repoName, page)
+            emit(RepositoryResult(Result.success(releases), DataSource.NETWORK, true))
         } catch (e: Exception) {
             emit(RepositoryResult(Result.failure(e), DataSource.NETWORK, true))
         }
