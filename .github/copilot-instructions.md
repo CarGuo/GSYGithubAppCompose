@@ -31,6 +31,8 @@ import com.shuyu.gsygithubappcompose.data.repository.vm.BaseUiState
 import com.shuyu.gsygithubappcompose.data.repository.vm.BaseViewModel
 ```
 
+如果使用了 `BaseViewModel`, 则需要同步使用 `BaseScreen` 来包裹，从而实现 Toast 展示
+
 ### 1. 模块职责划分
 
 *   **`feature/xxx` 模块**:

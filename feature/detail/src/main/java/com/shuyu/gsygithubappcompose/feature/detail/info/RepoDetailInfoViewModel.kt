@@ -19,6 +19,8 @@ import com.shuyu.gsygithubappcompose.data.repository.EventRepository
 import kotlinx.coroutines.CoroutineName
 import com.shuyu.gsygithubappcompose.data.repository.RepositoryResult
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 
 
 enum class RepoDetailItemType {
@@ -34,6 +36,7 @@ data class RepoDetailInfoUiState(
     val selectedItemType: RepoDetailItemType = RepoDetailItemType.EVENT, // New state for selected item type
     val isSwitchingItemType: Boolean = false, // New state to prevent multiple requests when switching
     val isLoadingDialog: Boolean = false,
+    val showMarkdownDialog: Boolean = false, // Added for the markdown dialog state
     override val isPageLoading: Boolean = false,
     override val isRefreshing: Boolean = false,
     override val isLoadingMore: Boolean = false,
@@ -42,6 +45,12 @@ data class RepoDetailInfoUiState(
     override val hasMore: Boolean = false,
     override val loadMoreError: Boolean = false
 ) : BaseUiState
+
+sealed class RepoDetailInfoEvent {
+    data class ShowToast(val message: String) : RepoDetailInfoEvent()
+    data class NavigateToIssueScreenAndRefresh(val owner: String, val repoName: String) : RepoDetailInfoEvent()
+    object DismissMarkdownDialog : RepoDetailInfoEvent()
+}
 
 @HiltViewModel
 class RepoDetailInfoViewModel @Inject constructor(
@@ -64,6 +73,9 @@ class RepoDetailInfoViewModel @Inject constructor(
             loadMoreError = loadMoreError
         )
     }) {
+
+    private val _events = MutableSharedFlow<RepoDetailInfoEvent>()
+    val events = _events.asSharedFlow()
 
     // This function is now responsible for setting the owner and repoName, then triggering a data load.
     fun loadRepoDetailInfo(owner: String, repoName: String) {
@@ -274,22 +286,31 @@ class RepoDetailInfoViewModel @Inject constructor(
                 .collectLatest { result ->
                     result.data.fold(
                         onSuccess = {
-                            _uiState.update { it.copy(isLoadingDialog = false) }
-                            refresh()
+                            _uiState.update { it.copy(isLoadingDialog = false, showMarkdownDialog = false) }
+                            _events.emit(RepoDetailInfoEvent.ShowToast(stringResourceProvider.getString(R.string.issue_created_successfully)))
+                            _events.emit(RepoDetailInfoEvent.NavigateToIssueScreenAndRefresh(owner, repo))
                         },
                         onFailure = {
                             _uiState.update { it.copy(isLoadingDialog = false) }
                             updateErrorState(
                                 Exception("Failed to create issue"),
                                 false,
-                                stringResourceProvider.getString(R.string.error_unknown)
+                                stringResourceProvider.getString(R.string.error_failed_to_create_issue)
                             )
+                            _events.emit(RepoDetailInfoEvent.ShowToast(stringResourceProvider.getString(R.string.error_failed_to_create_issue)))
                         }
                     )
                 }
         }
     }
 
+    fun showMarkdownDialog(show: Boolean) {
+        _uiState.update { it.copy(showMarkdownDialog = show) }
+    }
+
+    fun dismissMarkdownDialog() {
+        _uiState.update { it.copy(showMarkdownDialog = false) }
+    }
 
     // Public functions to trigger refresh and load more, leveraging BaseViewModel's functionality.
     fun refreshRepoDetailInfo() {

@@ -9,6 +9,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.shuyu.gsygithubappcompose.data.repository.vm.BaseScreen
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYGeneralLoadState
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYPullRefresh
 import com.shuyu.gsygithubappcompose.core.ui.components.RepositoryItem
@@ -24,24 +25,26 @@ fun TrendingScreen(
         viewModel.doInitialLoad()
     }
 
-    GSYGeneralLoadState(
-        isLoading = uiState.isPageLoading && uiState.repositories.isEmpty(),
-        error = uiState.error,
-        retry = { viewModel.refresh() }
-    ) {
-        GSYPullRefresh(
-            isRefreshing = uiState.isRefreshing,
-            onRefresh = { viewModel.refresh() },
-            isLoadMore = false, // Trending API does not support load more
-            onLoadMore = { /* No-op */ }, // Trending API does not support load more
-            hasMore = false, // Trending API does not support load more
-            itemCount = uiState.repositories.size,
-            loadMoreError = false, // Trending API does not support load more
-            contentPadding = PaddingValues(5.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+    BaseScreen(viewModel = viewModel) {
+        GSYGeneralLoadState(
+            isLoading = uiState.isPageLoading && uiState.repositories.isEmpty(),
+            error = uiState.error,
+            retry = { viewModel.refresh() }
         ) {
-            items(uiState.repositories) { repo ->
-                RepositoryItem(repoItem = repo.toTrendingDisplayData())
+            GSYPullRefresh(
+                isRefreshing = uiState.isRefreshing,
+                onRefresh = { viewModel.refresh() },
+                isLoadMore = false, // Trending API does not support load more
+                onLoadMore = { /* No-op */ }, // Trending API does not support load more
+                hasMore = false, // Trending API does not support load more
+                itemCount = uiState.repositories.size,
+                loadMoreError = false, // Trending API does not support load more
+                contentPadding = PaddingValues(5.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(uiState.repositories) { repo ->
+                    RepositoryItem(repoItem = repo.toTrendingDisplayData())
+                }
             }
         }
     }

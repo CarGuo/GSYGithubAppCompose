@@ -10,6 +10,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.shuyu.gsygithubappcompose.core.ui.components.EventItem
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYGeneralLoadState
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYPullRefresh
+import com.shuyu.gsygithubappcompose.data.repository.vm.BaseScreen
 
 @Composable
 fun DynamicScreen(
@@ -22,23 +23,25 @@ fun DynamicScreen(
         viewModel.doInitialLoad()
     }
 
-    GSYGeneralLoadState(
-        isLoading = uiState.isPageLoading,
-        error = uiState.error,
-        retry = { viewModel.refresh() }
-    ) {
-        GSYPullRefresh(
-            listState = listState,
-            onRefresh = { viewModel.refresh() },
-            onLoadMore = { viewModel.loadMore() },
-            isRefreshing = uiState.isRefreshing,
-            isLoadMore = uiState.isLoadingMore,
-            hasMore = uiState.hasMore,
-            itemCount = uiState.events.size,
-            loadMoreError = uiState.loadMoreError
+    BaseScreen(viewModel = viewModel) {
+        GSYGeneralLoadState(
+            isLoading = uiState.isPageLoading,
+            error = uiState.error,
+            retry = { viewModel.refresh() }
         ) {
-            items(uiState.events) { event ->
-                EventItem(event = event)
+            GSYPullRefresh(
+                listState = listState,
+                onRefresh = { viewModel.refresh() },
+                onLoadMore = { viewModel.loadMore() },
+                isRefreshing = uiState.isRefreshing,
+                isLoadMore = uiState.isLoadingMore,
+                hasMore = uiState.hasMore,
+                itemCount = uiState.events.size,
+                loadMoreError = uiState.loadMoreError
+            ) {
+                items(uiState.events) { event ->
+                    EventItem(event = event)
+                }
             }
         }
     }

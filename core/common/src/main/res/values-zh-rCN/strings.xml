@@ -75,6 +75,8 @@
     <string name="issue_content_tip">内容</string>
     <string name="cancel">取消</string>
     <string name="confirm">确定</string>
+    <string name="issue_created_successfully">Issue 创建成功！</string>
+    <string name="error_failed_to_create_issue">创建 Issue 失败</string>
 
     <!-- 通用 -->
     <string name="loading">加载中...</string>

@@ -11,6 +11,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYTopAppBar
+import com.shuyu.gsygithubappcompose.data.repository.vm.BaseScreen
 
 @Composable
 fun PersonScreen(
@@ -24,19 +25,21 @@ fun PersonScreen(
         viewModel.doInitialLoad()
     }
 
-    Scaffold(
-        modifier = modifier, topBar = {
-            GSYTopAppBar(
-                title = { Text(text = username) },
-                showBackButton = true
-            )
-        }) { paddingValues ->
-        Box(modifier = Modifier.padding(paddingValues)) {
-            ProfileContent(
-                uiState = uiState,
-                onRefresh = { viewModel.refresh() },
-                onLoadMore = { viewModel.loadMore() }
-            )
+    BaseScreen(viewModel = viewModel) {
+        Scaffold(
+            modifier = modifier, topBar = {
+                GSYTopAppBar(
+                    title = { Text(text = username) },
+                    showBackButton = true
+                )
+            }) { paddingValues ->
+            Box(modifier = Modifier.padding(paddingValues)) {
+                ProfileContent(
+                    uiState = uiState,
+                    onRefresh = { viewModel.refresh() },
+                    onLoadMore = { viewModel.loadMore() }
+                )
+            }
         }
     }
 }
