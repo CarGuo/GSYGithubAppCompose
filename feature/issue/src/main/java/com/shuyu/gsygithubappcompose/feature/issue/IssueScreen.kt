@@ -1,6 +1,7 @@
 package com.shuyu.gsygithubappcompose.feature.issue
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -33,6 +35,7 @@ import coil.compose.AsyncImage
 import com.shuyu.gsygithubappcompose.core.network.model.Comment
 import com.shuyu.gsygithubappcompose.core.network.model.Issue
 import com.shuyu.gsygithubappcompose.core.common.R // Corrected R import
+import com.shuyu.gsygithubappcompose.core.ui.components.GSYCardItem
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYGeneralLoadState
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYMarkdownText
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYPullRefresh
@@ -49,37 +52,37 @@ fun IssueScreen(
         viewModel.doInitialLoad()
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        GSYTopAppBar(
-            title = { Text("#${issueNumber} ${uiState.issue?.title ?: ""}", maxLines = 1) },
-            showBackButton = true
-        )
-
-        GSYGeneralLoadState(
-            isLoading = uiState.isPageLoading && uiState.issue == null,
-            error = uiState.error,
-            retry = { viewModel.refresh() }) {
-            GSYPullRefresh(
-                isRefreshing = uiState.isRefreshing,
-                onRefresh = { viewModel.refresh() },
-                isLoadMore = uiState.isLoadingMore,
-                onLoadMore = { viewModel.loadMore() },
-                hasMore = uiState.hasMore,
-                itemCount = uiState.comments.size,
-                loadMoreError = uiState.loadMoreError,
-                contentPadding = PaddingValues(5.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                uiState.issue?.let { issue ->
-                    item {
-                        IssueHeader(issue = issue)
+    Scaffold(
+        topBar = {
+            GSYTopAppBar(
+                title = { Text("#${issueNumber} ${uiState.issue?.title ?: ""}", maxLines = 1) },
+                showBackButton = true
+            )
+        }) { paddingValues ->
+        Box(modifier = Modifier.padding(paddingValues)) {
+            GSYGeneralLoadState(
+                isLoading = uiState.isPageLoading && uiState.issue == null,
+                error = uiState.error,
+                retry = { viewModel.refresh() }) {
+                GSYPullRefresh(
+                    isRefreshing = uiState.isRefreshing,
+                    onRefresh = { viewModel.refresh() },
+                    isLoadMore = uiState.isLoadingMore,
+                    onLoadMore = { viewModel.loadMore() },
+                    hasMore = uiState.hasMore,
+                    itemCount = uiState.comments.size,
+                    loadMoreError = uiState.loadMoreError,
+                    contentPadding = PaddingValues(5.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    uiState.issue?.let { issue ->
+                        item {
+                            IssueHeader(issue = issue)
+                        }
                     }
-                    item {
-                        IssueBody(issue = issue)
+                    items(uiState.comments) { comment ->
+                        IssueCommentItem(comment = comment)
                     }
-                }
-                items(uiState.comments) { comment ->
-                    IssueCommentItem(comment = comment)
                 }
             }
         }
@@ -88,57 +91,59 @@ fun IssueScreen(
 
 @Composable
 fun IssueHeader(issue: Issue) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            AsyncImage(
-                model = issue.user?.avatarUrl,
-                contentDescription = stringResource(R.string.user_avatar),
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape),
-                contentScale = ContentScale.Crop
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Column {
-                Text(text = issue.user?.login ?: "", fontWeight = FontWeight.Bold)
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    val stateColor = if (issue.state == "open") Color.Green else Color.Red
-                    Text(
-                        text = issue.state,
-                        color = stateColor,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(text = "#${issue.number}", fontSize = 12.sp)
-                    Spacer(modifier = Modifier.width(4.dp))
-                    issue.comments?.let { comments ->
+    GSYCardItem {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                AsyncImage(
+                    model = issue.user?.avatarUrl,
+                    contentDescription = stringResource(R.string.user_avatar),
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape),
+                    contentScale = ContentScale.Crop
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Column {
+                    Text(text = issue.user?.login ?: "", fontWeight = FontWeight.Bold)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        val stateColor = if (issue.state == "open") Color.Green else Color.Red
                         Text(
-                            text = stringResource(R.string.comments_count, comments),
-                            fontSize = 12.sp
+                            text = issue.state,
+                            color = stateColor,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold
                         )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(text = "#${issue.number}", fontSize = 12.sp)
+                        Spacer(modifier = Modifier.width(4.dp))
+                        issue.comments?.let { comments ->
+                            Text(
+                                text = stringResource(R.string.comments_count, comments),
+                                fontSize = 12.sp
+                            )
+                        }
                     }
                 }
+                Spacer(modifier = Modifier.weight(1f))
+                RelativeTimeText(dateString = issue.createdAt)
             }
-            Spacer(modifier = Modifier.weight(1f))
-            issue.createdAt.let { createdAt ->
-                // RelativeTimeText(timestamp = createdAt)
-            }
-        }
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(text = issue.title, style = MaterialTheme.typography.headlineSmall)
-        Spacer(modifier = Modifier.height(8.dp))
-        issue.closedAt?.let { closedAt ->
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                Text(
-                    text = stringResource(
-                        R.string.closed_by_at, issue.user?.login ?: "", closedAt
-                    ), fontSize = 12.sp
-                )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(text = issue.title, style = MaterialTheme.typography.headlineSmall)
+            Spacer(modifier = Modifier.height(8.dp))
+            IssueBody(issue = issue)
+            issue.closedAt?.let { closedAt ->
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                    Text(
+                        text = stringResource(
+                            R.string.closed_by_at, issue.user?.login ?: "", ""
+                        ), fontSize = 12.sp
+                    )
+                    RelativeTimeText(dateString = issue.closedAt!!)
+                }
             }
         }
     }
@@ -159,28 +164,30 @@ fun IssueBody(issue: Issue) {
 
 @Composable
 fun IssueCommentItem(comment: Comment) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp), verticalAlignment = Alignment.Top
-    ) {
-        AsyncImage(
-            model = comment.user.avatarUrl,
-            contentDescription = stringResource(R.string.user_avatar),
+    GSYCardItem {
+        Row(
             modifier = Modifier
-                .size(32.dp)
-                .clip(CircleShape),
-            contentScale = ContentScale.Crop
-        )
-        Spacer(modifier = Modifier.width(8.dp))
-        Column(modifier = Modifier.weight(1f)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(text = comment.user.login, fontWeight = FontWeight.Bold)
-                Spacer(modifier = Modifier.weight(1f))
-                RelativeTimeText(dateString = comment.createdAt)
+                .fillMaxWidth()
+                .padding(16.dp), verticalAlignment = Alignment.Top
+        ) {
+            AsyncImage(
+                model = comment.user.avatarUrl,
+                contentDescription = stringResource(R.string.user_avatar),
+                modifier = Modifier
+                    .size(32.dp)
+                    .clip(CircleShape),
+                contentScale = ContentScale.Crop
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(text = comment.user.login, fontWeight = FontWeight.Bold)
+                    Spacer(modifier = Modifier.weight(1f))
+                    RelativeTimeText(dateString = comment.createdAt)
+                }
+                Spacer(modifier = Modifier.height(4.dp))
+                GSYMarkdownText(markdown = comment.body)
             }
-            Spacer(modifier = Modifier.height(4.dp))
-            GSYMarkdownText(markdown = comment.body)
         }
     }
 }
