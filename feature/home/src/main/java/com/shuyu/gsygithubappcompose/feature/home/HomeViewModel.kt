@@ -2,7 +2,9 @@ package com.shuyu.gsygithubappcompose.feature.home
 
 import androidx.lifecycle.viewModelScope
 import com.shuyu.gsygithubappcompose.core.common.R
+import com.shuyu.gsygithubappcompose.core.common.datastore.AppLanguage
 import com.shuyu.gsygithubappcompose.core.common.datastore.UserPreferencesDataStore
+import com.shuyu.gsygithubappcompose.core.common.manager.LanguageManager
 import com.shuyu.gsygithubappcompose.core.common.util.StringResourceProvider
 import com.shuyu.gsygithubappcompose.core.network.model.Release
 import com.shuyu.gsygithubappcompose.core.network.model.User
@@ -27,7 +29,8 @@ class HomeViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val repositoryRepository: RepositoryRepository,
     private val stringResourceProvider: StringResourceProvider,
-    userPreferencesDataStore: UserPreferencesDataStore
+    userPreferencesDataStore: UserPreferencesDataStore,
+    private val languageManager: LanguageManager
 ) : BaseViewModel<HomeUiState>(
     initialUiState = HomeUiState(),
     preferencesDataStore = userPreferencesDataStore,
@@ -43,6 +46,11 @@ class HomeViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             doInitialLoad()
+        }
+        viewModelScope.launch {
+            languageManager.appLanguage.collectLatest { language -> // Changed from appLanguageFlow to appLanguage
+                _uiState.update { it.copy(currentAppLanguage = language) }
+            }
         }
     }
 
@@ -129,6 +137,20 @@ class HomeViewModel @Inject constructor(
         _uiState.update { it.copy(showUpdateDialog = false) }
     }
 
+    fun showLanguageSelectionDialog() {
+        _uiState.update { it.copy(showLanguageDialog = true) }
+    }
+
+    fun dismissLanguageSelectionDialog() {
+        _uiState.update { it.copy(showLanguageDialog = false) }
+    }
+
+    fun setAppLanguage(language: AppLanguage) {
+        viewModelScope.launch {
+            languageManager.setAppLanguage(language)
+        }
+    }
+
     private fun parseVersion(versionString: String): Version {
         // Remove any non-numeric or leading 'v' characters
         val cleanedVersion = versionString.replace(Regex("[^\\d.]"), "")
@@ -155,6 +177,8 @@ data class HomeUiState(
     val isLoadingDialog: Boolean = false,
     val latestRelease: Release? = null,
     val showUpdateDialog: Boolean = false,
+    val showLanguageDialog: Boolean = false,
+    val currentAppLanguage: AppLanguage = AppLanguage.ENGLISH, // Re-added
     override val isPageLoading: Boolean = false,
     override val isRefreshing: Boolean = false,
     override val isLoadingMore: Boolean = false,

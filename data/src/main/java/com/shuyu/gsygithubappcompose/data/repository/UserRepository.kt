@@ -131,6 +131,21 @@ class UserRepository @Inject constructor(
         }
     }
 
+    /**
+     * Update user info
+     */
+    suspend fun updateUserInfo(userInfo: Map<String, String>): Result<User> {
+        return try {
+            val user = apiService.updateUserInfo(userInfo)
+
+            // Update cache user in database
+            userDao.insertUser(user.toEntity())
+
+            Result.success(user)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 
     fun getCachedUser(login: String): Flow<UserEntity?> {
         return userDao.getUserByLogin(login)
@@ -243,7 +258,7 @@ class UserRepository @Inject constructor(
 
     private fun <T, R> getPaginatedFromCacheAndNetwork(
         page: Int,
-        cacheFetch: suspend () -> List<T>, // For page 1
+        cacheFetch: suspend () -> List<T>,
         networkFetch: suspend () -> List<R>,
         cacheUpdateForPage1: suspend (List<R>) -> Unit, // For page 1
         toDomain: (T) -> R,

@@ -31,7 +31,9 @@ android {
 
 dependencies {
     implementation(libs.androidx.core.ktx)
-    
+    implementation(libs.androidx.appcompat) // Added for AppCompatDelegate
+    implementation(libs.androidx.compose.runtime) // Added for Compose runtime
+
     // Hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
