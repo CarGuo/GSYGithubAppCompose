@@ -37,6 +37,8 @@ data class RepoDetailInfoUiState(
     val isSwitchingItemType: Boolean = false, // New state to prevent multiple requests when switching
     val isLoadingDialog: Boolean = false,
     val showMarkdownDialog: Boolean = false, // Added for the markdown dialog state
+    val issueTitle: String = "", // Added for create issue title
+    val issueBody: String = "", // Added for create issue body
     val branches: List<String> = emptyList(), // Added for branches list
     val selectedBranch: String? = null, // Added for selected branch
     override val isPageLoading: Boolean = false,
@@ -353,7 +355,15 @@ class RepoDetailInfoViewModel @Inject constructor(
     }
 
     fun showMarkdownDialog(show: Boolean) {
-        _uiState.update { it.copy(showMarkdownDialog = show) }
+        _uiState.update { it.copy(showMarkdownDialog = show, issueTitle = "", issueBody = "") }
+    }
+
+    fun updateIssueTitle(title: String) {
+        _uiState.update { it.copy(issueTitle = title) }
+    }
+
+    fun updateIssueBody(body: String) {
+        _uiState.update { it.copy(issueBody = body) }
     }
 
     fun dismissMarkdownDialog() {

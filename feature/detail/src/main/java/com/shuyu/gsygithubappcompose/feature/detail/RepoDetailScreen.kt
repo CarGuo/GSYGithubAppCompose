@@ -151,11 +151,19 @@ fun RepoDetailScreen(
 
     if (uiState.showMarkdownDialog) {
         GSYMarkdownInputDialog(
-            dialogTitle = stringResource(id = R.string.create_issue),
-            onDismissRequest = { repoDetailInfoViewModel.dismissMarkdownDialog() },
+            title = stringResource(id = R.string.create_issue),
+            initialTitle = uiState.issueTitle,
+            initialText = uiState.issueBody,
+            titleHint = stringResource(id = R.string.issue_title_tip),
+            textHint = stringResource(id = R.string.issue_content_tip),
+            showTitleField = true,
             onConfirm = { title, content ->
                 repoDetailInfoViewModel.createIssue(userName, repoName, title, content)
-            })
+            },
+            onDismiss = { repoDetailInfoViewModel.dismissMarkdownDialog() },
+            onTitleChange = { repoDetailInfoViewModel.updateIssueTitle(it) },
+            onTextChange = { repoDetailInfoViewModel.updateIssueBody(it) }
+        )
     }
 
     if (uiState.isLoadingDialog) {

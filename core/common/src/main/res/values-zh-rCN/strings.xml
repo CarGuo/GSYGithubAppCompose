@@ -82,6 +82,18 @@
     <string name="user_avatar">用户头像</string>
     <string name="comments_count">%d 条评论</string>
     <string name="closed_by_at">由 %s 关闭于 %s </string>
+    <string name="issue_action_reply">回复</string>
+    <string name="issue_action_edit">编辑</string>
+    <string name="issue_action_open">打开</string>
+    <string name="issue_action_close">关闭</string>
+    <string name="issue_action_lock">锁定</string>
+    <string name="issue_action_unlock">解锁</string>
+    <string name="issue_reply_dialog_title">回复 Issue</string>
+    <string name="issue_edit_dialog_title">编辑 Issue</string>
+    <string name="issue_reply_hint">输入你的评论</string>
+    <string name="issue_edit_title_hint">Issue 标题</string>
+    <string name="issue_edit_body_hint">Issue 内容</string>
+    <string name="issue_locked">已锁定</string>
 
     <!-- 通用 -->
     <string name="loading">加载中...</string>

@@ -295,7 +295,7 @@ interface GitHubApiService {
         @Path("owner") reposOwner: String,
         @Path("repo") reposName: String,
         @Path("issue_number") issueNumber: Int,
-        @Body issue: Map<String, Any>
+        @Body issue: Map<String, String>
     ): Issue
 
     /**
@@ -303,6 +303,16 @@ interface GitHubApiService {
      */
     @PUT("repos/{owner}/{repo}/issues/{issue_number}/lock")
     suspend fun lockIssue(
+        @Path("owner") reposOwner: String,
+        @Path("repo") reposName: String,
+        @Path("issue_number") issueNumber: Int
+    ): Unit
+
+    /**
+     * Unlock issue
+     */
+    @DELETE("repos/{owner}/{repo}/issues/{issue_number}/lock")
+    suspend fun unlockIssue(
         @Path("owner") reposOwner: String,
         @Path("repo") reposName: String,
         @Path("issue_number") issueNumber: Int

@@ -1,4 +1,3 @@
-
 package com.shuyu.gsygithubappcompose.core.ui.components
 
 import androidx.compose.foundation.clickable
@@ -43,58 +42,80 @@ import com.shuyu.gsygithubappcompose.core.common.R
 /**
  * Markdown 输入弹窗
  *
- * @param dialogTitle 弹窗标题
- * @param content 默认内容
- * @param onDismissRequest 点击外部区域或返回键
- * @param onConfirm 确认回调
+ * @param title 弹窗标题
+ * @param initialTitle 默认标题内容
+ * @param initialText 默认内容
+ * @param titleHint 标题输入框提示
+ * @param textHint 内容输入框提示
+ * @param showTitleField 是否显示标题输入框
+ * @param onDismiss 点击外部区域或返回键
+ * @param onConfirm 确认回调 (title, text)
+ * @param onTitleChange 标题内容改变回调
+ * @param onTextChange 内容改变回调
  */
 @Composable
 fun GSYMarkdownInputDialog(
-    dialogTitle: String,
-    content: String? = null,
-    onDismissRequest: () -> Unit,
-    onConfirm: (String, String) -> Unit
+    title: String,
+    initialTitle: String? = null,
+    initialText: String? = null,
+    titleHint: String? = null,
+    textHint: String? = null,
+    showTitleField: Boolean = true,
+    onDismiss: () -> Unit,
+    onConfirm: (String, String) -> Unit,
+    onTitleChange: (String) -> Unit = {},
+    onTextChange: (String) -> Unit = {}
 ) {
-    var title by remember { mutableStateOf(TextFieldValue("")) }
-    var text by remember { mutableStateOf(TextFieldValue(content ?: "")) }
+    var currentTitle by remember { mutableStateOf(TextFieldValue(initialTitle ?: "")) }
+    var currentText by remember { mutableStateOf(TextFieldValue(initialText ?: "")) }
 
     val markdownActions = remember {
         listOf(
-            MarkdownAction(Icons.Default.Title, "H1") { text.insert("# ") },
-            MarkdownAction(Icons.Default.Title, "H2") { text.insert("## ") },
-            MarkdownAction(Icons.Default.Title, "H3") { text.insert("### ") },
-            MarkdownAction(Icons.Default.FormatBold, "B") { text.insert("****") },
-            MarkdownAction(Icons.Default.FormatItalic, "I") { text.insert("**") },
-            MarkdownAction(Icons.Default.FormatListBulleted, "UL") { text.insert("- ") },
-            MarkdownAction(Icons.Default.FormatQuote, "Quote") { text.insert("> ") },
-            MarkdownAction(Icons.Default.Code, "Code") { text.insert("``") },
-            MarkdownAction(Icons.Default.Image, "IMG") { text.insert("![]()") },
-            MarkdownAction(Icons.Default.Link, "Link") { text.insert("[]()") },
+            MarkdownAction(Icons.Default.Title, "H1") { currentText.insert("# ") },
+            MarkdownAction(Icons.Default.Title, "H2") { currentText.insert("## ") },
+            MarkdownAction(Icons.Default.Title, "H3") { currentText.insert("### ") },
+            MarkdownAction(Icons.Default.FormatBold, "B") { currentText.insert("****") },
+            MarkdownAction(Icons.Default.FormatItalic, "I") { currentText.insert("**") },
+            MarkdownAction(Icons.Default.FormatListBulleted, "UL") { currentText.insert("- ") },
+            MarkdownAction(Icons.Default.FormatQuote, "Quote") { currentText.insert("> ") },
+            MarkdownAction(Icons.Default.Code, "Code") { currentText.insert("``") },
+            MarkdownAction(Icons.Default.Image, "IMG") { currentText.insert("![]()") },
+            MarkdownAction(Icons.Default.Link, "Link") { currentText.insert("[]()") },
         )
     }
 
-    Dialog(onDismissRequest = onDismissRequest) {
+    Dialog(onDismissRequest = onDismiss) {
         Surface(
             modifier = Modifier.fillMaxWidth(),
             shape = androidx.compose.material3.MaterialTheme.shapes.medium
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
-                Text(text = dialogTitle, style = androidx.compose.material3.MaterialTheme.typography.titleLarge)
+                Text(text = title, style = androidx.compose.material3.MaterialTheme.typography.titleLarge)
                 Spacer(modifier = Modifier.height(16.dp))
+
+                if (showTitleField) {
+                    OutlinedTextField(
+                        value = currentTitle,
+                        onValueChange = {
+                            currentTitle = it
+                            onTitleChange(it.text)
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text(titleHint ?: stringResource(id = R.string.issue_title_tip)) }
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+
                 OutlinedTextField(
-                    value = title,
-                    onValueChange = { title = it },
-                    modifier = Modifier.fillMaxWidth(),
-                    label = { Text(stringResource(id = R.string.issue_title_tip)) }
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                OutlinedTextField(
-                    value = text,
-                    onValueChange = { text = it },
+                    value = currentText,
+                    onValueChange = {
+                        currentText = it
+                        onTextChange(it.text)
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(200.dp),
-                    label = { Text(stringResource(id = R.string.issue_content_tip)) }
+                    label = { Text(textHint ?: stringResource(id = R.string.issue_content_tip)) }
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 LazyRow(
@@ -105,7 +126,8 @@ fun GSYMarkdownInputDialog(
                         MarkdownActionButton(
                             action = action,
                             onClick = {
-                                text = action.onAction(text)
+                                currentText = action.onAction(currentText)
+                                onTextChange(currentText.text)
                             }
                         )
                     }
@@ -115,11 +137,11 @@ fun GSYMarkdownInputDialog(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End
                 ) {
-                    TextButton(onClick = onDismissRequest) {
+                    TextButton(onClick = onDismiss) {
                         Text(stringResource(id = R.string.cancel))
                     }
                     Spacer(modifier = Modifier.width(8.dp))
-                    TextButton(onClick = { onConfirm(title.text, text.text) }) {
+                    TextButton(onClick = { onConfirm(currentTitle.text, currentText.text) }) {
                         Text(stringResource(id = R.string.confirm))
                     }
                 }

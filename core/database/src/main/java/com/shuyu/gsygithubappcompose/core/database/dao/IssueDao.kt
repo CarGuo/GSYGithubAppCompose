@@ -16,8 +16,8 @@ interface IssueDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertIssue(issue: IssueEntity)
 
-    @Query("SELECT * FROM issues WHERE id = :issueId")
-    fun getIssueById(issueId: Long): Flow<IssueEntity?>
+    @Query("SELECT * FROM issues WHERE owner = :owner AND repo_name = :repoName AND number = :number")
+    fun getIssueById(owner: String, repoName: String, number: Long): Flow<IssueEntity?>
 
     @Query("SELECT * FROM issues WHERE owner = :owner AND repo_name = :repoName  ORDER BY number DESC")
     fun getIssues(owner: String, repoName: String): Flow<List<IssueEntity>>

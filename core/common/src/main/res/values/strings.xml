@@ -82,6 +82,18 @@
     <string name="user_avatar">User Avatar</string>
     <string name="comments_count">%d comments</string>
     <string name="closed_by_at">Closed by %s at %s</string>
+    <string name="issue_action_reply">Reply</string>
+    <string name="issue_action_edit">Edit</string>
+    <string name="issue_action_open">Open</string>
+    <string name="issue_action_close">Close</string>
+    <string name="issue_action_lock">Lock</string>
+    <string name="issue_action_unlock">Unlock</string>
+    <string name="issue_reply_dialog_title">Reply to Issue</string>
+    <string name="issue_edit_dialog_title">Edit Issue</string>
+    <string name="issue_reply_hint">Enter your comment</string>
+    <string name="issue_edit_title_hint">Issue Title</string>
+    <string name="issue_edit_body_hint">Issue Body</string>
+    <string name="issue_locked">Locked</string>
 
     <!-- Common -->
     <string name="loading">Loading...</string>
