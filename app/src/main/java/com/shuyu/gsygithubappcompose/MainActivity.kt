@@ -74,18 +74,18 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
-                    composable("file_code/{owner}/{repo}/{path}?branch={branch}&dataText={dataText}") { backStackEntry ->
+                    composable("file_code/{owner}/{repo}/{path}?sha={sha}&branch={branch}") { backStackEntry ->
                         val owner = backStackEntry.arguments?.getString("owner") ?: ""
                         val repo = backStackEntry.arguments?.getString("repo") ?: ""
-                        val path = backStackEntry.arguments?.getString("path") ?: ""
+                        val sha = backStackEntry.arguments?.getString("sha")
                         val branch = backStackEntry.arguments?.getString("branch")
-                        val dataText = backStackEntry.arguments?.getString("dataText")
+                        val path = backStackEntry.arguments?.getString("path") ?: ""
                         FileCodeViewScreen(
                             owner = owner,
                             repo = repo,
                             path = path,
+                            sha = sha,
                             branch = branch,
-                            dataText = dataText,
                         )
                     }
 

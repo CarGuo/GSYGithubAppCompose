@@ -84,6 +84,7 @@ fun PushDetailScreen(pushDetailViewModel: PushDetailViewModel = hiltViewModel())
                                         file = file,
                                         owner = uiState.owner ?: "",
                                         repoName = uiState.repoName ?: "",
+                                        sha = uiState.sha ?: ""
                                     )
                                 }
                             }
@@ -190,7 +191,7 @@ fun PushDetailHeader(pushCommit: PushCommit) {
 }
 
 @Composable
-fun CommitFileItem(file: CommitFile, owner: String, repoName: String) {
+fun CommitFileItem(file: CommitFile, owner: String, repoName: String, sha: String) {
     val navigator = LocalNavigator.current
     val fullPath = file.filename ?: stringResource(R.string.unknown_file)
     val lastSlashIndex = fullPath.lastIndexOf('/')
@@ -210,11 +211,9 @@ fun CommitFileItem(file: CommitFile, owner: String, repoName: String) {
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable {
-                    file.patch?.let { patch ->
+                    if (sha.isNotEmpty()) {
                         val encodedPath = Uri.encode(fullPath)
-                        val encodedPatch = Uri.encode(patch)
-                        navigator.navigate("file_code/$owner/$repoName/$encodedPath?dataText=$encodedPatch")
-
+                        navigator.navigate("file_code/$owner/$repoName/$encodedPath?sha=$sha")
                     }
                 },
         ) {

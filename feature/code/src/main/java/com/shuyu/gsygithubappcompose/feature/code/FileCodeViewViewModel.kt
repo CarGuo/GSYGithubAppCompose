@@ -16,6 +16,7 @@ data class FileCodeViewUiState(
     val repo: String = "",
     val path: String = "",
     val branch: String? = "main",
+    val sha: String? = null,
     val content: String? = null,
     override val isPageLoading: Boolean = false,
     override val isRefreshing: Boolean = false,
@@ -53,6 +54,13 @@ class FileCodeViewViewModel @Inject constructor(
         doInitialLoad()
     }
 
+    fun loadFileWithSha(owner: String, repo: String, path: String, sha: String) {
+        _uiState.update {
+            it.copy(owner = owner, repo = repo, path = path, sha = sha)
+        }
+        doInitialLoad()
+    }
+
     fun setPatchContent(patchText: String) {
         _uiState.update {
             it.copy(
@@ -79,25 +87,59 @@ class FileCodeViewViewModel @Inject constructor(
             }
         }
 
-        repositoryRepository.getFileContents(uiState.value.owner, uiState.value.repo, uiState.value.path, uiState.value.branch)
-            .onEach { result ->
-                _uiState.update {
-                    if (result.data.isSuccess) {
-                        it.copy(
-                            content = result.data.getOrNull(),
-                            isPageLoading = false,
-                            isRefreshing = false,
-                            error = null
-                        )
-                    } else {
-                        it.copy(
-                            isPageLoading = false,
-                            isRefreshing = false,
-                            error = result.data.exceptionOrNull()?.message
-                        )
+        val sha = uiState.value.sha
+        if (sha != null) {
+            repositoryRepository.getCommitFile(
+                uiState.value.owner,
+                uiState.value.repo,
+                uiState.value.path,
+                sha
+            )
+                .onEach { result ->
+                    _uiState.update {
+                        if (result.data.isSuccess) {
+                            it.copy(
+                                content = result.data.getOrNull(),
+                                isPageLoading = false,
+                                isRefreshing = false,
+                                error = null
+                            )
+                        } else {
+                            it.copy(
+                                isPageLoading = false,
+                                isRefreshing = false,
+                                error = result.data.exceptionOrNull()?.message
+                            )
+                        }
                     }
                 }
-            }
-            .launchIn(viewModelScope)
+                .launchIn(viewModelScope)
+        } else {
+            repositoryRepository.getFileContents(
+                uiState.value.owner,
+                uiState.value.repo,
+                uiState.value.path,
+                uiState.value.branch
+            )
+                .onEach { result ->
+                    _uiState.update {
+                        if (result.data.isSuccess) {
+                            it.copy(
+                                content = result.data.getOrNull(),
+                                isPageLoading = false,
+                                isRefreshing = false,
+                                error = null
+                            )
+                        } else {
+                            it.copy(
+                                isPageLoading = false,
+                                isRefreshing = false,
+                                error = result.data.exceptionOrNull()?.message
+                            )
+                        }
+                    }
+                }
+                .launchIn(viewModelScope)
+        }
     }
 }
