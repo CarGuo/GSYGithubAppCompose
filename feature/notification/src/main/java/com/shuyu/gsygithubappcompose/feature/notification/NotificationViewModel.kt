@@ -2,6 +2,7 @@ package com.shuyu.gsygithubappcompose.feature.notification
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.shuyu.gsygithubappcompose.core.common.R
 import com.shuyu.gsygithubappcompose.core.common.util.StringResourceProvider
 import com.shuyu.gsygithubappcompose.core.network.config.NetworkConfig
 import com.shuyu.gsygithubappcompose.core.network.model.Notification
@@ -121,6 +122,30 @@ class NotificationViewModel @Inject constructor(
                                 error = throwable.message
                             )
                         }
+                    }
+                )
+            }.launchIn(viewModelScope)
+        }
+    }
+
+    fun markNotificationAsRead(notification: Notification) {
+        viewModelScope.launch {
+            notificationRepository.markNotificationAsRead(notification.id).onEach { result ->
+                result.data.fold(
+                    onSuccess = {
+                        val newList = _uiState.value.notifications.map {
+                            if (it.id == notification.id) {
+                                it.copy(unread = false)
+                            } else {
+                                it
+                            }
+                        }
+                        _uiState.update {
+                            it.copy(notifications = newList)
+                        }
+                    },
+                    onFailure = {
+                        //ignore
                     }
                 )
             }.launchIn(viewModelScope)

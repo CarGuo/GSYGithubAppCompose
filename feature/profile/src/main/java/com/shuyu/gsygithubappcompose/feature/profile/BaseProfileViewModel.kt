@@ -22,6 +22,8 @@ data class ProfileUiState(
     override val error: String? = null,
     val orgMembers: List<User>? = null,
     val userEvents: List<Event>? = null,
+    val notificationCount: Int = 0,
+    val isFollowing: Boolean = false,
     override val currentPage: Int = 1,
     override val hasMore: Boolean = false,
     override val loadMoreError: Boolean = false

@@ -30,6 +30,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.shuyu.gsygithubappcompose.core.common.R
 import com.shuyu.gsygithubappcompose.core.network.model.Notification
+import com.shuyu.gsygithubappcompose.core.ui.LocalNavigator
+import com.shuyu.gsygithubappcompose.core.ui.components.GSYCardItem
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYLoadingDialog
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYPullRefresh
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYTopAppBar
@@ -41,6 +43,7 @@ fun NotificationScreen(
     viewModel: NotificationViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val navigator = LocalNavigator.current
 
     LaunchedEffect(Unit) {
         viewModel.doInitialLoad()
@@ -62,8 +65,7 @@ fun NotificationScreen(
                             contentDescription = stringResource(R.string.mark_all_as_read)
                         )
                     }
-                }
-            )
+                })
         }) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
             if (uiState.isPageLoading && uiState.notifications.isEmpty()) {
@@ -79,18 +81,15 @@ fun NotificationScreen(
                     SegmentedButton(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 8.dp),
-                        items = listOf(
+                            .padding(horizontal = 16.dp, vertical = 8.dp), items = listOf(
                             stringResource(R.string.notification_unread),
                             stringResource(R.string.notification_participating),
                             stringResource(R.string.notification_all)
-                        ),
-                        selectedIndex = when (uiState.selectedItemType) {
+                        ), selectedIndex = when (uiState.selectedItemType) {
                             NotificationItemType.UNREAD -> 0
                             NotificationItemType.PARTICIPATING -> 1
                             NotificationItemType.ALL -> 2
-                        },
-                        onItemSelected = { index ->
+                        }, onItemSelected = { index ->
                             if (!uiState.isSwitchingItemType) {
                                 when (index) {
                                     0 -> viewModel.setSelectedItemType(NotificationItemType.UNREAD)
@@ -98,8 +97,7 @@ fun NotificationScreen(
                                     2 -> viewModel.setSelectedItemType(NotificationItemType.ALL)
                                 }
                             }
-                        }
-                    )
+                        })
                     GSYPullRefresh(
                         isRefreshing = uiState.isRefreshing,
                         onRefresh = { viewModel.refresh() },
@@ -111,10 +109,24 @@ fun NotificationScreen(
                         contentPadding = PaddingValues(5.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        items(uiState.notifications.size, key = { uiState.notifications[it].id }) { index ->
+                        items(
+                            uiState.notifications.size,
+                            key = { uiState.notifications[it].id }) { index ->
                             val notification = uiState.notifications[index]
                             NotificationItem(notification = notification) {
-                                //TODO item click
+                                viewModel.markNotificationAsRead(notification)
+                                if (notification.subject?.type == "Issue") {
+                                    val url = notification.subject.url
+                                    if (url != null) {
+                                        val issueId = url.substring(url.lastIndexOf("/") + 1)
+                                        val repoUrl = notification.repository?.fullName
+                                        if (repoUrl != null) {
+                                            val owner = repoUrl.split("/")[0]
+                                            val repo = repoUrl.split("/")[1]
+                                            navigator.navigate("issue_detail/$owner/$repo/$issueId")
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -126,24 +138,16 @@ fun NotificationScreen(
 
 @Composable
 fun NotificationItem(
-    notification: Notification,
-    onClick: () -> Unit
+    notification: Notification, onClick: () -> Unit
 ) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 10.dp)
-            .clickable(onClick = onClick),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
+    GSYCardItem(
+        modifier = Modifier.clickable(onClick = onClick),
     ) {
         Column(
             modifier = Modifier.padding(10.dp)
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
                     text = notification.repository?.fullName ?: "",
@@ -158,7 +162,6 @@ fun NotificationItem(
                 modifier = Modifier.padding(top = 5.dp)
             )
             val type = notification.subject?.type ?: ""
-
             val status =
                 if (notification.unread) stringResource(R.string.notification_status_unread) else stringResource(
                     R.string.notification_status_read

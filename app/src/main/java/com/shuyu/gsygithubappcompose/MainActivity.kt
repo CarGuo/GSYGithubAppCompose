@@ -121,7 +121,7 @@ class MainActivity : ComponentActivity() {
                     }
 
                     // Add NotificationScreen route
-                    composable("notification_screen") {
+                    composable("notification") {
                         NotificationScreen()
                     }
                 }

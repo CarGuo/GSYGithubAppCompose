@@ -43,6 +43,7 @@ fun ProfileContent(
     uiState: ProfileUiState,
     onRefresh: () -> Unit,
     onLoadMore: () -> Unit,
+    notificationAction: @Composable () -> Unit = {}
 ) {
     val navigator = LocalNavigator.current
     GSYGeneralLoadState(
@@ -63,7 +64,7 @@ fun ProfileContent(
         ) {
             uiState.user?.let {
                 item {
-                    ProfileHeader(user = it)
+                    ProfileHeader(user = it, notificationAction = notificationAction)
                 }
             }
             if (uiState.user?.type == "Organization") {
@@ -86,7 +87,7 @@ fun ProfileContent(
 }
 
 @Composable
-fun ProfileHeader(user: User) {
+fun ProfileHeader(user: User, notificationAction: @Composable () -> Unit = {}) {
     val navigator = LocalNavigator.current
     Column {
         Column(
@@ -108,7 +109,7 @@ fun ProfileHeader(user: User) {
                 )
 
                 // User Info
-                Column {
+                Column{
                     Text(
                         text = user.name ?: user.login,
                         style = MaterialTheme.typography.titleLarge,
@@ -121,6 +122,7 @@ fun ProfileHeader(user: User) {
                         color = Color.White.copy(alpha = 0.7f)
                     )
                 }
+                notificationAction()
             }
 
             // Bio

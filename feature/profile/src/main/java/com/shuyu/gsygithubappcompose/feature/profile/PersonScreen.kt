@@ -2,6 +2,11 @@ package com.shuyu.gsygithubappcompose.feature.profile
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.PersonAdd
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,12 +32,25 @@ fun PersonScreen(
 
     BaseScreen(viewModel = viewModel) {
         Scaffold(
-            modifier = modifier, topBar = {
+            modifier = modifier,
+            topBar = {
                 GSYTopAppBar(
                     title = { Text(text = username) },
                     showBackButton = true
                 )
-            }) { paddingValues ->
+            },
+            floatingActionButton = {
+                FloatingActionButton(onClick = {
+                    viewModel.changeFollowStatus()
+                }) {
+                    if (uiState.isFollowing) {
+                        Icon(Icons.Default.Check, contentDescription = "Following")
+                    } else {
+                        Icon(Icons.Default.PersonAdd, contentDescription = "Follow")
+                    }
+                }
+            }
+        ) { paddingValues ->
             Box(modifier = Modifier.padding(paddingValues)) {
                 ProfileContent(
                     uiState = uiState,
