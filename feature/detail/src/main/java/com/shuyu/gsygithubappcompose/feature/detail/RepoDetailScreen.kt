@@ -58,14 +58,19 @@ import com.shuyu.gsygithubappcompose.feature.detail.info.RepoDetailInfoEvent
 import com.shuyu.gsygithubappcompose.feature.detail.issue.RepoDetailIssueViewModel
 import com.shuyu.gsygithubappcompose.feature.detail.readme.RepoDetailReadmeViewModel
 import com.shuyu.gsygithubappcompose.feature.detail.file.RepoDetailFileViewModel
+import kotlinx.coroutines.delay
 
 val LocalRepoOwner = staticCompositionLocalOf<String> { error("No Repo Owner provided") }
 val LocalRepoName = staticCompositionLocalOf<String> { error("No Repo Name provided") }
 
-val LocalRepoDetailInfoViewModel = staticCompositionLocalOf<RepoDetailInfoViewModel> { error("No RepoDetailInfoViewModel provided") }
-val LocalRepoDetailReadmeViewModel = staticCompositionLocalOf<RepoDetailReadmeViewModel> { error("No RepoDetailReadmeViewModel provided") }
-val LocalRepoDetailIssueViewModel = staticCompositionLocalOf<RepoDetailIssueViewModel> { error("No RepoDetailIssueViewModel provided") }
-val LocalRepoDetailFileViewModel = staticCompositionLocalOf<RepoDetailFileViewModel> { error("No RepoDetailFileViewModel provided") }
+val LocalRepoDetailInfoViewModel =
+    staticCompositionLocalOf<RepoDetailInfoViewModel> { error("No RepoDetailInfoViewModel provided") }
+val LocalRepoDetailReadmeViewModel =
+    staticCompositionLocalOf<RepoDetailReadmeViewModel> { error("No RepoDetailReadmeViewModel provided") }
+val LocalRepoDetailIssueViewModel =
+    staticCompositionLocalOf<RepoDetailIssueViewModel> { error("No RepoDetailIssueViewModel provided") }
+val LocalRepoDetailFileViewModel =
+    staticCompositionLocalOf<RepoDetailFileViewModel> { error("No RepoDetailFileViewModel provided") }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -113,12 +118,15 @@ fun RepoDetailScreen(
                 is RepoDetailInfoEvent.ShowToast -> {
                     Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
                 }
+
                 is RepoDetailInfoEvent.NavigateToIssueScreenAndRefresh -> {
                     coroutineScope.launch {
                         pagerState.animateScrollToPage(2) // Navigate to Issue tab
-                        repoDetailIssueViewModel.triggerRefresh() // Trigger refresh on Issue tab
+                        delay(500)
+                        repoDetailIssueViewModel.refresh() // Trigger refresh on Issue tab
                     }
                 }
+
                 is RepoDetailInfoEvent.DismissMarkdownDialog -> {
                     // Handled by uiState.showMarkdownDialog = false
                 }
@@ -132,8 +140,7 @@ fun RepoDetailScreen(
             onDismissRequest = { repoDetailInfoViewModel.dismissMarkdownDialog() },
             onConfirm = { title, content ->
                 repoDetailInfoViewModel.createIssue(userName, repoName, title, content)
-            }
-        )
+            })
     }
 
     if (uiState.isLoadingDialog) {
@@ -190,12 +197,10 @@ fun RepoDetailScreen(
                             ) {
                                 Row {
                                     Text(
-                                        starText,
-                                        modifier = Modifier.padding(end = 5.dp)
+                                        starText, modifier = Modifier.padding(end = 5.dp)
                                     )
                                     Icon(
-                                        starIcon,
-                                        contentDescription = starText
+                                        starIcon, contentDescription = starText
                                     )
                                 }
                             }
@@ -203,7 +208,9 @@ fun RepoDetailScreen(
                             val watchIcon =
                                 if (uiState.repoDetail?.viewerSubscription == "SUBSCRIBED") Icons.Filled.Visibility else Icons.Outlined.VisibilityOff
                             val watchText =
-                                if (uiState.repoDetail?.viewerSubscription == "SUBSCRIBED") stringResource(R.string.repo_detail_action_unwatch) else stringResource(
+                                if (uiState.repoDetail?.viewerSubscription == "SUBSCRIBED") stringResource(
+                                    R.string.repo_detail_action_unwatch
+                                ) else stringResource(
                                     R.string.repo_detail_action_watch
                                 )
 
@@ -213,12 +220,10 @@ fun RepoDetailScreen(
                             ) {
                                 Row {
                                     Text(
-                                        watchText,
-                                        modifier = Modifier.padding(end = 5.dp)
+                                        watchText, modifier = Modifier.padding(end = 5.dp)
                                     )
                                     Icon(
-                                        watchIcon,
-                                        contentDescription = watchText
+                                        watchIcon, contentDescription = watchText
                                     )
                                 }
                             }
