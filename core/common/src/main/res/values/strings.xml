@@ -94,6 +94,8 @@
     <string name="issue_edit_title_hint">Issue Title</string>
     <string name="issue_edit_body_hint">Issue Body</string>
     <string name="issue_locked">Locked</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
 
     <!-- Common -->
     <string name="loading">Loading...</string>

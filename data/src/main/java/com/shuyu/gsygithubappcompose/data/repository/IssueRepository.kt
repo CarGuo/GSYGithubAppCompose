@@ -186,4 +186,27 @@ class IssueRepository @Inject constructor(
             emit(RepositoryResult(Result.failure(e), DataSource.NETWORK, true))
         }
     }
+
+    fun editComment(
+        owner: String, repoName: String, commentId: Long, body: String
+    ): Flow<RepositoryResult<Comment>> = flow {
+        try {
+            val comment = mapOf("body" to body)
+            val updatedComment = githubApiService.editComment(owner, repoName, commentId, comment)
+            emit(RepositoryResult(Result.success(updatedComment), DataSource.NETWORK, true))
+        } catch (e: Exception) {
+            emit(RepositoryResult(Result.failure(e), DataSource.NETWORK, true))
+        }
+    }
+
+    fun deleteComment(
+        owner: String, repoName: String, commentId: Long
+    ): Flow<RepositoryResult<Unit>> = flow {
+        try {
+            githubApiService.deleteComment(owner, repoName, commentId)
+            emit(RepositoryResult(Result.success(Unit), DataSource.NETWORK, true))
+        } catch (e: Exception) {
+            emit(RepositoryResult(Result.failure(e), DataSource.NETWORK, true))
+        }
+    }
 }

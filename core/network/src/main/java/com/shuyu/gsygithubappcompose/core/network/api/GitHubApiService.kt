@@ -346,7 +346,7 @@ interface GitHubApiService {
     suspend fun editComment(
         @Path("owner") reposOwner: String,
         @Path("repo") reposName: String,
-        @Path("comment_id") commentId: Int,
+        @Path("comment_id") commentId: Long,
         @Body comment: Map<String, String>
     ): Comment
 
@@ -357,7 +357,7 @@ interface GitHubApiService {
     suspend fun deleteComment(
         @Path("owner") reposOwner: String,
         @Path("repo") reposName: String,
-        @Path("comment_id") commentId: Int
+        @Path("comment_id") commentId: Long
     ): Unit
 
     /**
