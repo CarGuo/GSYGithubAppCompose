@@ -12,11 +12,6 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.automirrored.filled.CallSplit
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.outlined.StarBorder
-import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -67,6 +62,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.material.icons.automirrored.filled.CallSplit
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.outlined.StarBorder
+import androidx.compose.material.icons.outlined.VisibilityOff
+import com.shuyu.gsygithubappcompose.feature.detail.info.RepoDetailInfoUiState
+
 
 val LocalRepoOwner = staticCompositionLocalOf<String> { error("No Repo Owner provided") }
 val LocalRepoName = staticCompositionLocalOf<String> { error("No Repo Name provided") }
@@ -74,7 +77,7 @@ val LocalRepoName = staticCompositionLocalOf<String> { error("No Repo Name provi
 val LocalRepoDetailInfoViewModel =
     staticCompositionLocalOf<RepoDetailInfoViewModel> { error("No RepoDetailInfoViewModel provided") }
 val LocalRepoDetailReadmeViewModel =
-    staticCompositionLocalOf<RepoDetailReadmeViewModel> { error("No RepoDetailReadmeViewModel provided") }
+    staticCompositionLocalOf<RepoDetailReadmeViewModel> { error("No RepoDetailInfoViewModel provided") }
 val LocalRepoDetailIssueViewModel =
     staticCompositionLocalOf<RepoDetailIssueViewModel> { error("No RepoDetailIssueViewModel provided") }
 val LocalRepoDetailFileViewModel =
@@ -204,19 +207,10 @@ fun RepoDetailScreen(
                                     R.string.repo_detail_action_star
                                 )
 
-                            TextButton(
-                                onClick = { repoDetailInfoViewModel.starRepo(userName, repoName) },
-                                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.primary)
-                            ) {
-                                Row {
-                                    Text(
-                                        starText, modifier = Modifier.padding(end = 5.dp)
-                                    )
-                                    Icon(
-                                        starIcon, contentDescription = starText
-                                    )
-                                }
-                            }
+                            RepoActionButton(
+                                icon = starIcon,
+                                text = starText,
+                                onClick = { repoDetailInfoViewModel.starRepo(userName, repoName) })
 
                             val watchIcon =
                                 if (uiState.repoDetail?.viewerSubscription == "SUBSCRIBED") Icons.Filled.Visibility else Icons.Outlined.VisibilityOff
@@ -227,41 +221,27 @@ fun RepoDetailScreen(
                                     R.string.repo_detail_action_watch
                                 )
 
-                            TextButton(
-                                onClick = { repoDetailInfoViewModel.watchRepo(userName, repoName) },
-                                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.primary)
-                            ) {
-                                Row {
-                                    Text(
-                                        watchText, modifier = Modifier.padding(end = 5.dp)
-                                    )
-                                    Icon(
-                                        watchIcon, contentDescription = watchText
-                                    )
-                                }
-                            }
-                            TextButton(
-                                onClick = { repoDetailInfoViewModel.forkRepo(userName, repoName) },
-                                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.primary)
-                            ) {
-                                Row {
-                                    Text(
-                                        stringResource(R.string.repo_detail_action_fork),
-                                        modifier = Modifier.padding(end = 5.dp)
-                                    )
-                                    Icon(
-                                        Icons.AutoMirrored.Filled.CallSplit,
-                                        contentDescription = stringResource(R.string.repo_detail_action_fork)
-                                    )
-                                }
-                            }
+                            RepoActionButton(
+                                icon = watchIcon,
+                                text = watchText,
+                                onClick = { repoDetailInfoViewModel.watchRepo(userName, repoName) })
+
+                            RepoActionButton(
+                                icon = Icons.AutoMirrored.Filled.CallSplit,
+                                text = stringResource(R.string.repo_detail_action_fork),
+                                onClick = { repoDetailInfoViewModel.forkRepo(userName, repoName) })
 
                             // Branch selection Popmenu
                             uiState.selectedBranch?.let { currentBranch ->
                                 val expanded = remember { mutableStateOf(false) }
-                                Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterEnd) {
+                                Box(
+                                    modifier = Modifier.weight(1f),
+                                    contentAlignment = Alignment.CenterEnd
+                                ) {
                                     TextButton(
-                                        onClick = { if (uiState.branches.size > 1) expanded.value = true },
+                                        onClick = {
+                                            if (uiState.branches.size > 1) expanded.value = true
+                                        },
                                         colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.primary)
                                     ) {
                                         Text(
@@ -283,13 +263,10 @@ fun RepoDetailScreen(
                                         modifier = Modifier.widthIn(max = 200.dp)
                                     ) {
                                         uiState.branches.forEach { branch ->
-                                            DropdownMenuItem(
-                                                text = { Text(branch) },
-                                                onClick = {
-                                                    repoDetailInfoViewModel.setBranch(branch)
-                                                    expanded.value = false
-                                                }
-                                            )
+                                            DropdownMenuItem(text = { Text(branch) }, onClick = {
+                                                repoDetailInfoViewModel.setBranch(branch)
+                                                expanded.value = false
+                                            })
                                         }
                                     }
                                 }
@@ -320,6 +297,25 @@ fun RepoDetailScreen(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun RepoActionButton(
+    icon: ImageVector, text: String, onClick: () -> Unit
+) {
+    TextButton(
+        onClick = onClick,
+        colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.primary)
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Icon(
+                icon, contentDescription = text
+            )
+            Text(
+                text
+            )
         }
     }
 }
