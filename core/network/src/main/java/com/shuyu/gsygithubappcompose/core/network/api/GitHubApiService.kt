@@ -313,7 +313,7 @@ interface GitHubApiService {
     suspend fun createIssue(
         @Path("owner") reposOwner: String,
         @Path("repo") reposName: String,
-        @Body issue: Map<String, Any>
+        @Body issue: Map<String, String>
     ): Issue
 
     /**

@@ -7,6 +7,7 @@ import com.shuyu.gsygithubappcompose.core.database.dao.RepositoryDetailDao
 import com.shuyu.gsygithubappcompose.core.database.entity.RepositoryEntity
 import com.shuyu.gsygithubappcompose.core.network.api.GitHubApiService
 import com.shuyu.gsygithubappcompose.core.network.graphql.GetRepositoryDetailQuery
+import com.shuyu.gsygithubappcompose.core.network.model.Issue
 import com.shuyu.gsygithubappcompose.core.network.model.RepoCommit
 import com.shuyu.gsygithubappcompose.core.network.model.Repository
 import com.shuyu.gsygithubappcompose.core.network.model.RepositoryDetailModel
@@ -200,6 +201,16 @@ class RepositoryRepository @Inject constructor(
             emit(true)
         } catch (e: Exception) {
             emit(false)
+        }
+    }
+
+    fun createIssue(owner: String, repo: String, title: String, body: String): Flow<RepositoryResult<Issue>> = flow {
+        try {
+            val issue = mapOf("title" to title, "body" to body)
+            val createdIssue = apiService.createIssue(owner, repo, issue)
+            emit(RepositoryResult(Result.success(createdIssue), DataSource.NETWORK, true))
+        } catch (e: Exception) {
+            emit(RepositoryResult(Result.failure(e), DataSource.NETWORK, true))
         }
     }
 

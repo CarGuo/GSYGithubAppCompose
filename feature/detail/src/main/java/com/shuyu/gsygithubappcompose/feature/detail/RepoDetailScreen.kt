@@ -31,7 +31,10 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -40,6 +43,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import com.shuyu.gsygithubappcompose.core.common.R
+import com.shuyu.gsygithubappcompose.core.ui.components.GSYLoadingDialog
+import com.shuyu.gsygithubappcompose.core.ui.components.GSYMarkdownInputDialog
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYTopAppBar
 import com.shuyu.gsygithubappcompose.feature.detail.file.RepoDetailFileScreen
 import com.shuyu.gsygithubappcompose.feature.detail.info.RepoDetailInfoScreen
@@ -74,6 +79,23 @@ fun RepoDetailScreen(
     val coroutineScope = rememberCoroutineScope()
 
     val uiState by repoDetailInfoViewModel.uiState.collectAsState()
+
+    var showMarkdownDialog by remember { mutableStateOf(false) }
+
+    if (showMarkdownDialog) {
+        GSYMarkdownInputDialog(
+            dialogTitle = stringResource(id = R.string.create_issue),
+            onDismissRequest = { showMarkdownDialog = false },
+            onConfirm = { title, content ->
+                showMarkdownDialog = false
+                repoDetailInfoViewModel.createIssue(userName, repoName, title, content)
+            }
+        )
+    }
+
+    if (uiState.isLoadingDialog) {
+        GSYLoadingDialog()
+    }
 
     Scaffold(
         topBar = {
@@ -169,7 +191,7 @@ fun RepoDetailScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    /* TODO: Handle create issue click */
+                    showMarkdownDialog = true
                 }) {
                 Icon(Icons.Filled.Add, contentDescription = "Add")
             }
