@@ -17,6 +17,7 @@ import com.shuyu.gsygithubappcompose.feature.home.HomeScreen
 import com.shuyu.gsygithubappcompose.feature.issue.IssueScreen
 import com.shuyu.gsygithubappcompose.feature.list.ListScreen
 import com.shuyu.gsygithubappcompose.feature.login.LoginScreen
+import com.shuyu.gsygithubappcompose.feature.notification.NotificationScreen // Import NotificationScreen
 import com.shuyu.gsygithubappcompose.feature.profile.PersonScreen
 import com.shuyu.gsygithubappcompose.feature.profile.ProfileScreen
 import com.shuyu.gsygithubappcompose.feature.push.PushDetailScreen
@@ -117,6 +118,11 @@ class MainActivity : ComponentActivity() {
                             userName = username,
                             repoName = repoName
                         )
+                    }
+
+                    // Add NotificationScreen route
+                    composable("notification_screen") {
+                        NotificationScreen()
                     }
                 }
             }

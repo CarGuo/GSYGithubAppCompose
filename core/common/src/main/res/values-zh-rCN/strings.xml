@@ -127,6 +127,13 @@
     <string name="time_months_ago">%d 月前</string>
     <string name="time_years_ago">%d 年前</string>
 
+    <!-- Push Detail -->
+    <string name="files_changed">文件变更</string>
+    <string name="lines_added">新增行数</string>
+    <string name="lines_deleted">删除行数</string>
+    <string name="unknown_file">未知文件</string>
+    <string name="file_icon">文件图标</string>
+
     <!-- List Page -->
     <string name="list_repositories">%s 的仓库</string>
     <string name="list_followers">%s 的粉丝</string>
@@ -138,4 +145,15 @@
     <string name="list_forks">%s 的复刻</string>
     <string name="list_topics">%s 的主题</string>
     <string name="list_orgs">%s 的组织</string>
+
+    <!-- Notification -->
+    <string name="notification">通知</string>
+    <string name="mark_all_as_read">全部标记为已读</string>
+    <string name="notification_unread">未读</string>
+    <string name="notification_participating">参与</string>
+    <string name="notification_all">所有</string>
+    <string name="notify_type">类型</string>
+    <string name="notify_status">状态</string>
+    <string name="notification_status_unread">未读</string>
+    <string name="notification_status_read">已读</string>
 </resources>

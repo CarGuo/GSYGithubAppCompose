@@ -145,4 +145,15 @@
     <string name="list_forks">%s forks</string>
     <string name="list_topics">%s topics</string>
     <string name="list_orgs">%s orgs</string>
+
+    <!-- Notification -->
+    <string name="notification">Notification</string>
+    <string name="mark_all_as_read">Mark all as read</string>
+    <string name="notification_unread">Unread</string>
+    <string name="notification_participating">Participating</string>
+    <string name="notification_all">All</string>
+    <string name="notify_type">Type</string>
+    <string name="notify_status">Status</string>
+    <string name="notification_status_unread">Unread</string>
+    <string name="notification_status_read">Read</string>
 </resources>
