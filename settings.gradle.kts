@@ -13,6 +13,19 @@ dependencyResolutionManagement {
     }
 }
 
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+
 rootProject.name = "GSYGithubAppCompose"
 include(":app")
+include(":core:network")
+include(":core:database")
+include(":core:common")
+include(":core:ui")
+include(":data")
+include(":feature:welcome")
+include(":feature:login")
+include(":feature:home")
+include(":feature:dynamic")
+include(":feature:profile")
+include(":feature:trending")
  
