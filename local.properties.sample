@@ -1,0 +1,4 @@
+# GitHub OAuth Application Credentials
+# Get these from https://github.com/settings/developers
+CLIENT_ID=your_github_client_id_here
+CLIENT_SECRET=your_github_client_secret_here

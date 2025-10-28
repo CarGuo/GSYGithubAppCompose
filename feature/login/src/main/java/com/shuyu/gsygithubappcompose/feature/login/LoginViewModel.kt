@@ -15,7 +15,8 @@ data class LoginUiState(
     val token: String = "",
     val isLoading: Boolean = false,
     val isLoggedIn: Boolean = false,
-    val error: String? = null
+    val error: String? = null,
+    val showOAuthWebView: Boolean = false
 )
 
 @HiltViewModel
@@ -51,6 +52,42 @@ class LoginViewModel @Inject constructor(
                         it.copy(
                             isLoading = false,
                             error = exception.message ?: "Login failed"
+                        )
+                    }
+                }
+            )
+        }
+    }
+    
+    fun startOAuthFlow() {
+        _uiState.update { it.copy(showOAuthWebView = true, error = null) }
+    }
+    
+    fun cancelOAuthFlow() {
+        _uiState.update { it.copy(showOAuthWebView = false) }
+    }
+    
+    fun handleOAuthCode(clientId: String, clientSecret: String, code: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, showOAuthWebView = false, error = null) }
+            
+            val result = userRepository.loginWithOAuth(clientId, clientSecret, code)
+            
+            result.fold(
+                onSuccess = {
+                    _uiState.update { 
+                        it.copy(
+                            isLoading = false,
+                            isLoggedIn = true,
+                            error = null
+                        )
+                    }
+                },
+                onFailure = { exception ->
+                    _uiState.update { 
+                        it.copy(
+                            isLoading = false,
+                            error = exception.message ?: "OAuth login failed"
                         )
                     }
                 }

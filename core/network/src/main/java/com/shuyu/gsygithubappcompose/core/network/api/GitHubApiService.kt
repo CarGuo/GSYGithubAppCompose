@@ -1,10 +1,13 @@
 package com.shuyu.gsygithubappcompose.core.network.api
 
+import com.shuyu.gsygithubappcompose.core.network.model.AccessToken
 import com.shuyu.gsygithubappcompose.core.network.model.Event
 import com.shuyu.gsygithubappcompose.core.network.model.Repository
 import com.shuyu.gsygithubappcompose.core.network.model.User
 import retrofit2.http.GET
 import retrofit2.http.Header
+import retrofit2.http.Headers
+import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -12,6 +15,17 @@ import retrofit2.http.Query
  * GitHub API service
  */
 interface GitHubApiService {
+    
+    /**
+     * Exchange OAuth code for access token
+     */
+    @POST("https://github.com/login/oauth/access_token")
+    @Headers("Accept: application/json")
+    suspend fun getAccessToken(
+        @Query("client_id") clientId: String,
+        @Query("client_secret") clientSecret: String,
+        @Query("code") code: String
+    ): AccessToken
     
     /**
      * Get authenticated user

@@ -33,6 +33,29 @@ class UserRepository @Inject constructor(
         }
     }
     
+    suspend fun loginWithOAuth(clientId: String, clientSecret: String, code: String): Result<User> {
+        return try {
+            // Exchange code for access token
+            val tokenResponse = apiService.getAccessToken(clientId, clientSecret, code)
+            val accessToken = tokenResponse.accessToken
+            
+            // Get user info with the access token
+            val user = apiService.getAuthenticatedUser("token $accessToken")
+            
+            // Save credentials
+            preferencesDataStore.saveAuthToken(accessToken)
+            preferencesDataStore.saveUsername(user.login)
+            preferencesDataStore.saveUserId(user.id.toString())
+            
+            // Cache user in database
+            userDao.insertUser(user.toEntity())
+            
+            Result.success(user)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+    
     suspend fun logout() {
         preferencesDataStore.clearAll()
     }
