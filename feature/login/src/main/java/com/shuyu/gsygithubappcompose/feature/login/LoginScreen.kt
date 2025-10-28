@@ -1,6 +1,5 @@
 package com.shuyu.gsygithubappcompose.feature.login
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Key
@@ -9,7 +8,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
@@ -22,13 +20,13 @@ fun LoginScreen(
     viewModel: LoginViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    
+
     LaunchedEffect(uiState.isLoggedIn) {
         if (uiState.isLoggedIn) {
             onLoginSuccess()
         }
     }
-    
+
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.primaryContainer
@@ -57,14 +55,14 @@ fun LoginScreen(
                 ) {
                     // Logo/Avatar
                     Icon(
-                        imageVector = Icons.Default.Person,
+                        imageVector = Icons.Filled.Person,
                         contentDescription = "User Icon",
                         modifier = Modifier.size(90.dp),
                         tint = MaterialTheme.colorScheme.primary
                     )
-                    
+
                     Spacer(modifier = Modifier.height(24.dp))
-                    
+
                     // Title
                     Text(
                         text = "GSY GitHub",
@@ -72,17 +70,17 @@ fun LoginScreen(
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary
                     )
-                    
+
                     Spacer(modifier = Modifier.height(8.dp))
-                    
+
                     Text(
                         text = "Compose Edition",
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    
+
                     Spacer(modifier = Modifier.height(32.dp))
-                    
+
                     // Token Input Field
                     OutlinedTextField(
                         value = uiState.token,
@@ -91,7 +89,7 @@ fun LoginScreen(
                         placeholder = { Text("Enter your GitHub token") },
                         leadingIcon = {
                             Icon(
-                                imageVector = Icons.Default.Key,
+                                imageVector = Icons.Filled.Key,
                                 contentDescription = "Token"
                             )
                         },
@@ -102,9 +100,9 @@ fun LoginScreen(
                         isError = uiState.error != null,
                         shape = MaterialTheme.shapes.medium
                     )
-                    
+
                     Spacer(modifier = Modifier.height(8.dp))
-                    
+
                     // Helper text
                     Text(
                         text = "Get your token at github.com/settings/tokens",
@@ -112,7 +110,7 @@ fun LoginScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center
                     )
-                    
+
                     if (uiState.error != null) {
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
@@ -122,9 +120,9 @@ fun LoginScreen(
                             textAlign = TextAlign.Center
                         )
                     }
-                    
+
                     Spacer(modifier = Modifier.height(24.dp))
-                    
+
                     // Login Button
                     Button(
                         onClick = { viewModel.login() },
@@ -148,7 +146,7 @@ fun LoginScreen(
                             )
                         }
                     }
-                    
+
                     Spacer(modifier = Modifier.height(16.dp))
                 }
             }
