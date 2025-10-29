@@ -10,15 +10,16 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 
 sealed class BottomNavItem(
     val route: String,
     val icon: ImageVector,
-    val title: String
+    val titleRes: Int
 ) {
-    object Dynamic : BottomNavItem("dynamic", Icons.Default.Timeline, "动态")
-    object Trending : BottomNavItem("trending", Icons.Default.Star, "趋势")
-    object Profile : BottomNavItem("profile", Icons.Default.Person, "我的")
+    object Dynamic : BottomNavItem("dynamic", Icons.Default.Timeline, com.shuyu.gsygithubappcompose.R.string.nav_dynamic)
+    object Trending : BottomNavItem("trending", Icons.Default.Star, com.shuyu.gsygithubappcompose.R.string.nav_trending)
+    object Profile : BottomNavItem("profile", Icons.Default.Person, com.shuyu.gsygithubappcompose.R.string.nav_profile)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -39,15 +40,19 @@ fun HomeScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = "GSYGithubApp") }
+                title = { Text(text = stringResource(id = com.shuyu.gsygithubappcompose.R.string.app_name)) },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary
+                )
             )
         },
         bottomBar = {
             NavigationBar {
                 items.forEachIndexed { index, item ->
                     NavigationBarItem(
-                        icon = { Icon(item.icon, contentDescription = item.title) },
-                        label = { Text(item.title) },
+                        icon = { Icon(item.icon, contentDescription = stringResource(id = item.titleRes)) },
+                        label = { Text(stringResource(id = item.titleRes)) },
                         selected = selectedTab == index,
                         onClick = { selectedTab = index }
                     )
