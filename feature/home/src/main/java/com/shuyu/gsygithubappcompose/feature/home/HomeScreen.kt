@@ -1,5 +1,6 @@
 package com.shuyu.gsygithubappcompose.feature.home
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
@@ -20,6 +21,7 @@ sealed class BottomNavItem(
     object Profile : BottomNavItem("profile", Icons.Default.Person, "我的")
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     dynamicContent: @Composable () -> Unit,
@@ -35,6 +37,11 @@ fun HomeScreen(
     )
     
     Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(text = "GSYGithubApp") }
+            )
+        },
         bottomBar = {
             NavigationBar {
                 items.forEachIndexed { index, item ->
@@ -48,10 +55,12 @@ fun HomeScreen(
             }
         }
     ) { innerPadding ->
-        when (selectedTab) {
-            0 -> dynamicContent()
-            1 -> trendingContent()
-            2 -> profileContent()
+        Box(modifier = Modifier.padding(innerPadding)) {
+            when (selectedTab) {
+                0 -> dynamicContent()
+                1 -> trendingContent()
+                2 -> profileContent()
+            }
         }
     }
 }
