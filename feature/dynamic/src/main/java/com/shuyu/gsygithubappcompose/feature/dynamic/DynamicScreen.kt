@@ -14,6 +14,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.shuyu.gsygithubappcompose.core.common.R
 import com.shuyu.gsygithubappcompose.core.network.model.Event
 import com.shuyu.gsygithubappcompose.core.ui.components.AvatarImage
 import java.text.SimpleDateFormat
@@ -24,11 +25,11 @@ fun DynamicScreen(
     viewModel: DynamicViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    
+
     LaunchedEffect(Unit) {
         viewModel.loadEvents()
     }
-    
+
     Column(modifier = Modifier.fillMaxSize()) {
         when {
             uiState.isLoading -> {
@@ -46,12 +47,12 @@ fun DynamicScreen(
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            text = uiState.error ?: stringResource(id = com.shuyu.gsygithubappcompose.R.string.error),
+                            text = uiState.error ?: stringResource(id = R.string.error),
                             color = MaterialTheme.colorScheme.error
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Button(onClick = { viewModel.loadEvents() }) {
-                            Text(stringResource(id = com.shuyu.gsygithubappcompose.R.string.retry))
+                            Text(stringResource(id = R.string.retry))
                         }
                     }
                 }
@@ -62,7 +63,7 @@ fun DynamicScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = stringResource(id = com.shuyu.gsygithubappcompose.R.string.dynamic_empty),
+                        text = stringResource(id = R.string.dynamic_empty),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -97,7 +98,7 @@ fun EventItem(event: Event) {
             size = 40.dp,
             modifier = Modifier.clip(CircleShape)
         )
-        
+
         // Content
         Column(modifier = Modifier.weight(1f)) {
             // Username
@@ -107,9 +108,9 @@ fun EventItem(event: Event) {
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onSurface
             )
-            
+
             Spacer(modifier = Modifier.height(4.dp))
-            
+
             // Action description
             val actionText = when {
                 event.type.contains("Push") -> "pushed to"
@@ -121,15 +122,15 @@ fun EventItem(event: Event) {
                 event.type.contains("PullRequest") -> "created pull request in"
                 else -> event.type.replace("Event", "").lowercase()
             }
-            
+
             Text(
                 text = actionText,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            
+
             Spacer(modifier = Modifier.height(2.dp))
-            
+
             // Repository name
             Text(
                 text = event.repo.name,
@@ -137,9 +138,9 @@ fun EventItem(event: Event) {
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.primary
             )
-            
+
             Spacer(modifier = Modifier.height(4.dp))
-            
+
             // Time
             val timeText = formatEventTime(event.createdAt)
             Text(
@@ -156,14 +157,14 @@ fun formatEventTime(createdAt: String): String {
         val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US)
         dateFormat.timeZone = TimeZone.getTimeZone("UTC")
         val date = dateFormat.parse(createdAt)
-        
+
         if (date != null) {
             val now = Date()
             val diffInMillis = now.time - date.time
             val diffInMinutes = diffInMillis / (1000 * 60)
             val diffInHours = diffInMinutes / 60
             val diffInDays = diffInHours / 24
-            
+
             when {
                 diffInMinutes < 1 -> "just now"
                 diffInMinutes < 60 -> "${diffInMinutes}m ago"

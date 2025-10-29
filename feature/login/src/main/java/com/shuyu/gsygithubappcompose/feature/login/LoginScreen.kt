@@ -16,7 +16,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.shuyu.gsygithubappcompose.BuildConfig
+import com.shuyu.gsygithubappcompose.core.common.R
 
 @Composable
 fun LoginScreen(
@@ -24,13 +24,13 @@ fun LoginScreen(
     viewModel: LoginViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    
+
     LaunchedEffect(uiState.isLoggedIn) {
         if (uiState.isLoggedIn) {
             onLoginSuccess()
         }
     }
-    
+
     if (uiState.showOAuthWebView) {
         OAuthScreen(
             onCodeReceived = { code ->
@@ -88,37 +88,37 @@ fun LoginContent(
                 ) {
                     // Logo
                     Image(
-                        painter = painterResource(id = com.shuyu.gsygithubappcompose.R.drawable.ic_logo),
-                        contentDescription = stringResource(id = com.shuyu.gsygithubappcompose.R.string.app_name),
+                        painter = painterResource(id = R.mipmap.ic_launcher),
+                        contentDescription = stringResource(id = R.string.app_name),
                         modifier = Modifier.size(90.dp)
                     )
-                    
+
                     Spacer(modifier = Modifier.height(24.dp))
-                    
+
                     // Title
                     Text(
-                        text = stringResource(id = com.shuyu.gsygithubappcompose.R.string.login_title),
+                        text = stringResource(id = R.string.login_title),
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary
                     )
-                    
+
                     Spacer(modifier = Modifier.height(8.dp))
-                    
+
                     Text(
-                        text = stringResource(id = com.shuyu.gsygithubappcompose.R.string.login_subtitle),
+                        text = stringResource(id = R.string.login_subtitle),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    
+
                     Spacer(modifier = Modifier.height(32.dp))
-                    
+
                     // Token Input Field
                     OutlinedTextField(
                         value = uiState.token,
                         onValueChange = onTokenChange,
-                        label = { Text(stringResource(id = com.shuyu.gsygithubappcompose.R.string.login_token_label)) },
-                        placeholder = { Text(stringResource(id = com.shuyu.gsygithubappcompose.R.string.login_token_hint)) },
+                        label = { Text(stringResource(id = R.string.login_token_label)) },
+                        placeholder = { Text(stringResource(id = R.string.login_token_hint)) },
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Default.Key,
@@ -132,17 +132,17 @@ fun LoginContent(
                         isError = uiState.error != null,
                         shape = MaterialTheme.shapes.medium
                     )
-                    
+
                     Spacer(modifier = Modifier.height(8.dp))
-                    
+
                     // Helper text
                     Text(
-                        text = stringResource(id = com.shuyu.gsygithubappcompose.R.string.login_token_helper),
+                        text = stringResource(id = R.string.login_token_helper),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center
                     )
-                    
+
                     if (uiState.error != null) {
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
@@ -152,9 +152,9 @@ fun LoginContent(
                             textAlign = TextAlign.Center
                         )
                     }
-                    
+
                     Spacer(modifier = Modifier.height(24.dp))
-                    
+
                     // Login Buttons Row
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -177,13 +177,13 @@ fun LoginContent(
                                 )
                             } else {
                                 Text(
-                                    text = stringResource(id = com.shuyu.gsygithubappcompose.R.string.login_button),
+                                    text = stringResource(id = R.string.login_button),
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Medium
                                 )
                             }
                         }
-                        
+
                         // OAuth Button
                         Button(
                             onClick = onOAuthClick,
@@ -194,13 +194,13 @@ fun LoginContent(
                             shape = MaterialTheme.shapes.medium
                         ) {
                             Text(
-                                text = stringResource(id = com.shuyu.gsygithubappcompose.R.string.oauth_button),
+                                text = stringResource(id = R.string.oauth_button),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Medium
                             )
                         }
                     }
-                    
+
                     Spacer(modifier = Modifier.height(16.dp))
                 }
             }
@@ -218,16 +218,16 @@ fun OAuthScreen(
     val clientId = BuildConfig.CLIENT_ID
     val redirectUri = "gsygithubapp://oauth"
     val oauthUrl = "https://github.com/login/oauth/authorize?client_id=$clientId&redirect_uri=$redirectUri&scope=user,repo"
-    
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(id = com.shuyu.gsygithubappcompose.R.string.github_authorization)) },
+                title = { Text(stringResource(id = R.string.github_authorization)) },
                 navigationIcon = {
                     IconButton(onClick = onCancel) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = stringResource(id = com.shuyu.gsygithubappcompose.R.string.back)
+                            contentDescription = stringResource(id = R.string.back)
                         )
                     }
                 }

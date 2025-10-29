@@ -66,8 +66,8 @@ fun GSYGithubAppComposeTheme(
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            window.statusBarColor = colorScheme.primary.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
+            window.statusBarColor = Color.Transparent.toArgb() // 透明状态栏背景
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false // 始终亮色文本
         }
     }
 

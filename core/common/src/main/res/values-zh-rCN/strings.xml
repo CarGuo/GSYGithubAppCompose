@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 应用名称 -->
+    <string name="app_name">GSYGitHubApp</string>
+    
+    <!-- 欢迎页 -->
+    <string name="welcome_title">欢迎使用 GSYGitHubAPP</string>
+    
+    <!-- 登录页 -->
+    <string name="login_title">GSYGitHubAPP</string>
+    <string name="login_subtitle">Compose 版本</string>
+    <string name="login_token_label">访问令牌</string>
+    <string name="login_token_hint">输入您的 GitHub 令牌</string>
+    <string name="login_token_helper">在 github.com/settings/tokens 获取令牌</string>
+    <string name="login_button">登录</string>
+    <string name="oauth_button">OAuth 登录</string>
+    <string name="github_authorization">GitHub 授权</string>
+    
+    <!-- 底部导航 -->
+    <string name="nav_dynamic">动态</string>
+    <string name="nav_trending">趋势</string>
+    <string name="nav_profile">我的</string>
+    
+    <!-- 个人中心 -->
+    <string name="profile_repositories">仓库</string>
+    <string name="profile_followers">粉丝</string>
+    <string name="profile_following">关注</string>
+    <string name="profile_stars">星标</string>
+    <string name="profile_logout">退出登录</string>
+    <string name="profile_joined">加入时间：%s</string>
+    
+    <!-- 动态页 -->
+    <string name="dynamic_title">动态</string>
+    <string name="dynamic_empty">暂无动态</string>
+    <string name="dynamic_loading">加载中...</string>
+    
+    <!-- 趋势页 -->
+    <string name="trending_title">趋势</string>
+    <string name="trending_empty">暂无趋势仓库</string>
+    <string name="trending_loading">加载中...</string>
+    <string name="trending_language">语言：%s</string>
+    <string name="trending_stars">%d 星标</string>
+    <string name="trending_forks">%d 分支</string>
+    
+    <!-- 通用 -->
+    <string name="loading">加载中...</string>
+    <string name="error">错误</string>
+    <string name="retry">重试</string>
+    <string name="back">返回</string>
+</resources>
