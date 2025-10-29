@@ -22,7 +22,7 @@ fun OAuthWebView(
                         request: WebResourceRequest?
                     ): Boolean {
                         val uri = request?.url
-                        if (uri != null && uri.toString().startsWith("gsygithubapp://oauth")) {
+                        if (uri != null && uri.toString().startsWith("gsygithubapp://authed")) {
                             val code = uri.getQueryParameter("code")
                             if (code != null) {
                                 onCodeReceived(code)
