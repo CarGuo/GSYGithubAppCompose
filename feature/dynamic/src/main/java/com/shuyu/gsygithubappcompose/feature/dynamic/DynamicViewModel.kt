@@ -71,7 +71,7 @@ class DynamicViewModel @Inject constructor(
                     onSuccess = { newEvents ->
                         val currentEvents = if (isRefresh || initialLoad) emptyList() else _uiState.value.events
                         val updatedEvents = currentEvents + newEvents
-                        _uiState.update {
+                        _uiState.update { it ->
                             it.copy(
                                 events = updatedEvents,
                                 // Only reset loading states on second emission (network result)
@@ -85,7 +85,7 @@ class DynamicViewModel @Inject constructor(
                         }
                     },
                     onFailure = { exception ->
-                        _uiState.update {
+                        _uiState.update { it ->
                             it.copy(
                                 isLoading = false,
                                 isRefreshing = false,

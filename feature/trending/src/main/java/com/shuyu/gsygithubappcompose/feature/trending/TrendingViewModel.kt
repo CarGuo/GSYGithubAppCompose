@@ -44,7 +44,7 @@ class TrendingViewModel @Inject constructor(
                 emissionCount++
                 it.fold(
                     onSuccess = { repos ->
-                        _uiState.update {
+                        _uiState.update { it ->
                             it.copy(
                                 repositories = repos,
                                 // Only reset loading states on second emission (network result)
@@ -55,7 +55,7 @@ class TrendingViewModel @Inject constructor(
                         }
                     },
                     onFailure = { exception ->
-                        _uiState.update {
+                        _uiState.update { it ->
                             it.copy(
                                 isLoading = false,
                                 isRefreshing = false,

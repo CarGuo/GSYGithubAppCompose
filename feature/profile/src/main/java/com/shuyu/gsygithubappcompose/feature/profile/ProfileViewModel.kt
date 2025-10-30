@@ -59,7 +59,7 @@ class ProfileViewModel @Inject constructor(
                 emissionCount++
                 it.fold(
                     onSuccess = { user ->
-                        _uiState.update {
+                        _uiState.update { it ->
                             it.copy(
                                 user = user,
                                 // Only reset loading states on second emission (network result)
@@ -70,7 +70,7 @@ class ProfileViewModel @Inject constructor(
                         }
                     },
                     onFailure = { exception ->
-                        _uiState.update {
+                        _uiState.update { it ->
                             it.copy(
                                 isLoading = false,
                                 isRefreshing = false,
