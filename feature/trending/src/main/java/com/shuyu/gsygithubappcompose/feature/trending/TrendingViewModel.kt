@@ -39,14 +39,17 @@ class TrendingViewModel @Inject constructor(
                 _uiState.update { it.copy(isLoading = true, error = null) }
             }
 
+            var emissionCount = 0
             repositoryRepository.getTrendingRepositories().collect {
+                emissionCount++
                 it.fold(
                     onSuccess = { repos ->
                         _uiState.update {
                             it.copy(
                                 repositories = repos,
-                                isLoading = false,
-                                isRefreshing = false,
+                                // Only reset loading states on second emission (network result)
+                                isLoading = if (emissionCount >= 2) false else it.isLoading,
+                                isRefreshing = if (emissionCount >= 2) false else it.isRefreshing,
                                 error = null
                             )
                         }

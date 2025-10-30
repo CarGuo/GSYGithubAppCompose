@@ -54,14 +54,17 @@ class ProfileViewModel @Inject constructor(
                 return@launch
             }
 
+            var emissionCount = 0
             userRepository.getUser(username).collect {
+                emissionCount++
                 it.fold(
                     onSuccess = { user ->
                         _uiState.update {
                             it.copy(
                                 user = user,
-                                isLoading = false,
-                                isRefreshing = false,
+                                // Only reset loading states on second emission (network result)
+                                isLoading = if (emissionCount >= 2) false else it.isLoading,
+                                isRefreshing = if (emissionCount >= 2) false else it.isRefreshing,
                                 error = null
                             )
                         }

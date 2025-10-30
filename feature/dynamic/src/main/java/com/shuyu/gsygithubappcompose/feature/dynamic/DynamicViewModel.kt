@@ -64,7 +64,9 @@ class DynamicViewModel @Inject constructor(
 
             val pageToLoad = if (isRefresh) 1 else _uiState.value.currentPage
 
+            var emissionCount = 0
             eventRepository.getReceivedEvents(username, pageToLoad).collect {
+                emissionCount++
                 it.fold(
                     onSuccess = { newEvents ->
                         val currentEvents = if (isRefresh || initialLoad) emptyList() else _uiState.value.events
@@ -72,12 +74,13 @@ class DynamicViewModel @Inject constructor(
                         _uiState.update {
                             it.copy(
                                 events = updatedEvents,
-                                isLoading = false,
-                                isRefreshing = false,
-                                isLoadingMore = false,
+                                // Only reset loading states on second emission (network result)
+                                isLoading = if (emissionCount >= 2) false else it.isLoading,
+                                isRefreshing = if (emissionCount >= 2) false else it.isRefreshing,
+                                isLoadingMore = if (emissionCount >= 2) false else it.isLoadingMore,
                                 error = null,
-                                currentPage = pageToLoad + 1,
-                                hasMore = newEvents.size == PAGE_SIZE // Assuming if we get less than PAGE_SIZE, there are no more pages
+                                currentPage = if (emissionCount >= 2) pageToLoad + 1 else it.currentPage,
+                                hasMore = if (emissionCount >= 2) newEvents.size == PAGE_SIZE else it.hasMore
                             )
                         }
                     },

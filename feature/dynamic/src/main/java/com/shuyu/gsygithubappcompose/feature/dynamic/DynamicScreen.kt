@@ -13,11 +13,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.shuyu.gsygithubappcompose.core.common.R
 import com.shuyu.gsygithubappcompose.core.network.model.Event
 import com.shuyu.gsygithubappcompose.core.ui.components.AvatarImage
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYGeneralLoadState
@@ -49,7 +47,7 @@ fun DynamicScreen(
             ) {
                 items(uiState.events) { event ->
                     EventItem(event = event)
-                    Divider(color = MaterialTheme.colorScheme.outlineVariant)
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 }
                 if (uiState.isLoadingMore) {
                     item {

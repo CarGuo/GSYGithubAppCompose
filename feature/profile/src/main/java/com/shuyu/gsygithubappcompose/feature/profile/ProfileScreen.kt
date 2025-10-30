@@ -4,8 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material3.*
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -149,7 +147,7 @@ fun ProfileContent(user: User) {
                     label = stringResource(id = R.string.profile_repositories),
                     count = user.publicRepos
                 )
-                Divider(
+                HorizontalDivider(
                     modifier = Modifier
                         .width(1.dp)
                         .height(40.dp),
@@ -159,7 +157,7 @@ fun ProfileContent(user: User) {
                     label = stringResource(id = R.string.profile_followers),
                     count = user.followers
                 )
-                Divider(
+                HorizontalDivider(
                     modifier = Modifier
                         .width(1.dp)
                         .height(40.dp),
