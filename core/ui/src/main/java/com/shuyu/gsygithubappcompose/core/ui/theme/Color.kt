@@ -7,8 +7,8 @@ val PrimaryColor = Color(0xFF24292E)
 val PrimaryLight = Color(0xFF444D56)
 val PrimaryDark = Color(0xFF1B1F23)
 
-val SecondaryColor = Color(0xFF0366D6)
-val SecondaryLight = Color(0xFF2188FF)
+val SecondaryColor = Color(0xFFADB0B6)
+val SecondaryLight = Color(0xFFA3A3A8)
 val SecondaryDark = Color(0xFF005CC5)
 
 val BackgroundLight = Color(0xFFFAFBFC)

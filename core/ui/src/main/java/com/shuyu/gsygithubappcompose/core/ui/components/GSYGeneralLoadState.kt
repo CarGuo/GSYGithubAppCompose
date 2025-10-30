@@ -29,7 +29,9 @@ fun GSYGeneralLoadState(
     ) {
         when {
             isLoading -> {
-                CircularProgressIndicator()
+                CircularProgressIndicator(
+                    color = MaterialTheme.colorScheme.primary
+                )
             }
             error != null -> {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
