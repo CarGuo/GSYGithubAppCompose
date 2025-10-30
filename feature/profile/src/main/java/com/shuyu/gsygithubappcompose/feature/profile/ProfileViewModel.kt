@@ -17,6 +17,7 @@ import javax.inject.Inject
 data class ProfileUiState(
     val user: User? = null,
     val isLoading: Boolean = false,
+    val isRefreshing: Boolean = false,
     val error: String? = null
 )
 
@@ -29,15 +30,24 @@ class ProfileViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(ProfileUiState())
     val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
 
-    fun loadProfile() {
+    init {
+        loadProfile(initialLoad = true)
+    }
+
+    fun loadProfile(initialLoad: Boolean = false, isRefresh: Boolean = false) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null) }
+            if (isRefresh) {
+                _uiState.update { it.copy(isRefreshing = true, error = null) }
+            } else if (initialLoad) {
+                _uiState.update { it.copy(isLoading = true, error = null) }
+            }
 
             val username = preferencesDataStore.username.first()
             if (username.isNullOrEmpty()) {
                 _uiState.update {
                     it.copy(
                         isLoading = false,
+                        isRefreshing = false,
                         error = "No username found"
                     )
                 }
@@ -51,6 +61,7 @@ class ProfileViewModel @Inject constructor(
                             it.copy(
                                 user = user,
                                 isLoading = false,
+                                isRefreshing = false,
                                 error = null
                             )
                         }
@@ -59,6 +70,7 @@ class ProfileViewModel @Inject constructor(
                         _uiState.update {
                             it.copy(
                                 isLoading = false,
+                                isRefreshing = false,
                                 error = exception.message ?: "Failed to load profile"
                             )
                         }
@@ -66,6 +78,10 @@ class ProfileViewModel @Inject constructor(
                 )
             }
         }
+    }
+
+    fun refreshProfile() {
+        loadProfile(isRefresh = true)
     }
 
     fun logout() {

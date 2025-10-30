@@ -14,10 +14,16 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+const val PAGE_SIZE = 20 // Assuming a page size for loading more
+
 data class DynamicUiState(
     val events: List<Event> = emptyList(),
     val isLoading: Boolean = false,
-    val error: String? = null
+    val isRefreshing: Boolean = false,
+    val isLoadingMore: Boolean = false,
+    val error: String? = null,
+    val currentPage: Int = 1,
+    val hasMore: Boolean = true
 )
 
 @HiltViewModel
@@ -29,29 +35,49 @@ class DynamicViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(DynamicUiState())
     val uiState: StateFlow<DynamicUiState> = _uiState.asStateFlow()
 
-    fun loadEvents() {
+    init {
+        loadEvents(initialLoad = true)
+    }
+
+    fun loadEvents(initialLoad: Boolean = false, isRefresh: Boolean = false, isLoadMore: Boolean = false) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null) }
+            if (isRefresh) {
+                _uiState.update { it.copy(isRefreshing = true, error = null, currentPage = 1, hasMore = true) }
+            } else if (isLoadMore) {
+                _uiState.update { it.copy(isLoadingMore = true, error = null) }
+            } else if (initialLoad) {
+                _uiState.update { it.copy(isLoading = true, error = null) }
+            }
 
             val username = preferencesDataStore.username.first()
             if (username.isNullOrEmpty()) {
                 _uiState.update {
                     it.copy(
                         isLoading = false,
+                        isRefreshing = false,
+                        isLoadingMore = false,
                         error = "No username found"
                     )
                 }
                 return@launch
             }
 
-            eventRepository.getReceivedEvents(username).collect {
+            val pageToLoad = if (isRefresh) 1 else _uiState.value.currentPage
+
+            eventRepository.getReceivedEvents(username, pageToLoad).collect {
                 it.fold(
-                    onSuccess = { events ->
+                    onSuccess = { newEvents ->
+                        val currentEvents = if (isRefresh || initialLoad) emptyList() else _uiState.value.events
+                        val updatedEvents = currentEvents + newEvents
                         _uiState.update {
                             it.copy(
-                                events = events,
+                                events = updatedEvents,
                                 isLoading = false,
-                                error = null
+                                isRefreshing = false,
+                                isLoadingMore = false,
+                                error = null,
+                                currentPage = pageToLoad + 1,
+                                hasMore = newEvents.size == PAGE_SIZE // Assuming if we get less than PAGE_SIZE, there are no more pages
                             )
                         }
                     },
@@ -59,12 +85,24 @@ class DynamicViewModel @Inject constructor(
                         _uiState.update {
                             it.copy(
                                 isLoading = false,
+                                isRefreshing = false,
+                                isLoadingMore = false,
                                 error = exception.message ?: "Failed to load events"
                             )
                         }
                     }
                 )
             }
+        }
+    }
+
+    fun refreshEvents() {
+        loadEvents(isRefresh = true)
+    }
+
+    fun loadMoreEvents() {
+        if (!_uiState.value.isLoadingMore && _uiState.value.hasMore) {
+            loadEvents(isLoadMore = true)
         }
     }
 }

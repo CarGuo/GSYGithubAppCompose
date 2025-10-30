@@ -4,8 +4,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -17,65 +20,54 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.shuyu.gsygithubappcompose.core.common.R
 import com.shuyu.gsygithubappcompose.core.network.model.Event
 import com.shuyu.gsygithubappcompose.core.ui.components.AvatarImage
+import com.shuyu.gsygithubappcompose.core.ui.components.GSYGeneralLoadState
 import java.text.SimpleDateFormat
 import java.util.*
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DynamicScreen(
     viewModel: DynamicViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val pullRefreshState = rememberPullToRefreshState()
+    val listState = rememberLazyListState()
 
-    LaunchedEffect(Unit) {
-        viewModel.loadEvents()
-    }
-
-    Column(modifier = Modifier.fillMaxSize()) {
-        when {
-            uiState.isLoading -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
+    GSYGeneralLoadState(
+        isLoading = uiState.isLoading && uiState.events.isEmpty(),
+        error = uiState.error,
+        retry = { viewModel.loadEvents(initialLoad = true) }
+    ) {
+        PullToRefreshBox(
+            state = pullRefreshState,
+            isRefreshing = uiState.isRefreshing,
+            onRefresh = { viewModel.refreshEvents() }
+        ) {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                state = listState
+            ) {
+                items(uiState.events) { event ->
+                    EventItem(event = event)
+                    Divider(color = MaterialTheme.colorScheme.outlineVariant)
                 }
-            }
-            uiState.error != null -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = uiState.error ?: stringResource(id = R.string.error),
-                            color = MaterialTheme.colorScheme.error
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Button(onClick = { viewModel.loadEvents() }) {
-                            Text(stringResource(id = R.string.retry))
+                if (uiState.isLoadingMore) {
+                    item {
+                        Box(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+                            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                         }
                     }
                 }
             }
-            uiState.events.isEmpty() -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = stringResource(id = R.string.dynamic_empty),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-            else -> {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    items(uiState.events) { event ->
-                        EventItem(event = event)
-                        Divider(color = MaterialTheme.colorScheme.outlineVariant)
+
+            // Load more logic
+            val layoutInfo = listState.layoutInfo
+            val visibleItemsInfo = layoutInfo.visibleItemsInfo
+            if (visibleItemsInfo.isNotEmpty() && layoutInfo.totalItemsCount > 0) {
+                val lastVisibleItem = visibleItemsInfo.last()
+                if (lastVisibleItem.index == layoutInfo.totalItemsCount - 1 && !uiState.isLoadingMore && uiState.hasMore) {
+                    LaunchedEffect(lastVisibleItem) {
+                        viewModel.loadMoreEvents()
                     }
                 }
             }

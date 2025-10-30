@@ -7,6 +7,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,6 +21,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.shuyu.gsygithubappcompose.core.common.R
 import com.shuyu.gsygithubappcompose.core.network.model.User
 import com.shuyu.gsygithubappcompose.core.ui.components.AvatarImage
+import com.shuyu.gsygithubappcompose.core.ui.components.GSYGeneralLoadState
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -29,33 +32,21 @@ fun ProfileScreen(
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val pullRefreshState = rememberPullToRefreshState()
 
-    LaunchedEffect(Unit) {
-        viewModel.loadProfile()
-    }
-
-    when {
-        uiState.isLoading -> {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
+    GSYGeneralLoadState(
+        isLoading = uiState.isLoading && uiState.user == null,
+        error = uiState.error,
+        retry = { viewModel.loadProfile(initialLoad = true) }
+    ) {
+        PullToRefreshBox(
+            state = pullRefreshState,
+            isRefreshing = uiState.isRefreshing, // Use ViewModel\'s refreshing state
+            onRefresh = { viewModel.refreshProfile() } // Trigger refresh from ViewModel
+        ) {
+            uiState.user?.let {
+                ProfileContent(user = it)
             }
-        }
-        uiState.error != null -> {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = uiState.error ?: stringResource(id = R.string.error),
-                    color = MaterialTheme.colorScheme.error
-                )
-            }
-        }
-        uiState.user != null -> {
-            ProfileContent(user = uiState.user!!)
         }
     }
 }
@@ -132,7 +123,7 @@ fun ProfileContent(user: User) {
                 Spacer(modifier = Modifier.height(4.dp))
                 val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
                 val joinDate = try {
-                    val parsedDate = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US).parse(user.createdAt)
+                    val parsedDate = SimpleDateFormat("yyyy-MM-dd\'T\'HH:mm:ss\'Z\'", Locale.US).parse(user.createdAt)
                     parsedDate?.let { dateFormat.format(it) } ?: user.createdAt.split("T")[0]
                 } catch (e: Exception) {
                     user.createdAt.split("T")[0]

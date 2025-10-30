@@ -15,6 +15,7 @@ import javax.inject.Inject
 data class TrendingUiState(
     val repositories: List<Repository> = emptyList(),
     val isLoading: Boolean = false,
+    val isRefreshing: Boolean = false,
     val error: String? = null
 )
 
@@ -26,9 +27,17 @@ class TrendingViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(TrendingUiState())
     val uiState: StateFlow<TrendingUiState> = _uiState.asStateFlow()
 
-    fun loadTrendingRepositories() {
+    init {
+        loadTrendingRepositories(initialLoad = true)
+    }
+
+    fun loadTrendingRepositories(initialLoad: Boolean = false, isRefresh: Boolean = false) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null) }
+            if (isRefresh) {
+                _uiState.update { it.copy(isRefreshing = true, error = null) }
+            } else if (initialLoad) {
+                _uiState.update { it.copy(isLoading = true, error = null) }
+            }
 
             repositoryRepository.getTrendingRepositories().collect {
                 it.fold(
@@ -37,6 +46,7 @@ class TrendingViewModel @Inject constructor(
                             it.copy(
                                 repositories = repos,
                                 isLoading = false,
+                                isRefreshing = false,
                                 error = null
                             )
                         }
@@ -45,6 +55,7 @@ class TrendingViewModel @Inject constructor(
                         _uiState.update {
                             it.copy(
                                 isLoading = false,
+                                isRefreshing = false,
                                 error = exception.message ?: "Failed to load repositories"
                             )
                         }
@@ -52,5 +63,9 @@ class TrendingViewModel @Inject constructor(
                 )
             }
         }
+    }
+
+    fun refreshTrendingRepositories() {
+        loadTrendingRepositories(isRefresh = true)
     }
 }
