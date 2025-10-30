@@ -6,6 +6,7 @@ import com.shuyu.gsygithubappcompose.core.network.api.GitHubApiService
 import com.shuyu.gsygithubappcompose.core.network.model.Repository
 import com.shuyu.gsygithubappcompose.core.network.model.User
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import java.text.SimpleDateFormat
@@ -43,7 +44,9 @@ class RepositoryRepository @Inject constructor(
                 )
             }
         }
-        cachedRepos.collect { emit(Result.success(it)) }
+        //不需要collect阻塞
+        //cachedRepos.collect { emit(Result.success(it)) }
+        emit(Result.success(cachedRepos.first()))
 
         // 2. Fetch from network
         try {
