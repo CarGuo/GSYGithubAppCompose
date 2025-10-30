@@ -26,7 +26,8 @@ android {
 
 dependencies {
     implementation(libs.androidx.core.ktx)
-    
+
+    implementation(projects.core.common)
     // Hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)

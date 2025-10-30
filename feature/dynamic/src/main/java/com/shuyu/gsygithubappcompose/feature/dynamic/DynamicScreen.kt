@@ -114,19 +114,9 @@ fun EventItem(event: Event) {
             }
 
             Text(
-                text = actionText,
+                text = "$actionText ${event.repo.name}",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            Spacer(modifier = Modifier.height(2.dp))
-
-            // Repository name
-            Text(
-                text = event.repo.name,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.primary
             )
 
             Spacer(modifier = Modifier.height(4.dp))

@@ -1,6 +1,7 @@
 package com.shuyu.gsygithubappcompose.core.network.di
 
 import com.shuyu.gsygithubappcompose.core.network.api.GitHubApiService
+import com.shuyu.gsygithubappcompose.core.network.interceptor.TokenInterceptor
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -20,13 +21,14 @@ object NetworkModule {
     
     @Provides
     @Singleton
-    fun provideOkHttpClient(): OkHttpClient {
+    fun provideOkHttpClient(tokenInterceptor: TokenInterceptor): OkHttpClient {
         val loggingInterceptor = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         }
         
         return OkHttpClient.Builder()
             .addInterceptor(loggingInterceptor)
+            .addInterceptor(tokenInterceptor) // Add the TokenInterceptor here
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
             .writeTimeout(30, TimeUnit.SECONDS)

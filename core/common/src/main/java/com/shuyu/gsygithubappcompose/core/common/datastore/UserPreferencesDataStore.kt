@@ -41,6 +41,12 @@ class UserPreferencesDataStore @Inject constructor(
         }
     }
     
+    suspend fun clearAuthToken() {
+        context.dataStore.edit { preferences ->
+            preferences.remove(PreferencesKeys.AUTH_TOKEN)
+        }
+    }
+    
     suspend fun saveUsername(username: String) {
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.USERNAME] = username
