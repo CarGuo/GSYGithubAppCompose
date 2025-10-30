@@ -25,17 +25,17 @@ class DynamicViewModel @Inject constructor(
     private val eventRepository: EventRepository,
     private val preferencesDataStore: UserPreferencesDataStore
 ) : ViewModel() {
-    
+
     private val _uiState = MutableStateFlow(DynamicUiState())
     val uiState: StateFlow<DynamicUiState> = _uiState.asStateFlow()
-    
+
     fun loadEvents() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
-            
+
             val username = preferencesDataStore.username.first()
             if (username.isNullOrEmpty()) {
-                _uiState.update { 
+                _uiState.update {
                     it.copy(
                         isLoading = false,
                         error = "No username found"
@@ -43,28 +43,28 @@ class DynamicViewModel @Inject constructor(
                 }
                 return@launch
             }
-            
-            val result = eventRepository.getReceivedEvents(username)
-            
-            result.fold(
-                onSuccess = { events ->
-                    _uiState.update { 
-                        it.copy(
-                            events = events,
-                            isLoading = false,
-                            error = null
-                        )
+
+            eventRepository.getReceivedEvents(username).collect {
+                it.fold(
+                    onSuccess = { events ->
+                        _uiState.update {
+                            it.copy(
+                                events = events,
+                                isLoading = false,
+                                error = null
+                            )
+                        }
+                    },
+                    onFailure = { exception ->
+                        _uiState.update {
+                            it.copy(
+                                isLoading = false,
+                                error = exception.message ?: "Failed to load events"
+                            )
+                        }
                     }
-                },
-                onFailure = { exception ->
-                    _uiState.update { 
-                        it.copy(
-                            isLoading = false,
-                            error = exception.message ?: "Failed to load events"
-                        )
-                    }
-                }
-            )
+                )
+            }
         }
     }
 }

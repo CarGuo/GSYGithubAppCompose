@@ -11,7 +11,7 @@
     <string name="login_subtitle">Compose Edition</string>
     <string name="login_token_label">Access Token</string>
     <string name="login_token_hint">Enter your GitHub token</string>
-    <string name="login_token_helper">Get your token at github.com/settings/tokens</string>
+    <string name="login_token_helper">Get your token at github.com/settings/tokens，or Click OAuth</string>
     <string name="login_button">Login</string>
     <string name="oauth_button">OAuth</string>
     <string name="github_authorization">GitHub Authorization</string>

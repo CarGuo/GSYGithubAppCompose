@@ -42,3 +42,17 @@ data class RepositoryEntity(
     val createdAt: String,
     val updatedAt: String
 )
+
+@Entity(tableName = "events")
+data class EventEntity(
+    @PrimaryKey
+    val id: String,
+    val type: String,
+    val actorId: Long,
+    val actorLogin: String,
+    val actorAvatarUrl: String,
+    val repoId: Long,
+    val repoName: String,
+    val payload: String,
+    val createdAt: String
+)

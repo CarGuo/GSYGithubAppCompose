@@ -25,17 +25,17 @@ class ProfileViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val preferencesDataStore: UserPreferencesDataStore
 ) : ViewModel() {
-    
+
     private val _uiState = MutableStateFlow(ProfileUiState())
     val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
-    
+
     fun loadProfile() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
-            
+
             val username = preferencesDataStore.username.first()
             if (username.isNullOrEmpty()) {
-                _uiState.update { 
+                _uiState.update {
                     it.copy(
                         isLoading = false,
                         error = "No username found"
@@ -43,31 +43,31 @@ class ProfileViewModel @Inject constructor(
                 }
                 return@launch
             }
-            
-            val result = userRepository.getUser(username)
-            
-            result.fold(
-                onSuccess = { user ->
-                    _uiState.update { 
-                        it.copy(
-                            user = user,
-                            isLoading = false,
-                            error = null
-                        )
+
+            userRepository.getUser(username).collect {
+                it.fold(
+                    onSuccess = { user ->
+                        _uiState.update {
+                            it.copy(
+                                user = user,
+                                isLoading = false,
+                                error = null
+                            )
+                        }
+                    },
+                    onFailure = { exception ->
+                        _uiState.update {
+                            it.copy(
+                                isLoading = false,
+                                error = exception.message ?: "Failed to load profile"
+                            )
+                        }
                     }
-                },
-                onFailure = { exception ->
-                    _uiState.update { 
-                        it.copy(
-                            isLoading = false,
-                            error = exception.message ?: "Failed to load profile"
-                        )
-                    }
-                }
-            )
+                )
+            }
         }
     }
-    
+
     fun logout() {
         viewModelScope.launch {
             userRepository.logout()

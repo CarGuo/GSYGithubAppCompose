@@ -1,18 +1,22 @@
 package com.shuyu.gsygithubappcompose.feature.home
 
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Timeline
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import com.shuyu.gsygithubappcompose.core.common.R
+import kotlinx.coroutines.launch
 
 sealed class BottomNavItem(
     val route: String,
@@ -24,14 +28,15 @@ sealed class BottomNavItem(
     object Profile : BottomNavItem("profile", Icons.Default.Person, R.string.nav_profile)
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun HomeScreen(
     dynamicContent: @Composable () -> Unit,
     trendingContent: @Composable () -> Unit,
     profileContent: @Composable () -> Unit
 ) {
-    var selectedTab by remember { mutableIntStateOf(0) }
+    val pagerState = rememberPagerState(pageCount = { 3 })
+    val coroutineScope = rememberCoroutineScope()
 
     val items = listOf(
         BottomNavItem.Dynamic,
@@ -60,8 +65,12 @@ fun HomeScreen(
                             )
                         },
                         label = { Text(stringResource(id = item.titleRes)) },
-                        selected = selectedTab == index,
-                        onClick = { selectedTab = index },
+                        selected = pagerState.currentPage == index,
+                        onClick = {
+                            coroutineScope.launch {
+                                pagerState.animateScrollToPage(index)
+                            }
+                        },
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = Color.White,
                             unselectedIconColor = Color.White.copy(alpha = 0.6f),
@@ -74,8 +83,11 @@ fun HomeScreen(
             }
         }
     ) { innerPadding ->
-        Box(modifier = Modifier.padding(innerPadding)) {
-            when (selectedTab) {
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.padding(innerPadding)
+        ) { page ->
+            when (page) {
                 0 -> dynamicContent()
                 1 -> trendingContent()
                 2 -> profileContent()

@@ -11,9 +11,9 @@
     <string name="login_subtitle">Compose 版本</string>
     <string name="login_token_label">访问令牌</string>
     <string name="login_token_hint">输入您的 GitHub 令牌</string>
-    <string name="login_token_helper">在 github.com/settings/tokens 获取令牌</string>
+    <string name="login_token_helper">在 github.com/settings/tokens 获取令牌，也可以直接 OAuth 登录</string>
     <string name="login_button">登录</string>
-    <string name="oauth_button">OAuth 登录</string>
+    <string name="oauth_button">OAuth</string>
     <string name="github_authorization">GitHub 授权</string>
     
     <!-- 底部导航 -->

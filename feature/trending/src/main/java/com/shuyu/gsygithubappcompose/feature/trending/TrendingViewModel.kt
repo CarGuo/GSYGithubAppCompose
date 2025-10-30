@@ -22,35 +22,35 @@ data class TrendingUiState(
 class TrendingViewModel @Inject constructor(
     private val repositoryRepository: RepositoryRepository
 ) : ViewModel() {
-    
+
     private val _uiState = MutableStateFlow(TrendingUiState())
     val uiState: StateFlow<TrendingUiState> = _uiState.asStateFlow()
-    
+
     fun loadTrendingRepositories() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
-            
-            val result = repositoryRepository.getTrendingRepositories()
-            
-            result.fold(
-                onSuccess = { repos ->
-                    _uiState.update { 
-                        it.copy(
-                            repositories = repos,
-                            isLoading = false,
-                            error = null
-                        )
+
+            repositoryRepository.getTrendingRepositories().collect {
+                it.fold(
+                    onSuccess = { repos ->
+                        _uiState.update {
+                            it.copy(
+                                repositories = repos,
+                                isLoading = false,
+                                error = null
+                            )
+                        }
+                    },
+                    onFailure = { exception ->
+                        _uiState.update {
+                            it.copy(
+                                isLoading = false,
+                                error = exception.message ?: "Failed to load repositories"
+                            )
+                        }
                     }
-                },
-                onFailure = { exception ->
-                    _uiState.update { 
-                        it.copy(
-                            isLoading = false,
-                            error = exception.message ?: "Failed to load repositories"
-                        )
-                    }
-                }
-            )
+                )
+            }
         }
     }
 }

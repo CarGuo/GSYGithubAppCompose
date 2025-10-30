@@ -3,7 +3,7 @@ package com.shuyu.gsygithubappcompose.feature.login
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Key
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -15,13 +15,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.shuyu.gsygithubappcompose.core.common.R
 
 @Composable
 fun LoginScreen(
-    onLoginSuccess: () -> Unit,
-    viewModel: LoginViewModel = hiltViewModel()
+    onLoginSuccess: () -> Unit, viewModel: LoginViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -32,24 +31,17 @@ fun LoginScreen(
     }
 
     if (uiState.showOAuthWebView) {
-        OAuthScreen(
-            onCodeReceived = { code ->
-                viewModel.handleOAuthCode(
-                    BuildConfig.CLIENT_ID,
-                    BuildConfig.CLIENT_SECRET,
-                    code
-                )
-            },
-            onCancel = { viewModel.cancelOAuthFlow() },
-            onError = { viewModel.cancelOAuthFlow() }
-        )
+        OAuthScreen(onCodeReceived = { code ->
+            viewModel.handleOAuthCode(
+                BuildConfig.CLIENT_ID, BuildConfig.CLIENT_SECRET, code
+            )
+        }, onCancel = { viewModel.cancelOAuthFlow() }, onError = { viewModel.cancelOAuthFlow() })
     } else {
         LoginContent(
             uiState = uiState,
             onTokenChange = { viewModel.onTokenChange(it) },
             onLoginClick = { viewModel.login() },
-            onOAuthClick = { viewModel.startOAuthFlow() }
-        )
+            onOAuthClick = { viewModel.startOAuthFlow() })
     }
 }
 
@@ -61,14 +53,12 @@ fun LoginContent(
     onOAuthClick: () -> Unit
 ) {
     Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.primaryContainer
+        modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.primaryContainer
     ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
-            contentAlignment = Alignment.Center
+                .padding(16.dp), contentAlignment = Alignment.Center
         ) {
             Card(
                 modifier = Modifier
@@ -121,8 +111,7 @@ fun LoginContent(
                         placeholder = { Text(stringResource(id = R.string.login_token_hint)) },
                         leadingIcon = {
                             Icon(
-                                imageVector = Icons.Default.Key,
-                                contentDescription = "Token"
+                                imageVector = Icons.Default.Key, contentDescription = "Token"
                             )
                         },
                         modifier = Modifier.fillMaxWidth(),
@@ -146,7 +135,7 @@ fun LoginContent(
                     if (uiState.error != null) {
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = uiState.error ?: "",
+                            text = uiState.error,
                             color = MaterialTheme.colorScheme.error,
                             style = MaterialTheme.typography.bodySmall,
                             textAlign = TextAlign.Center
@@ -211,13 +200,11 @@ fun LoginContent(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OAuthScreen(
-    onCodeReceived: (String) -> Unit,
-    onCancel: () -> Unit,
-    onError: () -> Unit
+    onCodeReceived: (String) -> Unit, onCancel: () -> Unit, onError: () -> Unit
 ) {
     val clientId = BuildConfig.CLIENT_ID
-    val redirectUri = "gsygithubapp://oauth"
-    val oauthUrl = "https://github.com/login/oauth/authorize?client_id=$clientId&redirect_uri=$redirectUri&scope=user,repo"
+    val oauthUrl =
+        "https://github.com/login/oauth/authorize?client_id=$clientId&state=app&scope=user,repo,gist,notifications,read:org,workflow&redirect_uri=gsygithubapp://authed"
 
     Scaffold(
         topBar = {
@@ -226,19 +213,15 @@ fun OAuthScreen(
                 navigationIcon = {
                     IconButton(onClick = onCancel) {
                         Icon(
-                            imageVector = Icons.Default.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(id = R.string.back)
                         )
                     }
-                }
-            )
-        }
-    ) { paddingValues ->
+                })
+        }) { paddingValues ->
         Box(modifier = Modifier.padding(paddingValues)) {
             OAuthWebView(
-                url = oauthUrl,
-                onCodeReceived = onCodeReceived,
-                onError = onError
+                url = oauthUrl, onCodeReceived = onCodeReceived, onError = onError
             )
         }
     }

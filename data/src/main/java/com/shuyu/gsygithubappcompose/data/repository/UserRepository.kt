@@ -7,6 +7,7 @@ import com.shuyu.gsygithubappcompose.core.network.api.GitHubApiService
 import com.shuyu.gsygithubappcompose.core.network.model.User
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -65,13 +66,20 @@ class UserRepository @Inject constructor(
         return preferencesDataStore.authToken.map { it?.isNotEmpty() == true }
     }
 
-    suspend fun getUser(username: String): Result<User> {
-        return try {
-            val user = apiService.getUser(username)
-            userDao.insertUser(user.toEntity())
-            Result.success(user)
+    suspend fun getUser(username: String): Flow<Result<User>> = flow {
+        // 1. Emit data from database
+        val cachedUser = userDao.getUserByLogin(username).first()
+        if (cachedUser != null) {
+            emit(Result.success(cachedUser.toUser()))
+        }
+
+        // 2. Fetch from network
+        try {
+            val networkUser = apiService.getUser(username)
+            userDao.insertUser(networkUser.toEntity())
+            emit(Result.success(networkUser))
         } catch (e: Exception) {
-            Result.failure(e)
+            emit(Result.failure(e))
         }
     }
 
@@ -80,6 +88,23 @@ class UserRepository @Inject constructor(
     }
 
     private fun User.toEntity() = UserEntity(
+        id = id,
+        login = login,
+        name = name,
+        avatarUrl = avatarUrl,
+        bio = bio,
+        company = company,
+        blog = blog,
+        location = location,
+        email = email,
+        publicRepos = publicRepos,
+        followers = followers,
+        following = following,
+        createdAt = createdAt,
+        updatedAt = updatedAt
+    )
+
+    private fun UserEntity.toUser() = User(
         id = id,
         login = login,
         name = name,
