@@ -24,4 +24,16 @@ interface EventDao {
         clearEvents(login, isReceivedEvent)
         insert(events)
     }
+
+    @Query("SELECT * FROM events WHERE userLogin = :userLogin")
+    suspend fun getEventsByUserLogin(userLogin: String): List<EventEntity>
+
+    @Query("DELETE FROM events WHERE userLogin = :userLogin")
+    suspend fun clearUserEvents(userLogin: String)
+
+    @Transaction
+    suspend fun clearAndInsertUserEvents(userLogin: String, events: List<EventEntity>) {
+        clearUserEvents(userLogin)
+        insert(events)
+    }
 }

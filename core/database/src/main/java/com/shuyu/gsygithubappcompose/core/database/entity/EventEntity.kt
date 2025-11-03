@@ -20,5 +20,6 @@ data class EventEntity(
     @ColumnInfo(name = "org_id")
     val orgId: String? = null, // Assuming we might need to link to an organization later
     @ColumnInfo(name = "is_received_event")
-    val isReceivedEvent: Boolean = false // New field to differentiate event types
+    val isReceivedEvent: Boolean = false, // New field to differentiate event types
+    val userLogin: String? = null // Added for user events
 )

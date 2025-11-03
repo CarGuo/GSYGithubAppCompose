@@ -74,7 +74,7 @@ fun GSYPullRefresh(
             verticalArrangement = verticalArrangement
         ) {
             content()
-            if (itemCount > 0) { // Only show load more indicators if there's data
+            if (itemCount > 0 && !isRefreshing) { // Only show load more indicators if there's data
                 if (isLoadMore) {
                     item {
                         Box(

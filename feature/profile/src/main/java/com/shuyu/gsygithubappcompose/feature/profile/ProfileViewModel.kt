@@ -45,14 +45,32 @@ class ProfileViewModel @Inject constructor(
         loadProfile(initialLoad = true)
     }
 
-    fun loadProfile(initialLoad: Boolean = false, isRefresh: Boolean = false, isLoadMore: Boolean = false) {
+    fun loadProfile(
+        initialLoad: Boolean = false, isRefresh: Boolean = false, isLoadMore: Boolean = false
+    ) {
         viewModelScope.launch {
             if (isRefresh) {
-                _uiState.update { it.copy(isRefreshing = true, error = null, currentPage = 1, hasMore = true, loadMoreError = false) }
+                _uiState.update {
+                    it.copy(
+                        isRefreshing = true,
+                        error = null,
+                        currentPage = 1,
+                        hasMore = true,
+                        loadMoreError = false
+                    )
+                }
             } else if (isLoadMore) {
-                _uiState.update { it.copy(isLoadingMore = true, error = null, loadMoreError = false) }
+                _uiState.update {
+                    it.copy(
+                        isLoadingMore = true, error = null, loadMoreError = false
+                    )
+                }
             } else if (initialLoad) {
-                _uiState.update { it.copy(isPageLoading = true, error = null, loadMoreError = false) }
+                _uiState.update {
+                    it.copy(
+                        isPageLoading = true, error = null, loadMoreError = false
+                    )
+                }
             }
 
             val username = preferencesDataStore.username.first()
@@ -74,75 +92,70 @@ class ProfileViewModel @Inject constructor(
             var emissionCount = 0
             userRepository.getUser(username).collect {
                 emissionCount++
-                it.fold(
-                    onSuccess = { user ->
-                        _uiState.update { it ->
-                            it.copy(
-                                user = user,
-                                // Only reset loading states on second emission (network result)
-                                isPageLoading = if (emissionCount >= 2) false else it.isPageLoading,
-                                isRefreshing = if (emissionCount >= 2) false else it.isRefreshing,
-                                error = null
-                            )
+                it.fold(onSuccess = { user ->
+                    _uiState.update { it ->
+                        it.copy(
+                            user = user,
+                            // Only reset loading states on second emission (network result)
+                            isPageLoading = if (emissionCount >= 2) false else it.isPageLoading,
+                            isRefreshing = if (emissionCount >= 2) false else it.isRefreshing,
+                            error = null
+                        )
+                    }
+                    if (user.type == "Organization") {
+                        userRepository.getOrgMembers(user.login).collect { it ->
+                            it.fold(onSuccess = { members ->
+                                _uiState.update { it.copy(orgMembers = members) }
+                            }, onFailure = { exception ->
+                                _uiState.update { it.copy(error = exception.message) }
+                            })
                         }
-                        if (user.type == "Organization") {
-                            userRepository.getOrgMembers(user.login).collect {
-                                it.fold(
-                                    onSuccess = { members ->
-                                        _uiState.update { it.copy(orgMembers = members) }
-                                    },
-                                    onFailure = { exception ->
-                                        _uiState.update { it.copy(error = exception.message) }
-                                    }
-                                )
-                            }
-                        } else {
-                            userRepository.getUserEvents(user.login, pageToLoad, NetworkConfig.PER_PAGE).collect {
-                                it.fold(
-                                    onSuccess = { newEvents ->
-                                        val currentEvents =
-                                            if (isRefresh || initialLoad) emptyList() else _uiState.value.userEvents.orEmpty()
-                                        val updatedEvents = currentEvents + newEvents
-                                        _uiState.update { it ->
-                                            it.copy(
-                                                userEvents = updatedEvents,
-                                                isPageLoading = if (emissionCount >= 1) false else it.isPageLoading,
-                                                isRefreshing = if (emissionCount >= 2) false else it.isRefreshing,
-                                                isLoadingMore = if (emissionCount >= 2) false else it.isLoadingMore,
-                                                error = null,
-                                                currentPage = if (emissionCount >= 2) pageToLoad + 1 else it.currentPage,
-                                                hasMore = if (emissionCount >= 2) newEvents.size == NetworkConfig.PER_PAGE else it.hasMore,
-                                                loadMoreError = false
-                                            )
-                                        }
-                                    },
-                                    onFailure = { exception ->
-                                        _uiState.update { it ->
-                                            it.copy(
-                                                isPageLoading = false,
-                                                isRefreshing = false,
-                                                isLoadingMore = false,
-                                                error = exception.message ?: stringResourceProvider.getString(R.string.error_failed_to_load_events),
-                                                loadMoreError = isLoadMore
-                                            )
-                                        }
-                                    }
-                                )
-                            }
-                        }
-                    },
-                    onFailure = { exception ->
-                        _uiState.update { it ->
-                            it.copy(
-                                isPageLoading = false,
-                                isRefreshing = false,
-                                isLoadingMore = false,
-                                error = exception.message ?: stringResourceProvider.getString(R.string.error_failed_to_load_profile),
-                                loadMoreError = isLoadMore
-                            )
+                    } else {
+                        userRepository.getUserEvents(
+                            user.login, pageToLoad, NetworkConfig.PER_PAGE
+                        ).collect { it ->
+                            it.fold(onSuccess = { newEvents ->
+                                val currentEvents =
+                                    if (isRefresh || initialLoad) emptyList() else _uiState.value.userEvents.orEmpty()
+                                val updatedEvents = currentEvents + newEvents
+                                _uiState.update { it ->
+                                    it.copy(
+                                        userEvents = updatedEvents,
+                                        isPageLoading = if (emissionCount >= 1) false else it.isPageLoading,
+                                        isRefreshing = if (emissionCount >= 2) false else it.isRefreshing,
+                                        isLoadingMore = if (emissionCount >= 2) false else it.isLoadingMore,
+                                        error = null,
+                                        currentPage = if (emissionCount >= 2) pageToLoad + 1 else it.currentPage,
+                                        hasMore = if (emissionCount >= 2) newEvents.size == NetworkConfig.PER_PAGE else it.hasMore,
+                                        loadMoreError = false
+                                    )
+                                }
+                            }, onFailure = { exception ->
+                                _uiState.update { it ->
+                                    it.copy(
+                                        isPageLoading = false,
+                                        isRefreshing = false,
+                                        isLoadingMore = false,
+                                        error = exception.message
+                                            ?: stringResourceProvider.getString(R.string.error_failed_to_load_events),
+                                        loadMoreError = isLoadMore
+                                    )
+                                }
+                            })
                         }
                     }
-                )
+                }, onFailure = { exception ->
+                    _uiState.update { it ->
+                        it.copy(
+                            isPageLoading = false,
+                            isRefreshing = false,
+                            isLoadingMore = false,
+                            error = exception.message
+                                ?: stringResourceProvider.getString(R.string.error_failed_to_load_profile),
+                            loadMoreError = isLoadMore
+                        )
+                    }
+                })
             }
         }
     }

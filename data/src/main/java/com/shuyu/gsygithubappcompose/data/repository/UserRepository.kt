@@ -1,12 +1,14 @@
 package com.shuyu.gsygithubappcompose.data.repository
 
 import com.shuyu.gsygithubappcompose.core.common.datastore.UserPreferencesDataStore
+import com.shuyu.gsygithubappcompose.core.database.dao.EventDao
 import com.shuyu.gsygithubappcompose.core.database.dao.UserDao
 import com.shuyu.gsygithubappcompose.core.database.entity.UserEntity
 import com.shuyu.gsygithubappcompose.core.network.api.GitHubApiService
 import com.shuyu.gsygithubappcompose.core.network.model.Event
 import com.shuyu.gsygithubappcompose.core.network.model.User
 import com.shuyu.gsygithubappcompose.data.repository.mapper.toEntity
+import com.shuyu.gsygithubappcompose.data.repository.mapper.toEvent
 import com.shuyu.gsygithubappcompose.data.repository.mapper.toUser
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -19,6 +21,7 @@ import javax.inject.Singleton
 class UserRepository @Inject constructor(
     private val apiService: GitHubApiService,
     private val userDao: UserDao,
+    private val eventDao: EventDao,
     private val preferencesDataStore: UserPreferencesDataStore
 ) {
 
@@ -91,19 +94,44 @@ class UserRepository @Inject constructor(
     }
 
     fun getOrgMembers(org: String): Flow<Result<List<User>>> = flow {
+        // 1. Emit data from database if available
+        val cachedMembers = userDao.getOrgMembers(org).first()
+        if (cachedMembers.isNotEmpty()) {
+            emit(Result.success(cachedMembers.map { it.toUser() }))
+        }
+
+        // 2. Fetch from network
         try {
-            val members = apiService.getOrgMembers(org)
-            emit(Result.success(members))
+            val networkMembers = apiService.getOrgMembers(org)
+            // 3. Update the database
+            userDao.clearOrgMembers(org)
+            userDao.insertUsers(networkMembers.map { it.toEntity(org) })
+            // 4. Emit network data
+            emit(Result.success(networkMembers))
         } catch (e: Exception) {
+            // Emit network failure. If cached data was already emitted, this failure will follow the cached data.
             emit(Result.failure(e))
         }
     }
 
     fun getUserEvents(username: String, page: Int, perPage: Int): Flow<Result<List<Event>>> = flow {
+        // 1. Emit data from database if available
+        val cachedEvents = eventDao.getEventsByUserLogin(username).map { it.toEvent() }
+        if (cachedEvents.isNotEmpty()) {
+            emit(Result.success(cachedEvents))
+        }
+
+        // 2. Fetch from network
         try {
-            val events = apiService.getUserEvents(username, page, perPage)
-            emit(Result.success(events))
+            val networkEvents = apiService.getUserEvents(username, page, perPage)
+            // 3. If it's the first page, update the database
+            if (page == 1) {
+                eventDao.clearAndInsertUserEvents(username, networkEvents.map { it.toEntity(false, username) })
+            }
+            // 4. Emit network data
+            emit(Result.success(networkEvents))
         } catch (e: Exception) {
+            // Emit network failure. If cached data was already emitted, this failure will follow the cached data.
             emit(Result.failure(e))
         }
     }

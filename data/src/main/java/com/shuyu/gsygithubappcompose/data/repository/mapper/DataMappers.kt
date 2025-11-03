@@ -50,6 +50,49 @@ fun User.toEntity(): UserEntity {
     )
 }
 
+fun User.toEntity(orgLogin: String): UserEntity {
+    return UserEntity(
+        id = id,
+        login = login,
+        nodeId = nodeId,
+        avatarUrl = avatarUrl,
+        gravatarId = gravatarId,
+        url = url,
+        htmlUrl = htmlUrl,
+        followersUrl = followersUrl,
+        followingUrl = followingUrl,
+        gistsUrl = gistsUrl,
+        starredUrl = starredUrl,
+        subscriptionsUrl = subscriptionsUrl,
+        organizationsUrl = organizationsUrl,
+        reposUrl = reposUrl,
+        eventsUrl = eventsUrl,
+        receivedEventsUrl = receivedEventsUrl,
+        type = type,
+        siteAdmin = siteAdmin,
+        name = name,
+        company = company,
+        blog = blog,
+        location = location,
+        email = email,
+        starred = starred,
+        bio = bio,
+        publicRepos = publicRepos,
+        publicGists = publicGists,
+        followers = followers,
+        following = following,
+        createdAt = createdAt,
+        updatedAt = updatedAt,
+        privateGists = privateGists,
+        totalPrivateRepos = totalPrivateRepos,
+        ownedPrivateRepos = ownedPrivateRepos,
+        diskUsage = diskUsage,
+        collaborators = collaborators,
+        twoFactorAuthentication = twoFactorAuthentication,
+        orgLogin = orgLogin
+    )
+}
+
 fun UserEntity.toUser(): User {
     return User(
         id = id,
@@ -171,7 +214,7 @@ fun RepositoryEntity.toRepository(): Repository {
     )
 }
 
-fun Event.toEntity(isReceivedEvent: Boolean): EventEntity {
+fun Event.toEntity(isReceivedEvent: Boolean, userLogin: String? = null): EventEntity {
     return EventEntity(
         id = id,
         type = type,
@@ -199,7 +242,8 @@ fun Event.toEntity(isReceivedEvent: Boolean): EventEntity {
         createdAt = createdAt,
         public = null,
         orgId = null,
-        isReceivedEvent = isReceivedEvent
+        isReceivedEvent = isReceivedEvent,
+        userLogin = userLogin
     )
 }
 

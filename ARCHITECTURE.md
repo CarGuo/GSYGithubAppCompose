@@ -34,4 +34,5 @@
 - 创建代码时，要以 libs.versions.toml 里的版本为主，尽量使用正确的 API
 - Icons 使用 import androidx.compose.material.icons.Icons / import androidx.compose.material.icons.filled
 - 每次修改后，需要注意检查是否有这个修改的关联使用需要同步处理
+- 任何修改数据库表的变动，都需要修改增加 AppDatabase 的数据库版本
 - 使用控件优先判断 core/ui 有没有合适，没有合适的，考虑添加自定义的控件进去（如果符合通用情况）

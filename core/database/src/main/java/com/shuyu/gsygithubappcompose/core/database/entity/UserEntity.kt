@@ -42,5 +42,6 @@ data class UserEntity(
     val ownedPrivateRepos: Int?,
     val diskUsage: Int?,
     val collaborators: Int?,
-    val twoFactorAuthentication: Boolean?
+    val twoFactorAuthentication: Boolean?,
+    val orgLogin: String? = null // Added for organization members
 )
