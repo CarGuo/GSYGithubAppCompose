@@ -4,9 +4,6 @@ import com.shuyu.gsygithubappcompose.core.database.dao.EventDao
 import com.shuyu.gsygithubappcompose.core.database.entity.EventEntity
 import com.shuyu.gsygithubappcompose.core.network.api.GitHubApiService
 import com.shuyu.gsygithubappcompose.core.network.model.Event
-import com.shuyu.gsygithubappcompose.core.network.model.EventPayload
-import com.shuyu.gsygithubappcompose.core.network.model.EventRepo
-import com.shuyu.gsygithubappcompose.core.network.model.User
 import com.shuyu.gsygithubappcompose.data.repository.mapper.toEntity
 import com.shuyu.gsygithubappcompose.data.repository.mapper.toEvent
 import kotlinx.coroutines.flow.Flow

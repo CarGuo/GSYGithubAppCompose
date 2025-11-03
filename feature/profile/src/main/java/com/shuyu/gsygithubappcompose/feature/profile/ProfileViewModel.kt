@@ -3,6 +3,7 @@ package com.shuyu.gsygithubappcompose.feature.profile
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.shuyu.gsygithubappcompose.core.common.datastore.UserPreferencesDataStore
+import com.shuyu.gsygithubappcompose.core.network.model.Event
 import com.shuyu.gsygithubappcompose.core.network.model.User
 import com.shuyu.gsygithubappcompose.data.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,7 +19,9 @@ data class ProfileUiState(
     val user: User? = null,
     val isLoading: Boolean = false,
     val isRefreshing: Boolean = false,
-    val error: String? = null
+    val error: String? = null,
+    val orgMembers: List<User>? = null,
+    val userEvents: List<Event>? = null
 )
 
 @HiltViewModel
@@ -67,6 +70,29 @@ class ProfileViewModel @Inject constructor(
                                 isRefreshing = if (emissionCount >= 2) false else it.isRefreshing,
                                 error = null
                             )
+                        }
+                        if (user.type == "Organization") {
+                            userRepository.getOrgMembers(user.login).collect {
+                                it.fold(
+                                    onSuccess = { members ->
+                                        _uiState.update { it.copy(orgMembers = members) }
+                                    },
+                                    onFailure = { exception ->
+                                        _uiState.update { it.copy(error = exception.message) }
+                                    }
+                                )
+                            }
+                        } else {
+                            userRepository.getUserEvents(user.login).collect {
+                                it.fold(
+                                    onSuccess = { events ->
+                                        _uiState.update { it.copy(userEvents = events) }
+                                    },
+                                    onFailure = { exception ->
+                                        _uiState.update { it.copy(error = exception.message) }
+                                    }
+                                )
+                            }
                         }
                     },
                     onFailure = { exception ->

@@ -4,6 +4,7 @@ import com.shuyu.gsygithubappcompose.core.common.datastore.UserPreferencesDataSt
 import com.shuyu.gsygithubappcompose.core.database.dao.UserDao
 import com.shuyu.gsygithubappcompose.core.database.entity.UserEntity
 import com.shuyu.gsygithubappcompose.core.network.api.GitHubApiService
+import com.shuyu.gsygithubappcompose.core.network.model.Event
 import com.shuyu.gsygithubappcompose.core.network.model.User
 import com.shuyu.gsygithubappcompose.data.repository.mapper.toEntity
 import com.shuyu.gsygithubappcompose.data.repository.mapper.toUser
@@ -89,4 +90,21 @@ class UserRepository @Inject constructor(
         return userDao.getUserByLogin(login)
     }
 
+    fun getOrgMembers(org: String): Flow<Result<List<User>>> = flow {
+        try {
+            val members = apiService.getOrgMembers(org)
+            emit(Result.success(members))
+        } catch (e: Exception) {
+            emit(Result.failure(e))
+        }
+    }
+
+    fun getUserEvents(username: String): Flow<Result<List<Event>>> = flow {
+        try {
+            val events = apiService.getUserEvents(username)
+            emit(Result.success(events))
+        } catch (e: Exception) {
+            emit(Result.failure(e))
+        }
+    }
 }
