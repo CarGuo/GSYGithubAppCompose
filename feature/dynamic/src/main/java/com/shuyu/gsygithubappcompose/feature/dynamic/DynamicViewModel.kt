@@ -3,6 +3,7 @@ package com.shuyu.gsygithubappcompose.feature.dynamic
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.shuyu.gsygithubappcompose.core.common.datastore.UserPreferencesDataStore
+import com.shuyu.gsygithubappcompose.core.network.config.NetworkConfig
 import com.shuyu.gsygithubappcompose.core.network.model.Event
 import com.shuyu.gsygithubappcompose.data.repository.EventRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -13,8 +14,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
-const val PAGE_SIZE = 20 // Assuming a page size for loading more
 
 data class DynamicUiState(
     val events: List<Event> = emptyList(),
@@ -88,7 +87,7 @@ class DynamicViewModel @Inject constructor(
                             isLoadingMore = if (emissionCount >= 2) false else it.isLoadingMore,
                             error = null,
                             currentPage = if (emissionCount >= 2) pageToLoad + 1 else it.currentPage,
-                            hasMore = if (emissionCount >= 2) newEvents.size == PAGE_SIZE else it.hasMore,
+                            hasMore = if (emissionCount >= 2) newEvents.size == NetworkConfig.PER_PAGE else it.hasMore,
                             loadMoreError = false
                         )
                     }
