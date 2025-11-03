@@ -29,6 +29,7 @@ dependencies {
     implementation(libs.androidx.core.ktx)
 
     implementation(projects.core.common)
+    implementation(projects.core.network)
     // Compose
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)

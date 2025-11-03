@@ -39,10 +39,16 @@ class DynamicViewModel @Inject constructor(
         loadEvents(initialLoad = true)
     }
 
-    fun loadEvents(initialLoad: Boolean = false, isRefresh: Boolean = false, isLoadMore: Boolean = false) {
+    fun loadEvents(
+        initialLoad: Boolean = false, isRefresh: Boolean = false, isLoadMore: Boolean = false
+    ) {
         viewModelScope.launch {
             if (isRefresh) {
-                _uiState.update { it.copy(isRefreshing = true, error = null, currentPage = 1, hasMore = true) }
+                _uiState.update {
+                    it.copy(
+                        isRefreshing = true, error = null, currentPage = 1, hasMore = true
+                    )
+                }
             } else if (isLoadMore) {
                 _uiState.update { it.copy(isLoadingMore = true, error = null) }
             } else if (initialLoad) {
@@ -65,36 +71,34 @@ class DynamicViewModel @Inject constructor(
             val pageToLoad = if (isRefresh) 1 else _uiState.value.currentPage
 
             var emissionCount = 0
-            eventRepository.getReceivedEvents(username, pageToLoad).collect {
+            eventRepository.getReceivedEvents(username, pageToLoad, true).collect {
                 emissionCount++
-                it.fold(
-                    onSuccess = { newEvents ->
-                        val currentEvents = if (isRefresh || initialLoad) emptyList() else _uiState.value.events
-                        val updatedEvents = currentEvents + newEvents
-                        _uiState.update { it ->
-                            it.copy(
-                                events = updatedEvents,
-                                // Only reset loading states on second emission (network result)
-                                isLoading = if (emissionCount >= 2) false else it.isLoading,
-                                isRefreshing = if (emissionCount >= 2) false else it.isRefreshing,
-                                isLoadingMore = if (emissionCount >= 2) false else it.isLoadingMore,
-                                error = null,
-                                currentPage = if (emissionCount >= 2) pageToLoad + 1 else it.currentPage,
-                                hasMore = if (emissionCount >= 2) newEvents.size == PAGE_SIZE else it.hasMore
-                            )
-                        }
-                    },
-                    onFailure = { exception ->
-                        _uiState.update { it ->
-                            it.copy(
-                                isLoading = false,
-                                isRefreshing = false,
-                                isLoadingMore = false,
-                                error = exception.message ?: "Failed to load events"
-                            )
-                        }
+                it.fold(onSuccess = { newEvents ->
+                    val currentEvents =
+                        if (isRefresh || initialLoad) emptyList() else _uiState.value.events
+                    val updatedEvents = currentEvents + newEvents
+                    _uiState.update { it ->
+                        it.copy(
+                            events = updatedEvents,
+                            // Only reset loading states on second emission (network result)
+                            isLoading = if (emissionCount >= 2) false else it.isLoading,
+                            isRefreshing = if (emissionCount >= 2) false else it.isRefreshing,
+                            isLoadingMore = if (emissionCount >= 2) false else it.isLoadingMore,
+                            error = null,
+                            currentPage = if (emissionCount >= 2) pageToLoad + 1 else it.currentPage,
+                            hasMore = if (emissionCount >= 2) newEvents.size == PAGE_SIZE else it.hasMore
+                        )
                     }
-                )
+                }, onFailure = { exception ->
+                    _uiState.update { it ->
+                        it.copy(
+                            isLoading = false,
+                            isRefreshing = false,
+                            isLoadingMore = false,
+                            error = exception.message ?: "Failed to load events"
+                        )
+                    }
+                })
             }
         }
     }

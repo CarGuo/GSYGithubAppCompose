@@ -7,6 +7,8 @@ import com.shuyu.gsygithubappcompose.core.network.model.Event
 import com.shuyu.gsygithubappcompose.core.network.model.EventPayload
 import com.shuyu.gsygithubappcompose.core.network.model.EventRepo
 import com.shuyu.gsygithubappcompose.core.network.model.User
+import com.shuyu.gsygithubappcompose.data.repository.mapper.toEntity
+import com.shuyu.gsygithubappcompose.data.repository.mapper.toEvent
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
@@ -14,21 +16,15 @@ import javax.inject.Singleton
 
 @Singleton
 class EventRepository @Inject constructor(
-    private val apiService: GitHubApiService,
-    private val eventDao: EventDao
+    private val apiService: GitHubApiService, private val eventDao: EventDao
 ) {
 
-    fun getReceivedEvents(username: String, page: Int = 1): Flow<Result<List<Event>>> = flow {
+    fun getReceivedEvents(
+        username: String, page: Int = 1, isReceivedEvent: Boolean
+    ): Flow<Result<List<Event>>> = flow {
         // 1. Emit data from database
-        val cachedEvents = eventDao.getEvents().map {
-            Event(
-                id = it.id,
-                type = it.type,
-                actor = User(id = it.actorId, login = it.actorLogin, avatarUrl = it.actorAvatarUrl, name = null, bio = null, company = null, blog = null, location = null, email = null, publicRepos = 0, followers = 0, following = 0, createdAt = "", updatedAt = ""),
-                repo = EventRepo(id = it.repoId, name = it.repoName, url = ""),
-                payload = EventPayload(action = it.payload, refType = null, masterBranch = null, description = null, pusherType = null),
-                createdAt = it.createdAt
-            )
+        val cachedEvents = eventDao.getEvents("*me", true).map { it ->
+            it.toEvent()
         }
         emit(Result.success(cachedEvents))
 
@@ -37,20 +33,10 @@ class EventRepository @Inject constructor(
             val networkEvents = apiService.getReceivedEvents(username, page)
             // 3. If it's the first page, update the database
             if (page == 1) {
-                val eventEntities = networkEvents.map {
-                    EventEntity(
-                        id = it.id,
-                        type = it.type ,
-                        actorId = it.actor.id,
-                        actorLogin = it.actor.login,
-                        actorAvatarUrl = it.actor.avatarUrl,
-                        repoId = it.repo.id,
-                        repoName = it.repo.name,
-                        payload = it.payload?.action ?: "",
-                        createdAt = it.createdAt
-                    )
+                val eventEntities = networkEvents.map { it ->
+                    it.toEntity(isReceivedEvent)
                 }
-                eventDao.clearAndInsert(eventEntities)
+                eventDao.clearAndInsert("*me", true, eventEntities)
             }
             // 4. Emit network data
             emit(Result.success(networkEvents))

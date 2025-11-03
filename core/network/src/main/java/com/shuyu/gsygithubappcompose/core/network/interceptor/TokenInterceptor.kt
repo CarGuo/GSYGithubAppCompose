@@ -45,7 +45,7 @@ class TokenInterceptor @Inject constructor(
         // Add Authorization header if token exists
         currentToken?.let { token ->
             request = request.newBuilder()
-                .header("Authorization", token)
+                .header("Authorization", "token $token")
                 .build()
         }
 

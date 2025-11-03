@@ -5,6 +5,8 @@ import com.shuyu.gsygithubappcompose.core.database.entity.RepositoryEntity
 import com.shuyu.gsygithubappcompose.core.network.api.GitHubApiService
 import com.shuyu.gsygithubappcompose.core.network.model.Repository
 import com.shuyu.gsygithubappcompose.core.network.model.User
+import com.shuyu.gsygithubappcompose.data.repository.mapper.toEntity
+import com.shuyu.gsygithubappcompose.data.repository.mapper.toRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
@@ -25,23 +27,7 @@ class RepositoryRepository @Inject constructor(
         // 1. Emit data from database
         val cachedRepos = repositoryDao.getTrendingRepositories().map {
             it.map { repoEntity ->
-                Repository(
-                    id = repoEntity.id,
-                    name = repoEntity.name,
-                    fullName = repoEntity.fullName,
-                    description = repoEntity.description,
-                    owner = User(id = repoEntity.ownerId, login = repoEntity.ownerLogin, avatarUrl = repoEntity.ownerAvatarUrl, name = null, bio = null, company = null, blog = null, location = null, email = null, publicRepos = 0, followers = 0, following = 0, createdAt = "", updatedAt = ""),
-                    private = repoEntity.isPrivate,
-                    htmlUrl = repoEntity.htmlUrl,
-                    language = repoEntity.language,
-                    stargazersCount = repoEntity.stargazersCount,
-                    watchersCount = repoEntity.watchersCount,
-                    forksCount = repoEntity.forksCount,
-                    openIssuesCount = repoEntity.openIssuesCount,
-                    createdAt = repoEntity.createdAt,
-                    updatedAt = repoEntity.updatedAt,
-                    pushedAt = ""
-                )
+                repoEntity.toRepository()
             }
         }
         //不需要collect阻塞
@@ -90,22 +76,4 @@ class RepositoryRepository @Inject constructor(
         return repositoryDao.getTrendingRepositories(limit)
     }
 
-    private fun Repository.toEntity() = RepositoryEntity(
-        id = id,
-        name = name,
-        fullName = fullName,
-        description = description,
-        ownerId = owner.id,
-        ownerLogin = owner.login,
-        ownerAvatarUrl = owner.avatarUrl,
-        isPrivate = private,
-        htmlUrl = htmlUrl,
-        language = language,
-        stargazersCount = stargazersCount,
-        watchersCount = watchersCount,
-        forksCount = forksCount,
-        openIssuesCount = openIssuesCount,
-        createdAt = createdAt,
-        updatedAt = updatedAt
-    )
 }

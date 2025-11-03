@@ -5,6 +5,8 @@ import com.shuyu.gsygithubappcompose.core.database.dao.UserDao
 import com.shuyu.gsygithubappcompose.core.database.entity.UserEntity
 import com.shuyu.gsygithubappcompose.core.network.api.GitHubApiService
 import com.shuyu.gsygithubappcompose.core.network.model.User
+import com.shuyu.gsygithubappcompose.data.repository.mapper.toEntity
+import com.shuyu.gsygithubappcompose.data.repository.mapper.toUser
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
@@ -66,7 +68,7 @@ class UserRepository @Inject constructor(
         return preferencesDataStore.authToken.map { it?.isNotEmpty() == true }
     }
 
-    suspend fun getUser(username: String): Flow<Result<User>> = flow {
+    fun getUser(username: String): Flow<Result<User>> = flow {
         // 1. Emit data from database
         val cachedUser = userDao.getUserByLogin(username).first()
         if (cachedUser != null) {
@@ -87,37 +89,4 @@ class UserRepository @Inject constructor(
         return userDao.getUserByLogin(login)
     }
 
-    private fun User.toEntity() = UserEntity(
-        id = id,
-        login = login,
-        name = name,
-        avatarUrl = avatarUrl,
-        bio = bio,
-        company = company,
-        blog = blog,
-        location = location,
-        email = email,
-        publicRepos = publicRepos,
-        followers = followers,
-        following = following,
-        createdAt = createdAt,
-        updatedAt = updatedAt
-    )
-
-    private fun UserEntity.toUser() = User(
-        id = id,
-        login = login,
-        name = name,
-        avatarUrl = avatarUrl,
-        bio = bio,
-        company = company,
-        blog = blog,
-        location = location,
-        email = email,
-        publicRepos = publicRepos,
-        followers = followers,
-        following = following,
-        createdAt = createdAt,
-        updatedAt = updatedAt
-    )
 }
