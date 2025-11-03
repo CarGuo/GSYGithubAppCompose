@@ -22,8 +22,9 @@
 
 ## 一个常规页面模块结构
 - 初始状态使用 GSYGeneralLoadState 加载首次数据
-- 加载首次数据时，如果有数据库数据，先加载显示其数据库数据，之后再请求网络数据，网络数据回来后，更新数据库和 UI
+- 使用对应的 xxxRepository 获取数据，Repository 内部会先从数据库获取数据，并且再请求网络数据，更新数据库和 UI
 - 之后数据的刷新和加载更多，可以通过 GSYPullRefresh 控件实现，由用户自己操作触发
+- 基础页面都会有 Screen 和 ViewModel 实现，ViewModel 会继承 BaseViewModel 
 
 ## 注意：
 - 工作时注意当前是 windows 环境还是 macOS 环境
