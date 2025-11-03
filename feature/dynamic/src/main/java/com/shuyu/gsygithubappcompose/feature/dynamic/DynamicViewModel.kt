@@ -46,11 +46,19 @@ class DynamicViewModel @Inject constructor(
             if (isRefresh) {
                 _uiState.update {
                     it.copy(
-                        isRefreshing = true, error = null, currentPage = 1, hasMore = true, loadMoreError = false
+                        isRefreshing = true,
+                        error = null,
+                        currentPage = 1,
+                        hasMore = true,
+                        loadMoreError = false
                     )
                 }
             } else if (isLoadMore) {
-                _uiState.update { it.copy(isLoadingMore = true, error = null, loadMoreError = false) }
+                _uiState.update {
+                    it.copy(
+                        isLoadingMore = true, error = null, loadMoreError = false
+                    )
+                }
             } else if (initialLoad) {
                 _uiState.update { it.copy(isLoading = true, error = null, loadMoreError = false) }
             }

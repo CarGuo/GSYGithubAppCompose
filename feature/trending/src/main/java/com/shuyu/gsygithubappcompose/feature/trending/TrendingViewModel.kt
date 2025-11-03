@@ -1,5 +1,6 @@
 package com.shuyu.gsygithubappcompose.feature.trending
 
+import android.nfc.tech.MifareUltralight.PAGE_SIZE
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.shuyu.gsygithubappcompose.core.network.model.Repository
@@ -11,8 +12,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
-const val PAGE_SIZE = 20 // Assuming a page size for loading more
 
 data class TrendingUiState(
     val repositories: List<Repository> = emptyList(),

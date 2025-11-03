@@ -19,11 +19,14 @@ class EventRepository @Inject constructor(
     fun getReceivedEvents(
         username: String, page: Int = 1, isReceivedEvent: Boolean
     ): Flow<Result<List<Event>>> = flow {
-        // 1. Emit data from database
-        val cachedEvents = eventDao.getEvents("*me", true).map { it ->
+        // 1. Emit data from database if available
+        val cachedEvents = eventDao.getEvents("", isReceivedEvent).map { it ->
             it.toEvent()
         }
+
+
         emit(Result.success(cachedEvents))
+
 
         // 2. Fetch from network
         try {
@@ -33,11 +36,13 @@ class EventRepository @Inject constructor(
                 val eventEntities = networkEvents.map { it ->
                     it.toEntity(isReceivedEvent)
                 }
-                eventDao.clearAndInsert("*me", true, eventEntities)
+
+                eventDao.clearAndInsert("", isReceivedEvent, eventEntities)
             }
             // 4. Emit network data
             emit(Result.success(networkEvents))
         } catch (e: Exception) {
+            // Emit network failure. If cached data was already emitted, this failure will follow the cached data.
             emit(Result.failure(e))
         }
     }
