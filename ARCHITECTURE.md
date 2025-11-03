@@ -9,7 +9,7 @@
 - 存放所有自定义控件，主题，颜色等相关内容
 
 ### core/network
-- 是网络请求模块 ，网络数据的实体都在这个模块的 model 目录下
+- 是网络请求模块 ，网络数据的实体都在这个模块的 model/ 目录下，接口地址是 api/ 下的 GitHubApiService
 
 ### core/database
 - 是所有数据库模块，包括所有数据库能力，有 xxDao、xxEntiny，而每次修改数据库如果设计增删字段，需要修改增加 AppDatabase 的数据库版本
@@ -21,5 +21,6 @@
 - 模块是页面功能模块，内部每个模块每个模块的页面 xxxScreen 和 xxxViewModel
 
 ## 其他注意：
-- 所有模块代码都是在  src/main/java/packageName/ 下、
+- 所有模块代码都是在  src/main/java/packageName/ 下
 - 每次修改后，需要注意检查是否有这个修改的关联使用需要同步处理
+- 依赖添加和版本修改需要走 gradle/ 下的 libs.versions.toml 进行统一管理

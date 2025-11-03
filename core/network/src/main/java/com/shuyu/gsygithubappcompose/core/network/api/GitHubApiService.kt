@@ -3,6 +3,7 @@ package com.shuyu.gsygithubappcompose.core.network.api
 import com.shuyu.gsygithubappcompose.core.network.model.AccessToken
 import com.shuyu.gsygithubappcompose.core.network.model.Event
 import com.shuyu.gsygithubappcompose.core.network.model.Repository
+import com.shuyu.gsygithubappcompose.core.network.model.RepositorySearchResponse
 import com.shuyu.gsygithubappcompose.core.network.model.User
 import retrofit2.http.GET
 import retrofit2.http.Header
@@ -52,7 +53,29 @@ interface GitHubApiService {
         @Query("page") page: Int = 1,
         @Query("per_page") perPage: Int = 30
     ): List<Event>
-    
+
+
+    /**
+     * Get user events
+     */
+    @GET("users/{username}/events")
+    suspend fun getUserEvents(
+        @Path("username") username: String,
+        @Query("page") page: Int = 1,
+        @Query("per_page") perPage: Int = 30
+    ): List<Event>
+
+    /**
+     * Get organization members
+     */
+    @GET("orgs/{org}/members")
+    suspend fun getOrgMembers(
+        @Path("org") org: String,
+        @Query("page") page: Int = 1,
+        @Query("per_page") perPage: Int = 30
+    ): List<User>
+
+
     /**
      * Get trending repositories
      */
@@ -74,10 +97,5 @@ interface GitHubApiService {
         @Query("page") page: Int = 1,
         @Query("per_page") perPage: Int = 30
     ): List<Repository>
-}
 
-data class RepositorySearchResponse(
-    val total_count: Int,
-    val incomplete_results: Boolean,
-    val items: List<Repository>
-)
+}
