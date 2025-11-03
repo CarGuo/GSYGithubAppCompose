@@ -1,5 +1,6 @@
 package com.shuyu.gsygithubappcompose.core.network.api
 
+import com.shuyu.gsygithubappcompose.core.network.config.NetworkConfig
 import com.shuyu.gsygithubappcompose.core.network.model.AccessToken
 import com.shuyu.gsygithubappcompose.core.network.model.Event
 import com.shuyu.gsygithubappcompose.core.network.model.Repository
@@ -51,7 +52,7 @@ interface GitHubApiService {
     suspend fun getReceivedEvents(
         @Path("username") username: String,
         @Query("page") page: Int = 1,
-        @Query("per_page") perPage: Int = 30
+        @Query("per_page") perPage: Int = NetworkConfig.PER_PAGE
     ): List<Event>
 
 
@@ -62,7 +63,7 @@ interface GitHubApiService {
     suspend fun getUserEvents(
         @Path("username") username: String,
         @Query("page") page: Int = 1,
-        @Query("per_page") perPage: Int = 30
+        @Query("per_page") perPage: Int = NetworkConfig.PER_PAGE
     ): List<Event>
 
     /**
@@ -72,7 +73,7 @@ interface GitHubApiService {
     suspend fun getOrgMembers(
         @Path("org") org: String,
         @Query("page") page: Int = 1,
-        @Query("per_page") perPage: Int = 30
+        @Query("per_page") perPage: Int = NetworkConfig.PER_PAGE
     ): List<User>
 
 
@@ -85,7 +86,7 @@ interface GitHubApiService {
         @Query("sort") sort: String = "stars",
         @Query("order") order: String = "desc",
         @Query("page") page: Int = 1,
-        @Query("per_page") perPage: Int = 30
+        @Query("per_page") perPage: Int = NetworkConfig.PER_PAGE
     ): RepositorySearchResponse
     
     /**
@@ -95,7 +96,7 @@ interface GitHubApiService {
     suspend fun getUserRepositories(
         @Path("username") username: String,
         @Query("page") page: Int = 1,
-        @Query("per_page") perPage: Int = 30
+        @Query("per_page") perPage: Int = NetworkConfig.PER_PAGE
     ): List<Repository>
 
 }
