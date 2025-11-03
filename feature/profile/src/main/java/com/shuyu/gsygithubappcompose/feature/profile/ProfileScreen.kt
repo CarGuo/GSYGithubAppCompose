@@ -47,14 +47,14 @@ fun ProfileScreen(
     GSYGeneralLoadState(
         isLoading = uiState.isPageLoading && uiState.user == null,
         error = uiState.error,
-        retry = { viewModel.loadProfile(initialLoad = true) }
+        retry = { viewModel.refresh() }
     ) {
         GSYPullRefresh(
             modifier = Modifier.fillMaxSize(),
             isRefreshing = uiState.isRefreshing,
-            onRefresh = { viewModel.refreshProfile() },
+            onRefresh = { viewModel.refresh() },
             isLoadMore = uiState.isLoadingMore,
-            onLoadMore = { viewModel.loadMoreUserEvents() },
+            onLoadMore = { viewModel.loadMore() },
             hasMore = uiState.hasMore,
             itemCount = if (uiState.user?.type == "Organization") uiState.orgMembers?.size ?: 0 else uiState.userEvents?.size ?: 0,
             loadMoreError = uiState.loadMoreError

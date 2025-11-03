@@ -1,6 +1,5 @@
 package com.shuyu.gsygithubappcompose.feature.profile
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.shuyu.gsygithubappcompose.core.common.datastore.UserPreferencesDataStore
 import com.shuyu.gsygithubappcompose.core.common.util.StringResourceProvider
@@ -8,10 +7,9 @@ import com.shuyu.gsygithubappcompose.core.network.config.NetworkConfig
 import com.shuyu.gsygithubappcompose.core.network.model.Event
 import com.shuyu.gsygithubappcompose.core.network.model.User
 import com.shuyu.gsygithubappcompose.data.repository.UserRepository
+import com.shuyu.gsygithubappcompose.data.repository.vm.BaseUiState
+import com.shuyu.gsygithubappcompose.data.repository.vm.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -20,153 +18,115 @@ import com.shuyu.gsygithubappcompose.core.common.R
 
 data class ProfileUiState(
     val user: User? = null,
-    val isPageLoading: Boolean = false,
-    val isRefreshing: Boolean = false,
-    val isLoadingMore: Boolean = false,
-    val error: String? = null,
+    override val isPageLoading: Boolean = false,
+    override val isRefreshing: Boolean = false,
+    override val isLoadingMore: Boolean = false,
+    override val error: String? = null,
     val orgMembers: List<User>? = null,
     val userEvents: List<Event>? = null,
-    val currentPage: Int = 1,
-    val hasMore: Boolean = true,
-    val loadMoreError: Boolean = false
-)
+    override val currentPage: Int = 1,
+    override val hasMore: Boolean = true,
+    override val loadMoreError: Boolean = false
+) : BaseUiState
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     private val userRepository: UserRepository,
-    private val preferencesDataStore: UserPreferencesDataStore,
+    preferencesDataStore: UserPreferencesDataStore,
     private val stringResourceProvider: StringResourceProvider
-) : ViewModel() {
-
-    private val _uiState = MutableStateFlow(ProfileUiState())
-    val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
-
-    init {
-        loadProfile(initialLoad = true)
+) : BaseViewModel<ProfileUiState>(
+    initialUiState = ProfileUiState(),
+    preferencesDataStore = preferencesDataStore,
+    commonStateUpdater = { currentState, isPageLoading, isRefreshing, isLoadingMore, error, currentPage, hasMore, loadMoreError ->
+        currentState.copy(
+            isPageLoading = isPageLoading,
+            isRefreshing = isRefreshing,
+            isLoadingMore = isLoadingMore,
+            error = error,
+            currentPage = currentPage,
+            hasMore = hasMore,
+            loadMoreError = loadMoreError
+        )
     }
+) {
 
-    fun loadProfile(
-        initialLoad: Boolean = false, isRefresh: Boolean = false, isLoadMore: Boolean = false
+    override fun loadData(
+        initialLoad: Boolean,
+        isRefresh: Boolean,
+        isLoadMore: Boolean
     ) {
-        viewModelScope.launch {
-            if (isRefresh) {
-                _uiState.update {
-                    it.copy(
-                        isRefreshing = true,
-                        error = null,
-                        currentPage = 1,
-                        hasMore = true,
-                        loadMoreError = false
-                    )
-                }
-            } else if (isLoadMore) {
-                _uiState.update {
-                    it.copy(
-                        isLoadingMore = true, error = null, loadMoreError = false
-                    )
-                }
-            } else if (initialLoad) {
-                _uiState.update {
-                    it.copy(
-                        isPageLoading = true, error = null, loadMoreError = false
-                    )
-                }
-            }
-
-            val username = preferencesDataStore.username.first()
-            if (username.isNullOrEmpty()) {
-                _uiState.update {
-                    it.copy(
-                        isPageLoading = false,
-                        isRefreshing = false,
-                        isLoadingMore = false,
-                        error = stringResourceProvider.getString(R.string.error_no_username_found),
-                        loadMoreError = false
-                    )
-                }
-                return@launch
-            }
-
-            val pageToLoad = if (isRefresh) 1 else _uiState.value.currentPage
-
+        launchDataLoadWithUser(initialLoad, isRefresh, isLoadMore) { userLogin, pageToLoad ->
             var emissionCount = 0
-            userRepository.getUser(username).collect {
+            userRepository.getUser(userLogin).collect {
                 emissionCount++
-                it.fold(onSuccess = { user ->
-                    _uiState.update { it ->
-                        it.copy(
-                            user = user,
-                            // Only reset loading states on second emission (network result)
-                            isPageLoading = if (emissionCount >= 2) false else it.isPageLoading,
-                            isRefreshing = if (emissionCount >= 2) false else it.isRefreshing,
-                            error = null
+                it.fold(onSuccess = { fetchedUser ->
+                    _uiState.update { currentState ->
+                        currentState.copy(
+                            user = fetchedUser
                         )
                     }
-                    if (user.type == "Organization") {
-                        userRepository.getOrgMembers(user.login).collect { it ->
-                            it.fold(onSuccess = { members ->
+
+                    if (fetchedUser.type == "Organization") {
+                        userRepository.getOrgMembers(fetchedUser.login).collect { orgResult ->
+                            orgResult.fold(onSuccess = { members ->
                                 _uiState.update { it.copy(orgMembers = members) }
                             }, onFailure = { exception ->
-                                _uiState.update { it.copy(error = exception.message) }
+                                updateErrorState(exception, isLoadMore, stringResourceProvider.getString(R.string.error_failed_to_load_org_members))
                             })
                         }
                     } else {
                         userRepository.getUserEvents(
-                            user.login, pageToLoad, NetworkConfig.PER_PAGE
-                        ).collect { it ->
-                            it.fold(onSuccess = { newEvents ->
+                            fetchedUser.login, pageToLoad, NetworkConfig.PER_PAGE
+                        ).collect { eventResult ->
+                            eventResult.fold(onSuccess = { newEvents ->
                                 val currentEvents =
                                     if (isRefresh || initialLoad) emptyList() else _uiState.value.userEvents.orEmpty()
                                 val updatedEvents = currentEvents + newEvents
-                                _uiState.update { it ->
-                                    it.copy(
-                                        userEvents = updatedEvents,
-                                        isPageLoading = if (emissionCount >= 1) false else it.isPageLoading,
-                                        isRefreshing = if (emissionCount >= 2) false else it.isRefreshing,
-                                        isLoadingMore = if (emissionCount >= 2) false else it.isLoadingMore,
-                                        error = null,
-                                        currentPage = if (emissionCount >= 2) pageToLoad + 1 else it.currentPage,
-                                        hasMore = if (emissionCount >= 2) newEvents.size == NetworkConfig.PER_PAGE else it.hasMore,
-                                        loadMoreError = false
-                                    )
-                                }
+                                handleResult(
+                                    emissionCount,
+                                    newEvents,
+                                    pageToLoad,
+                                    isRefresh,
+                                    initialLoad,
+                                    isLoadMore,
+                                    updateSuccess = { currentState, items, page, isR, initialL, isLM ->
+                                        currentState.copy(
+                                            userEvents = updatedEvents
+                                        )
+                                    },
+                                    updateFailure = { currentState, errorMessage, isLM ->
+                                        currentState.copy(
+                                            userEvents = emptyList() // Clear events on failure if no data found
+                                        )
+                                    }
+                                )
                             }, onFailure = { exception ->
-                                _uiState.update { it ->
-                                    it.copy(
-                                        isPageLoading = false,
-                                        isRefreshing = false,
-                                        isLoadingMore = false,
-                                        error = exception.message
-                                            ?: stringResourceProvider.getString(R.string.error_failed_to_load_events),
-                                        loadMoreError = isLoadMore
-                                    )
-                                }
+                                updateErrorState(
+                                    exception,
+                                    isLoadMore,
+                                    stringResourceProvider.getString(R.string.error_failed_to_load_events)
+                                )
                             })
                         }
                     }
                 }, onFailure = { exception ->
-                    _uiState.update { it ->
-                        it.copy(
-                            isPageLoading = false,
-                            isRefreshing = false,
-                            isLoadingMore = false,
-                            error = exception.message
-                                ?: stringResourceProvider.getString(R.string.error_failed_to_load_profile),
-                            loadMoreError = isLoadMore
-                        )
-                    }
+                    updateErrorState(
+                        exception,
+                        isLoadMore,
+                        stringResourceProvider.getString(R.string.error_failed_to_load_profile)
+                    )
                 })
             }
         }
     }
 
     fun refreshProfile() {
-        loadProfile(isRefresh = true)
+        refresh()
     }
 
     fun loadMoreUserEvents() {
         if (!_uiState.value.isLoadingMore && _uiState.value.hasMore && _uiState.value.user?.type != "Organization") {
-            loadProfile(isLoadMore = true)
+            loadMore()
         }
     }
 

@@ -20,12 +20,12 @@ fun DynamicScreen(
     GSYGeneralLoadState(
         isLoading = uiState.isPageLoading,
         error = uiState.error,
-        retry = { viewModel.loadEvents(initialLoad = true) }
+        retry = { viewModel.refresh() }
     ) {
         GSYPullRefresh(
             listState = listState,
-            onRefresh = { viewModel.refreshEvents() },
-            onLoadMore = { viewModel.loadMoreEvents() },
+            onRefresh = { viewModel.refresh() },
+            onLoadMore = { viewModel.loadMore() },
             isRefreshing = uiState.isRefreshing,
             isLoadMore = uiState.isLoadingMore,
             hasMore = uiState.hasMore,

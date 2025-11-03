@@ -1,53 +1,53 @@
 package com.shuyu.gsygithubappcompose.feature.trending
 
-import android.nfc.tech.MifareUltralight.PAGE_SIZE
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+
+import com.shuyu.gsygithubappcompose.core.common.datastore.UserPreferencesDataStore
+import com.shuyu.gsygithubappcompose.core.network.config.NetworkConfig
 import com.shuyu.gsygithubappcompose.core.network.model.Repository
 import com.shuyu.gsygithubappcompose.data.repository.RepositoryRepository
+import com.shuyu.gsygithubappcompose.data.repository.vm.BaseUiState
+import com.shuyu.gsygithubappcompose.data.repository.vm.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class TrendingUiState(
     val repositories: List<Repository> = emptyList(),
-    val isPageLoading: Boolean = false,
-    val isRefreshing: Boolean = false,
-    val isLoadingMore: Boolean = false,
-    val error: String? = null,
-    val currentPage: Int = 1,
-    val hasMore: Boolean = true,
-    val loadMoreError: Boolean = false
-)
+    override val isPageLoading: Boolean = false,
+    override val isRefreshing: Boolean = false,
+    override val isLoadingMore: Boolean = false,
+    override val error: String? = null,
+    override val currentPage: Int = 1,
+    override val hasMore: Boolean = true,
+    override val loadMoreError: Boolean = false
+) : BaseUiState
 
 @HiltViewModel
 class TrendingViewModel @Inject constructor(
-    private val repositoryRepository: RepositoryRepository
-) : ViewModel() {
-
-    private val _uiState = MutableStateFlow(TrendingUiState())
-    val uiState: StateFlow<TrendingUiState> = _uiState.asStateFlow()
-
-    init {
-        loadTrendingRepositories(initialLoad = true)
+    private val repositoryRepository: RepositoryRepository,
+    preferencesDataStore: UserPreferencesDataStore
+) : BaseViewModel<TrendingUiState>(
+    initialUiState = TrendingUiState(),
+    preferencesDataStore = preferencesDataStore,
+    commonStateUpdater = { currentState, isPageLoading, isRefreshing, isLoadingMore, error, currentPage, hasMore, loadMoreError ->
+        currentState.copy(
+            isPageLoading = isPageLoading,
+            isRefreshing = isRefreshing,
+            isLoadingMore = isLoadingMore,
+            error = error,
+            currentPage = currentPage,
+            hasMore = hasMore,
+            loadMoreError = loadMoreError
+        )
     }
+) {
 
-    fun loadTrendingRepositories(initialLoad: Boolean = false, isRefresh: Boolean = false, isLoadMore: Boolean = false) {
-        viewModelScope.launch {
-            if (isRefresh) {
-                _uiState.update { it.copy(isRefreshing = true, error = null, currentPage = 1, hasMore = true, loadMoreError = false) }
-            } else if (isLoadMore) {
-                _uiState.update { it.copy(isLoadingMore = true, error = null, loadMoreError = false) }
-            } else if (initialLoad) {
-                _uiState.update { it.copy(isPageLoading = true, error = null, loadMoreError = false) }
-            }
-
-            val pageToLoad = if (isRefresh) 1 else _uiState.value.currentPage
-
+    override fun loadData(
+        initialLoad: Boolean,
+        isRefresh: Boolean,
+        isLoadMore: Boolean
+    ) {
+        launchDataLoadWithUser(initialLoad, isRefresh, isLoadMore) { user,pageToLoad ->
             var emissionCount = 0
             repositoryRepository.getTrendingRepositories().collect {
                 emissionCount++
@@ -56,30 +56,27 @@ class TrendingViewModel @Inject constructor(
                         val currentRepos =
                             if (isRefresh || initialLoad) emptyList() else _uiState.value.repositories
                         val updatedRepos = currentRepos + newRepos
-                        _uiState.update { it ->
-                            it.copy(
-                                repositories = updatedRepos,
-                                // Only reset loading states on second emission (network result)
-                                isPageLoading = if (emissionCount >= 1) false else it.isPageLoading,
-                                isRefreshing = if (emissionCount >= 2) false else it.isRefreshing,
-                                isLoadingMore = if (emissionCount >= 2) false else it.isLoadingMore,
-                                error = null,
-                                currentPage = if (emissionCount >= 2) pageToLoad + 1 else it.currentPage,
-                                hasMore = if (emissionCount >= 2) newRepos.size == PAGE_SIZE else it.hasMore,
-                                loadMoreError = false
-                            )
-                        }
+                        handleResult(
+                            emissionCount,
+                            newRepos,
+                            pageToLoad,
+                            isRefresh,
+                            initialLoad,
+                            isLoadMore,
+                            updateSuccess = { currentState, items, page, isR, initialL, isLM ->
+                                currentState.copy(
+                                    repositories = updatedRepos
+                                )
+                            },
+                            updateFailure = { currentState, errorMessage, isLM ->
+                                currentState.copy(
+                                    repositories = emptyList() // Clear repositories on failure if no data found
+                                )
+                            }
+                        )
                     },
                     onFailure = { exception ->
-                        _uiState.update { it ->
-                            it.copy(
-                                isPageLoading = false,
-                                isRefreshing = false,
-                                isLoadingMore = false,
-                                error = exception.message ?: "Failed to load repositories",
-                                loadMoreError = isLoadMore
-                            )
-                        }
+                        updateErrorState(exception, isLoadMore, "Failed to load repositories")
                     }
                 )
             }
@@ -87,12 +84,10 @@ class TrendingViewModel @Inject constructor(
     }
 
     fun refreshTrendingRepositories() {
-        loadTrendingRepositories(isRefresh = true)
+        refresh()
     }
 
     fun loadMoreTrendingRepositories() {
-        if (!_uiState.value.isLoadingMore && _uiState.value.hasMore) {
-            loadTrendingRepositories(isLoadMore = true)
-        }
+        loadMore()
     }
 }

@@ -53,4 +53,5 @@
     <string name="error_no_username_found">未找到用户名</string>
     <string name="error_failed_to_load_events">加载事件失败</string>
     <string name="error_failed_to_load_profile">加载个人资料失败</string>
+    <string name="error_failed_to_load_org_members">加载组织成员失败</string>
 </resources>

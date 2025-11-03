@@ -21,13 +21,13 @@ fun TrendingScreen(
     GSYGeneralLoadState(
         isLoading = uiState.isPageLoading && uiState.repositories.isEmpty(),
         error = uiState.error,
-        retry = { viewModel.loadTrendingRepositories(initialLoad = true) }
+        retry = { viewModel.refresh() }
     ) {
         GSYPullRefresh(
             isRefreshing = uiState.isRefreshing,
-            onRefresh = { viewModel.refreshTrendingRepositories() },
+            onRefresh = { viewModel.refresh() },
             isLoadMore = uiState.isLoadingMore,
-            onLoadMore = { viewModel.loadMoreTrendingRepositories() },
+            onLoadMore = { viewModel.loadMore() },
             hasMore = uiState.hasMore,
             itemCount = uiState.repositories.size,
             loadMoreError = uiState.loadMoreError,
