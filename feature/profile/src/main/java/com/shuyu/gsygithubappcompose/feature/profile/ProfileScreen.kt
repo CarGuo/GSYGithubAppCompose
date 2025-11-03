@@ -45,7 +45,7 @@ fun ProfileScreen(
     val uiState by viewModel.uiState.collectAsState()
 
     GSYGeneralLoadState(
-        isLoading = uiState.isLoading && uiState.user == null,
+        isLoading = uiState.isPageLoading && uiState.user == null,
         error = uiState.error,
         retry = { viewModel.loadProfile(initialLoad = true) }
     ) {

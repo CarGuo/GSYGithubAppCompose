@@ -20,7 +20,7 @@ import com.shuyu.gsygithubappcompose.core.common.R
 
 data class ProfileUiState(
     val user: User? = null,
-    val isLoading: Boolean = false,
+    val isPageLoading: Boolean = false,
     val isRefreshing: Boolean = false,
     val isLoadingMore: Boolean = false,
     val error: String? = null,
@@ -52,14 +52,14 @@ class ProfileViewModel @Inject constructor(
             } else if (isLoadMore) {
                 _uiState.update { it.copy(isLoadingMore = true, error = null, loadMoreError = false) }
             } else if (initialLoad) {
-                _uiState.update { it.copy(isLoading = true, error = null, loadMoreError = false) }
+                _uiState.update { it.copy(isPageLoading = true, error = null, loadMoreError = false) }
             }
 
             val username = preferencesDataStore.username.first()
             if (username.isNullOrEmpty()) {
                 _uiState.update {
                     it.copy(
-                        isLoading = false,
+                        isPageLoading = false,
                         isRefreshing = false,
                         isLoadingMore = false,
                         error = stringResourceProvider.getString(R.string.error_no_username_found),
@@ -80,7 +80,7 @@ class ProfileViewModel @Inject constructor(
                             it.copy(
                                 user = user,
                                 // Only reset loading states on second emission (network result)
-                                isLoading = if (emissionCount >= 2) false else it.isLoading,
+                                isPageLoading = if (emissionCount >= 2) false else it.isPageLoading,
                                 isRefreshing = if (emissionCount >= 2) false else it.isRefreshing,
                                 error = null
                             )
@@ -106,7 +106,7 @@ class ProfileViewModel @Inject constructor(
                                         _uiState.update { it ->
                                             it.copy(
                                                 userEvents = updatedEvents,
-                                                isLoading = if (emissionCount >= 2) false else it.isLoading,
+                                                isPageLoading = if (emissionCount >= 1) false else it.isPageLoading,
                                                 isRefreshing = if (emissionCount >= 2) false else it.isRefreshing,
                                                 isLoadingMore = if (emissionCount >= 2) false else it.isLoadingMore,
                                                 error = null,
@@ -119,7 +119,7 @@ class ProfileViewModel @Inject constructor(
                                     onFailure = { exception ->
                                         _uiState.update { it ->
                                             it.copy(
-                                                isLoading = false,
+                                                isPageLoading = false,
                                                 isRefreshing = false,
                                                 isLoadingMore = false,
                                                 error = exception.message ?: stringResourceProvider.getString(R.string.error_failed_to_load_events),
@@ -134,7 +134,7 @@ class ProfileViewModel @Inject constructor(
                     onFailure = { exception ->
                         _uiState.update { it ->
                             it.copy(
-                                isLoading = false,
+                                isPageLoading = false,
                                 isRefreshing = false,
                                 isLoadingMore = false,
                                 error = exception.message ?: stringResourceProvider.getString(R.string.error_failed_to_load_profile),

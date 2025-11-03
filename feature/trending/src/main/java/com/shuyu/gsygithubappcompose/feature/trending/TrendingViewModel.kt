@@ -15,7 +15,7 @@ import javax.inject.Inject
 
 data class TrendingUiState(
     val repositories: List<Repository> = emptyList(),
-    val isLoading: Boolean = false,
+    val isPageLoading: Boolean = false,
     val isRefreshing: Boolean = false,
     val isLoadingMore: Boolean = false,
     val error: String? = null,
@@ -43,7 +43,7 @@ class TrendingViewModel @Inject constructor(
             } else if (isLoadMore) {
                 _uiState.update { it.copy(isLoadingMore = true, error = null, loadMoreError = false) }
             } else if (initialLoad) {
-                _uiState.update { it.copy(isLoading = true, error = null, loadMoreError = false) }
+                _uiState.update { it.copy(isPageLoading = true, error = null, loadMoreError = false) }
             }
 
             val pageToLoad = if (isRefresh) 1 else _uiState.value.currentPage
@@ -60,7 +60,7 @@ class TrendingViewModel @Inject constructor(
                             it.copy(
                                 repositories = updatedRepos,
                                 // Only reset loading states on second emission (network result)
-                                isLoading = if (emissionCount >= 2) false else it.isLoading,
+                                isPageLoading = if (emissionCount >= 1) false else it.isPageLoading,
                                 isRefreshing = if (emissionCount >= 2) false else it.isRefreshing,
                                 isLoadingMore = if (emissionCount >= 2) false else it.isLoadingMore,
                                 error = null,
@@ -73,7 +73,7 @@ class TrendingViewModel @Inject constructor(
                     onFailure = { exception ->
                         _uiState.update { it ->
                             it.copy(
-                                isLoading = false,
+                                isPageLoading = false,
                                 isRefreshing = false,
                                 isLoadingMore = false,
                                 error = exception.message ?: "Failed to load repositories",

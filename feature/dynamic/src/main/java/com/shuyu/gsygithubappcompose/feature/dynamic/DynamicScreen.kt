@@ -18,7 +18,7 @@ fun DynamicScreen(
     val listState = rememberLazyListState()
 
     GSYGeneralLoadState(
-        isLoading = uiState.isLoading,
+        isLoading = uiState.isPageLoading,
         error = uiState.error,
         retry = { viewModel.loadEvents(initialLoad = true) }
     ) {

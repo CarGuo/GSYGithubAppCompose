@@ -57,7 +57,13 @@ fun GSYPullRefresh(
     content: LazyListScope.() -> Unit
 ) {
     PullToRefreshBox(
-        modifier = modifier, isRefreshing = isRefreshing, onRefresh = onRefresh
+        modifier = modifier,
+        isRefreshing = isRefreshing,
+        onRefresh = {
+            if (!isLoadMore) { // Prevent refresh if loading more
+                onRefresh()
+            }
+        }
     ) {
         LazyColumn(
             modifier = Modifier

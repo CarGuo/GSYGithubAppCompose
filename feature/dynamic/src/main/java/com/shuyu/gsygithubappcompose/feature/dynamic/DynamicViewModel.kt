@@ -17,7 +17,7 @@ import javax.inject.Inject
 
 data class DynamicUiState(
     val events: List<Event> = emptyList(),
-    val isLoading: Boolean = false,
+    val isPageLoading: Boolean = false,
     val isRefreshing: Boolean = false,
     val isLoadingMore: Boolean = false,
     val error: String? = null,
@@ -60,14 +60,14 @@ class DynamicViewModel @Inject constructor(
                     )
                 }
             } else if (initialLoad) {
-                _uiState.update { it.copy(isLoading = true, error = null, loadMoreError = false) }
+                _uiState.update { it.copy(isPageLoading = true, error = null, loadMoreError = false) }
             }
 
             val username = preferencesDataStore.username.first()
             if (username.isNullOrEmpty()) {
                 _uiState.update {
                     it.copy(
-                        isLoading = false,
+                        isPageLoading = false,
                         isRefreshing = false,
                         isLoadingMore = false,
                         error = "No username found",
@@ -90,7 +90,7 @@ class DynamicViewModel @Inject constructor(
                         it.copy(
                             events = updatedEvents,
                             // Only reset loading states on second emission (network result)
-                            isLoading = if (emissionCount >= 2) false else it.isLoading,
+                            isPageLoading = if (emissionCount >= 1) false else it.isPageLoading,
                             isRefreshing = if (emissionCount >= 2) false else it.isRefreshing,
                             isLoadingMore = if (emissionCount >= 2) false else it.isLoadingMore,
                             error = null,
@@ -102,7 +102,7 @@ class DynamicViewModel @Inject constructor(
                 }, onFailure = { exception ->
                     _uiState.update { it ->
                         it.copy(
-                            isLoading = false,
+                            isPageLoading = false,
                             isRefreshing = false,
                             isLoadingMore = false,
                             error = exception.message ?: "Failed to load events",

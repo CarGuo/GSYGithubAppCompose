@@ -19,7 +19,7 @@ fun TrendingScreen(
     val uiState by viewModel.uiState.collectAsState()
 
     GSYGeneralLoadState(
-        isLoading = uiState.isLoading && uiState.repositories.isEmpty(),
+        isLoading = uiState.isPageLoading && uiState.repositories.isEmpty(),
         error = uiState.error,
         retry = { viewModel.loadTrendingRepositories(initialLoad = true) }
     ) {
