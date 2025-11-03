@@ -17,6 +17,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -43,17 +45,24 @@ fun ProfileScreen(
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val pullRefreshState = rememberPullToRefreshState()
 
     GSYGeneralLoadState(
         isLoading = uiState.isLoading && uiState.user == null,
         error = uiState.error,
         retry = { viewModel.loadProfile(initialLoad = true) }
     ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            uiState.user?.let { user ->
-                ProfileHeader(user = user)
-            }
-            LazyColumn(modifier = Modifier.weight(1f)) {
+        PullToRefreshBox(
+            isRefreshing = uiState.isRefreshing,
+            onRefresh = { viewModel.refreshProfile() },
+            state = pullRefreshState
+        ) {
+            LazyColumn(modifier = Modifier.fillMaxSize()) {
+                uiState.user?.let { user ->
+                    item {
+                        ProfileHeader(user = user)
+                    }
+                }
                 if (uiState.user?.type == "Organization") {
                     uiState.orgMembers?.let {
                         items(it) { member ->

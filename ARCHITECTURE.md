@@ -20,7 +20,9 @@
 ### feature
 - 模块是页面功能模块，内部每个模块每个模块的页面 xxxScreen 和 xxxViewModel
 
-## 其他注意：
+##  Other：
+- 工作时注意当前是 windows 环境还是 macOS 环境
+- 不允许随意删除我的注释和无用代码
 - 所有模块代码都是在  src/main/java/packageName/ 下
 - 每次修改后，需要注意检查是否有这个修改的关联使用需要同步处理
 - 依赖添加和版本修改需要走 gradle/ 下的 libs.versions.toml 进行统一管理
