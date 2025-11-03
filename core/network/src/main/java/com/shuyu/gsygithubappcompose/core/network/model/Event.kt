@@ -17,14 +17,3 @@ data class EventRepo(
     val name: String,
     val url: String
 )
-
-data class EventPayload(
-    val action: String?,
-    @SerializedName("ref_type")
-    val refType: String?,
-    @SerializedName("master_branch")
-    val masterBranch: String?,
-    val description: String?,
-    @SerializedName("pusher_type")
-    val pusherType: String?
-)
