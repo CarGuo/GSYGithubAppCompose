@@ -3,7 +3,7 @@
 ## Modules
 
 ### core/common
-- 存放 `DataStore<Preferences>` 和用户 token 等，另外多语言文本和图片资源等公共资源也放在这个模块
+- 存放 `DataStore<Preferences>` 和用户 token 等，另外多语言文本（/res/values/ 和 /res/values-zh-rCN）和图片资源等公共资源也放在这个模块
 
 ### core/ui
 - 存放所有自定义控件，主题，颜色等相关内容，特别注意，下拉刷新和加载更多控件需要统一使用 GSYPullRefresh
@@ -28,7 +28,7 @@
 ## 注意：
 - 工作时注意当前是 windows 环境还是 macOS 环境
 - 不允许随意删除我的注释和无用代码
-- 所有显示类型的文本内容都要多语言
+- 所有显示类型的文本内容都要多语言,不能写死,多语言在 core/common模块的 /res/values/ 和 /res/values-zh-rCN 下，需要注意中文和英文两个
 - 所有模块内代码都是在  src/main/java/packageName/ 下
 - 依赖添加和版本修改需要走 gradle/ 下的 libs.versions.toml 进行统一管理
 - 创建代码时，要以 libs.versions.toml 里的版本为主，尽量使用正确的 API

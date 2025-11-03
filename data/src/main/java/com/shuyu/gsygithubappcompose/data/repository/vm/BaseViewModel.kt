@@ -3,6 +3,7 @@ package com.shuyu.gsygithubappcompose.data.repository.vm
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.shuyu.gsygithubappcompose.core.common.datastore.UserPreferencesDataStore
+import com.shuyu.gsygithubappcompose.core.common.util.StringResourceProvider
 import com.shuyu.gsygithubappcompose.core.network.config.NetworkConfig
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -10,6 +11,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import com.shuyu.gsygithubappcompose.core.common.R
 
 interface BaseUiState {
     val isPageLoading: Boolean
@@ -24,6 +26,7 @@ interface BaseUiState {
 abstract class BaseViewModel<UiState : BaseUiState>(
     initialUiState: UiState,
     private val preferencesDataStore: UserPreferencesDataStore? = null,
+    private val stringResourceProvider: StringResourceProvider,
     private val commonStateUpdater: (
         currentState: UiState,
         isPageLoading: Boolean,
@@ -38,6 +41,7 @@ abstract class BaseViewModel<UiState : BaseUiState>(
 
     constructor(
         initialUiState: UiState,
+        stringResourceProvider: StringResourceProvider,
         commonStateUpdater: (
             currentState: UiState,
             isPageLoading: Boolean,
@@ -48,7 +52,7 @@ abstract class BaseViewModel<UiState : BaseUiState>(
             hasMore: Boolean,
             loadMoreError: Boolean
         ) -> UiState
-    ) : this(initialUiState, null, commonStateUpdater)
+    ) : this(initialUiState, null, stringResourceProvider, commonStateUpdater)
 
     protected val _uiState: MutableStateFlow<UiState> = MutableStateFlow(initialUiState)
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
@@ -101,7 +105,7 @@ abstract class BaseViewModel<UiState : BaseUiState>(
                         isPageLoading = false,
                         isRefreshing = false,
                         isLoadingMore = false,
-                        error = "UserPreferencesDataStore not provided for username-dependent operation", // TODO: Use StringResourceProvider
+                        error = stringResourceProvider.getString(R.string.error_datastore_not_provided),
                         loadMoreError = false
                     )
                 }
@@ -116,7 +120,7 @@ abstract class BaseViewModel<UiState : BaseUiState>(
                         isPageLoading = false,
                         isRefreshing = false,
                         isLoadingMore = false,
-                        error = "No username found", // TODO: Use StringResourceProvider
+                        error = stringResourceProvider.getString(R.string.error_no_username_found),
                         loadMoreError = false
                     )
                 }
@@ -176,7 +180,7 @@ abstract class BaseViewModel<UiState : BaseUiState>(
             } else {
                 updateFailure(
                     currentState,
-                    "No data found", // TODO: Use StringResourceProvider
+                    stringResourceProvider.getString(R.string.error_no_data_found),
                     isLoadMore
                 )
             }
@@ -193,7 +197,7 @@ abstract class BaseViewModel<UiState : BaseUiState>(
         }
     }
 
-    protected fun updateErrorState(exception: Throwable?, isLoadMore: Boolean, defaultMessage: String = "Unknown error") {
+    protected fun updateErrorState(exception: Throwable?, isLoadMore: Boolean, defaultMessage: String = stringResourceProvider.getString(R.string.error_unknown)) {
         _uiState.update {
             updateUiStateWithCommonProperties(
                 it,

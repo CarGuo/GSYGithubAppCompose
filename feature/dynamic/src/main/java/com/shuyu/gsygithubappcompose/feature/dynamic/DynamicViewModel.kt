@@ -2,6 +2,7 @@ package com.shuyu.gsygithubappcompose.feature.dynamic
 
 import androidx.lifecycle.viewModelScope
 import com.shuyu.gsygithubappcompose.core.common.datastore.UserPreferencesDataStore
+import com.shuyu.gsygithubappcompose.core.common.util.StringResourceProvider
 import com.shuyu.gsygithubappcompose.core.network.config.NetworkConfig
 import com.shuyu.gsygithubappcompose.core.network.model.Event
 import com.shuyu.gsygithubappcompose.data.repository.EventRepository
@@ -12,6 +13,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.shuyu.gsygithubappcompose.core.common.R
 
 data class DynamicUiState(
     val events: List<Event> = emptyList(),
@@ -20,17 +22,19 @@ data class DynamicUiState(
     override val isLoadingMore: Boolean = false,
     override val error: String? = null,
     override val currentPage: Int = 1,
-    override val hasMore: Boolean = true,
+    override val hasMore: Boolean = false,
     override val loadMoreError: Boolean = false
 ) : BaseUiState
 
 @HiltViewModel
 class DynamicViewModel @Inject constructor(
     private val eventRepository: EventRepository,
-    preferencesDataStore: UserPreferencesDataStore
+    preferencesDataStore: UserPreferencesDataStore,
+    private val stringResourceProvider: StringResourceProvider
 ) : BaseViewModel<DynamicUiState>(
     initialUiState = DynamicUiState(),
     preferencesDataStore = preferencesDataStore,
+    stringResourceProvider = stringResourceProvider,
     commonStateUpdater = { currentState, isPageLoading, isRefreshing, isLoadingMore, error, currentPage, hasMore, loadMoreError ->
         currentState.copy(
             isPageLoading = isPageLoading,
@@ -76,7 +80,7 @@ class DynamicViewModel @Inject constructor(
                         }
                     )
                 }, onFailure = { exception ->
-                    updateErrorState(exception, isLoadMore, "Failed to load events")
+                    updateErrorState(exception, isLoadMore, stringResourceProvider.getString(R.string.error_failed_to_load_events))
                 })
             }
         }

@@ -10,7 +10,6 @@ import com.shuyu.gsygithubappcompose.data.repository.UserRepository
 import com.shuyu.gsygithubappcompose.data.repository.vm.BaseUiState
 import com.shuyu.gsygithubappcompose.data.repository.vm.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -25,7 +24,7 @@ data class ProfileUiState(
     val orgMembers: List<User>? = null,
     val userEvents: List<Event>? = null,
     override val currentPage: Int = 1,
-    override val hasMore: Boolean = true,
+    override val hasMore: Boolean = false,
     override val loadMoreError: Boolean = false
 ) : BaseUiState
 
@@ -37,6 +36,7 @@ class ProfileViewModel @Inject constructor(
 ) : BaseViewModel<ProfileUiState>(
     initialUiState = ProfileUiState(),
     preferencesDataStore = preferencesDataStore,
+    stringResourceProvider = stringResourceProvider,
     commonStateUpdater = { currentState, isPageLoading, isRefreshing, isLoadingMore, error, currentPage, hasMore, loadMoreError ->
         currentState.copy(
             isPageLoading = isPageLoading,
@@ -47,13 +47,10 @@ class ProfileViewModel @Inject constructor(
             hasMore = hasMore,
             loadMoreError = loadMoreError
         )
-    }
-) {
+    }) {
 
     override fun loadData(
-        initialLoad: Boolean,
-        isRefresh: Boolean,
-        isLoadMore: Boolean
+        initialLoad: Boolean, isRefresh: Boolean, isLoadMore: Boolean
     ) {
         launchDataLoadWithUser(initialLoad, isRefresh, isLoadMore) { userLogin, pageToLoad ->
             var emissionCount = 0
@@ -71,7 +68,11 @@ class ProfileViewModel @Inject constructor(
                             orgResult.fold(onSuccess = { members ->
                                 _uiState.update { it.copy(orgMembers = members) }
                             }, onFailure = { exception ->
-                                updateErrorState(exception, isLoadMore, stringResourceProvider.getString(R.string.error_failed_to_load_org_members))
+                                updateErrorState(
+                                    exception,
+                                    isLoadMore,
+                                    stringResourceProvider.getString(R.string.error_failed_to_load_org_members)
+                                )
                             })
                         }
                     } else {
@@ -98,8 +99,7 @@ class ProfileViewModel @Inject constructor(
                                         currentState.copy(
                                             userEvents = emptyList() // Clear events on failure if no data found
                                         )
-                                    }
-                                )
+                                    })
                             }, onFailure = { exception ->
                                 updateErrorState(
                                     exception,

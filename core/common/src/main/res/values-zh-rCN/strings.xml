@@ -54,4 +54,8 @@
     <string name="error_failed_to_load_events">加载事件失败</string>
     <string name="error_failed_to_load_profile">加载个人资料失败</string>
     <string name="error_failed_to_load_org_members">加载组织成员失败</string>
+    <string name="error_datastore_not_provided">未提供 UserPreferencesDataStore 以进行依赖用户名的操作</string>
+    <string name="error_no_data_found">未找到数据</string>
+    <string name="error_unknown">未知错误</string>
+    <string name="error_failed_to_load_repositories">加载仓库失败</string>
 </resources>

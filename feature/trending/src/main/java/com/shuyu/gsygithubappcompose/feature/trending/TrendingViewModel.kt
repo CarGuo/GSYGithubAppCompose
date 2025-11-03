@@ -2,6 +2,7 @@ package com.shuyu.gsygithubappcompose.feature.trending
 
 
 import com.shuyu.gsygithubappcompose.core.common.datastore.UserPreferencesDataStore
+import com.shuyu.gsygithubappcompose.core.common.util.StringResourceProvider
 import com.shuyu.gsygithubappcompose.core.network.config.NetworkConfig
 import com.shuyu.gsygithubappcompose.core.network.model.Repository
 import com.shuyu.gsygithubappcompose.data.repository.RepositoryRepository
@@ -10,6 +11,7 @@ import com.shuyu.gsygithubappcompose.data.repository.vm.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.update
 import javax.inject.Inject
+import com.shuyu.gsygithubappcompose.core.common.R
 
 data class TrendingUiState(
     val repositories: List<Repository> = emptyList(),
@@ -18,17 +20,19 @@ data class TrendingUiState(
     override val isLoadingMore: Boolean = false,
     override val error: String? = null,
     override val currentPage: Int = 1,
-    override val hasMore: Boolean = true,
+    override val hasMore: Boolean = false,
     override val loadMoreError: Boolean = false
 ) : BaseUiState
 
 @HiltViewModel
 class TrendingViewModel @Inject constructor(
     private val repositoryRepository: RepositoryRepository,
-    preferencesDataStore: UserPreferencesDataStore
+    preferencesDataStore: UserPreferencesDataStore,
+    private val stringResourceProvider: StringResourceProvider
 ) : BaseViewModel<TrendingUiState>(
     initialUiState = TrendingUiState(),
     preferencesDataStore = preferencesDataStore,
+    stringResourceProvider = stringResourceProvider,
     commonStateUpdater = { currentState, isPageLoading, isRefreshing, isLoadingMore, error, currentPage, hasMore, loadMoreError ->
         currentState.copy(
             isPageLoading = isPageLoading,
@@ -76,7 +80,7 @@ class TrendingViewModel @Inject constructor(
                         )
                     },
                     onFailure = { exception ->
-                        updateErrorState(exception, isLoadMore, "Failed to load repositories")
+                        updateErrorState(exception, isLoadMore, stringResourceProvider.getString(R.string.error_failed_to_load_repositories))
                     }
                 )
             }

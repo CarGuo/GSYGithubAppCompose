@@ -54,4 +54,8 @@
     <string name="error_failed_to_load_events">Failed to load events</string>
     <string name="error_failed_to_load_profile">Failed to load profile</string>
     <string name="error_failed_to_load_org_members">Failed to load organization members</string>
+    <string name="error_datastore_not_provided">UserPreferencesDataStore not provided for username-dependent operation</string>
+    <string name="error_no_data_found">No data found</string>
+    <string name="error_unknown">Unknown error</string>
+    <string name="error_failed_to_load_repositories">Failed to load repositories</string>
 </resources>
