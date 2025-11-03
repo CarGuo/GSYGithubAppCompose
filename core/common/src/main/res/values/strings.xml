@@ -44,6 +44,8 @@
     
     <!-- Common -->
     <string name="loading">Loading...</string>
+    <string name="loading_more">Loading more...</string>
+    <string name="no_more_data">No more data</string>
     <string name="error">Error</string>
     <string name="retry">Retry</string>
     <string name="back">Back</string>

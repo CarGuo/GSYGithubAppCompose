@@ -11,14 +11,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -33,8 +30,9 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.shuyu.gsygithubappcompose.core.common.R
 import com.shuyu.gsygithubappcompose.core.network.model.User
 import com.shuyu.gsygithubappcompose.core.ui.components.AvatarImage
-import com.shuyu.gsygithubappcompose.core.ui.components.GSYGeneralLoadState
 import com.shuyu.gsygithubappcompose.core.ui.components.EventItem
+import com.shuyu.gsygithubappcompose.core.ui.components.GSYGeneralLoadState
+import com.shuyu.gsygithubappcompose.core.ui.components.GSYPullRefresh
 import com.shuyu.gsygithubappcompose.core.ui.components.UserItem
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -45,35 +43,35 @@ fun ProfileScreen(
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val pullRefreshState = rememberPullToRefreshState()
 
     GSYGeneralLoadState(
         isLoading = uiState.isLoading && uiState.user == null,
         error = uiState.error,
         retry = { viewModel.loadProfile(initialLoad = true) }
     ) {
-        PullToRefreshBox(
+        GSYPullRefresh(
+            modifier = Modifier.fillMaxSize(),
             isRefreshing = uiState.isRefreshing,
             onRefresh = { viewModel.refreshProfile() },
-            state = pullRefreshState
+            isLoadMore = false,
+            onLoadMore = {},
+            hasMore = false
         ) {
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
-                uiState.user?.let { user ->
-                    item {
-                        ProfileHeader(user = user)
+            uiState.user?.let {
+                item {
+                    ProfileHeader(user = it)
+                }
+            }
+            if (uiState.user?.type == "Organization") {
+                uiState.orgMembers?.let {
+                    items(it) { member ->
+                        UserItem(user = member)
                     }
                 }
-                if (uiState.user?.type == "Organization") {
-                    uiState.orgMembers?.let {
-                        items(it) { member ->
-                            UserItem(user = member)
-                        }
-                    }
-                } else {
-                    uiState.userEvents?.let {
-                        items(it) { event ->
-                            EventItem(event = event)
-                        }
+            } else {
+                uiState.userEvents?.let {
+                    items(it) { event ->
+                        EventItem(event = event)
                     }
                 }
             }

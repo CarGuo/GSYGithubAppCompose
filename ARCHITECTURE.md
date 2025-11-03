@@ -3,10 +3,10 @@
 ## Modules
 
 ### core/common
-- 存放 `DataStore<Preferences>` 和用户 token 等
+- 存放 `DataStore<Preferences>` 和用户 token 等，另外多语言文本和图片资源等公共资源也放在这个模块
 
 ### core/ui
-- 存放所有自定义控件，主题，颜色等相关内容
+- 存放所有自定义控件，主题，颜色等相关内容，特别注意，下拉刷新和加载更多控件需要统一使用 GSYPullRefresh
 
 ### core/network
 - 是网络请求模块 ，网络数据的实体都在这个模块的 model/ 目录下，接口地址是 api/ 下的 GitHubApiService
@@ -20,10 +20,13 @@
 ### feature
 - 模块是页面功能模块，内部每个模块每个模块的页面 xxxScreen 和 xxxViewModel
 
-##  Other：
+## 注意：
 - 工作时注意当前是 windows 环境还是 macOS 环境
 - 不允许随意删除我的注释和无用代码
-- 所有模块代码都是在  src/main/java/packageName/ 下
-- 每次修改后，需要注意检查是否有这个修改的关联使用需要同步处理
+- 所有显示类型的文本内容都要多语言
+- 所有模块内代码都是在  src/main/java/packageName/ 下
 - 依赖添加和版本修改需要走 gradle/ 下的 libs.versions.toml 进行统一管理
+- 创建代码时，要以 libs.versions.toml 里的版本为主，尽量使用正确的 API
+- Icons 使用 import androidx.compose.material.icons.Icons / import androidx.compose.material.icons.filled
+- 每次修改后，需要注意检查是否有这个修改的关联使用需要同步处理
 - 使用控件优先判断 core/ui 有没有合适，没有合适的，考虑添加自定义的控件进去（如果符合通用情况）
