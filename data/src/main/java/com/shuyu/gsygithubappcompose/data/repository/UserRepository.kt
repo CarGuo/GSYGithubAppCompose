@@ -99,9 +99,9 @@ class UserRepository @Inject constructor(
         }
     }
 
-    fun getUserEvents(username: String): Flow<Result<List<Event>>> = flow {
+    fun getUserEvents(username: String, page: Int, perPage: Int): Flow<Result<List<Event>>> = flow {
         try {
-            val events = apiService.getUserEvents(username)
+            val events = apiService.getUserEvents(username, page, perPage)
             emit(Result.success(events))
         } catch (e: Exception) {
             emit(Result.failure(e))

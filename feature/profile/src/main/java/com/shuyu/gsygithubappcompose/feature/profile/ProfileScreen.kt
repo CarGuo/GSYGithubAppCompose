@@ -53,9 +53,11 @@ fun ProfileScreen(
             modifier = Modifier.fillMaxSize(),
             isRefreshing = uiState.isRefreshing,
             onRefresh = { viewModel.refreshProfile() },
-            isLoadMore = false,
-            onLoadMore = {},
-            hasMore = false
+            isLoadMore = uiState.isLoadingMore,
+            onLoadMore = { viewModel.loadMoreUserEvents() },
+            hasMore = uiState.hasMore,
+            itemCount = if (uiState.user?.type == "Organization") uiState.orgMembers?.size ?: 0 else uiState.userEvents?.size ?: 0,
+            loadMoreError = uiState.loadMoreError
         ) {
             uiState.user?.let {
                 item {

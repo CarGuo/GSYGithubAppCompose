@@ -49,4 +49,8 @@
     <string name="error">Error</string>
     <string name="retry">Retry</string>
     <string name="back">Back</string>
+    <string name="load_failed_click_to_retry">Load failed, click to retry</string>
+    <string name="error_no_username_found">No username found</string>
+    <string name="error_failed_to_load_events">Failed to load events</string>
+    <string name="error_failed_to_load_profile">Failed to load profile</string>
 </resources>

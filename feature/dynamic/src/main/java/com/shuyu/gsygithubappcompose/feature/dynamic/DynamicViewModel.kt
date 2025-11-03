@@ -23,7 +23,8 @@ data class DynamicUiState(
     val isLoadingMore: Boolean = false,
     val error: String? = null,
     val currentPage: Int = 1,
-    val hasMore: Boolean = true
+    val hasMore: Boolean = true,
+    val loadMoreError: Boolean = false
 )
 
 @HiltViewModel
@@ -46,13 +47,13 @@ class DynamicViewModel @Inject constructor(
             if (isRefresh) {
                 _uiState.update {
                     it.copy(
-                        isRefreshing = true, error = null, currentPage = 1, hasMore = true
+                        isRefreshing = true, error = null, currentPage = 1, hasMore = true, loadMoreError = false
                     )
                 }
             } else if (isLoadMore) {
-                _uiState.update { it.copy(isLoadingMore = true, error = null) }
+                _uiState.update { it.copy(isLoadingMore = true, error = null, loadMoreError = false) }
             } else if (initialLoad) {
-                _uiState.update { it.copy(isLoading = true, error = null) }
+                _uiState.update { it.copy(isLoading = true, error = null, loadMoreError = false) }
             }
 
             val username = preferencesDataStore.username.first()
@@ -62,7 +63,8 @@ class DynamicViewModel @Inject constructor(
                         isLoading = false,
                         isRefreshing = false,
                         isLoadingMore = false,
-                        error = "No username found"
+                        error = "No username found",
+                        loadMoreError = false
                     )
                 }
                 return@launch
@@ -86,7 +88,8 @@ class DynamicViewModel @Inject constructor(
                             isLoadingMore = if (emissionCount >= 2) false else it.isLoadingMore,
                             error = null,
                             currentPage = if (emissionCount >= 2) pageToLoad + 1 else it.currentPage,
-                            hasMore = if (emissionCount >= 2) newEvents.size == PAGE_SIZE else it.hasMore
+                            hasMore = if (emissionCount >= 2) newEvents.size == PAGE_SIZE else it.hasMore,
+                            loadMoreError = false
                         )
                     }
                 }, onFailure = { exception ->
@@ -95,7 +98,8 @@ class DynamicViewModel @Inject constructor(
                             isLoading = false,
                             isRefreshing = false,
                             isLoadingMore = false,
-                            error = exception.message ?: "Failed to load events"
+                            error = exception.message ?: "Failed to load events",
+                            loadMoreError = isLoadMore // Set loadMoreError to true only if it was a loadMore operation
                         )
                     }
                 })

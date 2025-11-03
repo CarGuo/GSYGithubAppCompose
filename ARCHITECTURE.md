@@ -9,7 +9,7 @@
 - 存放所有自定义控件，主题，颜色等相关内容，特别注意，下拉刷新和加载更多控件需要统一使用 GSYPullRefresh
 
 ### core/network
-- 是网络请求模块 ，网络数据的实体都在这个模块的 model/ 目录下，接口地址是 api/ 下的 GitHubApiService
+- 是网络请求模块 ，网络数据的实体都在这个模块的 model/ 目录下，接口地址是 api/ 下的 GitHubApiService，同时也有 config 配置，比如  PAGE_SIZE
 
 ### core/database
 - 是所有数据库模块，包括所有数据库能力，有 xxDao、xxEntiny，而每次修改数据库如果设计增删字段，需要修改增加 AppDatabase 的数据库版本
@@ -19,6 +19,11 @@
 
 ### feature
 - 模块是页面功能模块，内部每个模块每个模块的页面 xxxScreen 和 xxxViewModel
+
+## 一个常规页面模块结构
+- 初始状态使用 GSYGeneralLoadState 加载首次数据
+- 加载首次数据时，如果有数据库数据，先加载显示其数据库数据，之后再请求网络数据，网络数据回来后，更新数据库和 UI
+- 之后数据的刷新和加载更多，可以通过 GSYPullRefresh 控件实现，由用户自己操作触发
 
 ## 注意：
 - 工作时注意当前是 windows 环境还是 macOS 环境

@@ -49,4 +49,8 @@
     <string name="error">错误</string>
     <string name="retry">重试</string>
     <string name="back">返回</string>
+    <string name="load_failed_click_to_retry">加载失败，点击重试</string>
+    <string name="error_no_username_found">未找到用户名</string>
+    <string name="error_failed_to_load_events">加载事件失败</string>
+    <string name="error_failed_to_load_profile">加载个人资料失败</string>
 </resources>

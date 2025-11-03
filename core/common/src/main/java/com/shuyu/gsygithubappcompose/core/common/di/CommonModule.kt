@@ -1,23 +1,18 @@
 package com.shuyu.gsygithubappcompose.core.common.di
 
-import android.content.Context
-import com.shuyu.gsygithubappcompose.core.common.datastore.UserPreferencesDataStore
+import com.shuyu.gsygithubappcompose.core.common.util.StringResourceProvider
+import com.shuyu.gsygithubappcompose.core.common.util.StringResourceProviderImpl
+import dagger.Binds
 import dagger.Module
-import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object CommonModule {
-    
-    @Provides
+abstract class CommonModule {
+
+    @Binds
     @Singleton
-    fun provideUserPreferencesDataStore(
-        @ApplicationContext context: Context
-    ): UserPreferencesDataStore {
-        return UserPreferencesDataStore(context)
-    }
+    abstract fun bindStringResourceProvider(stringResourceProviderImpl: StringResourceProviderImpl): StringResourceProvider
 }

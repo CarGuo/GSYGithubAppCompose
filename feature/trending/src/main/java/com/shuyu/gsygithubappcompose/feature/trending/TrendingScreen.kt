@@ -26,9 +26,11 @@ fun TrendingScreen(
         GSYPullRefresh(
             isRefreshing = uiState.isRefreshing,
             onRefresh = { viewModel.refreshTrendingRepositories() },
-            isLoadMore = false,
-            onLoadMore = { },
-            hasMore = false,
+            isLoadMore = uiState.isLoadingMore,
+            onLoadMore = { viewModel.loadMoreTrendingRepositories() },
+            hasMore = uiState.hasMore,
+            itemCount = uiState.repositories.size,
+            loadMoreError = uiState.loadMoreError,
             contentPadding = PaddingValues(5.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {

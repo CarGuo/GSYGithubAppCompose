@@ -1,6 +1,7 @@
 package com.shuyu.gsygithubappcompose.core.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -35,6 +36,8 @@ import com.shuyu.gsygithubappcompose.core.common.R
  * @param isRefreshing       是否正在刷新
  * @param isLoadMore         是否正在加载更多
  * @param hasMore            是否还有更多数据
+ * @param itemCount          列表数据量
+ * @param loadMoreError      加载更多是否失败
  * @param content            列表内容
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -49,6 +52,8 @@ fun GSYPullRefresh(
     isRefreshing: Boolean,
     isLoadMore: Boolean,
     hasMore: Boolean,
+    itemCount: Int,
+    loadMoreError: Boolean = false,
     content: LazyListScope.() -> Unit
 ) {
     PullToRefreshBox(
@@ -63,37 +68,51 @@ fun GSYPullRefresh(
             verticalArrangement = verticalArrangement
         ) {
             content()
-            if (isLoadMore) {
-                item {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator()
+            if (itemCount > 0) { // Only show load more indicators if there's data
+                if (isLoadMore) {
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
                     }
-                }
-            } else if (hasMore) {
-                item {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(text = stringResource(id = R.string.loading_more))
+                } else if (loadMoreError) {
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp)
+                                .clickable { onLoadMore() }, // Click to retry
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = stringResource(id = R.string.load_failed_click_to_retry)) // Assuming you'll add this string resource
+                        }
                     }
-                }
-            } else {
-                item {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(text = stringResource(id = R.string.no_more_data))
+                } else if (hasMore) {
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = stringResource(id = R.string.loading_more))
+                        }
+                    }
+                } else {
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = stringResource(id = R.string.no_more_data))
+                        }
                     }
                 }
             }
@@ -101,6 +120,7 @@ fun GSYPullRefresh(
 
         ///判断滚动位置: 代码中有一个 shouldLoadMore 的状态，它会持续观察列表的滚动状态：
         ///当用户滚动列表，即将看到倒数第二个 item 时，shouldLoadMore 的值就会变为 true。
+
         val shouldLoadMore by remember {
             derivedStateOf {
                 val lastVisibleItem = listState.layoutInfo.visibleItemsInfo.lastOrNull()
@@ -114,13 +134,15 @@ fun GSYPullRefresh(
 
         /// LaunchedEffect 会观察 shouldLoadMore 的变化：
         ///当 shouldLoadMore 变为 true 时，这个 LaunchedEffect 会执行。
+
         // 它会进行一系列判断：◦shouldLoadMore: 是否滚动到了底部？◦
         // !isLoadMore: 当前是否没有正在加载更多？（防止重复触发）◦
         // !isRefreshing: 当前是否没有在下拉刷新？（防止冲突）◦
         // hasMore: 是否还有更多数据可供加载？
         // 如果所有条件都满足，就会调用您传入的 onLoadMore() 回调函数，从而触发加载更多的逻辑。
+
         LaunchedEffect(shouldLoadMore) {
-            if (shouldLoadMore && !isLoadMore && !isRefreshing && hasMore) {
+            if (itemCount > 0 && shouldLoadMore && !isLoadMore && !isRefreshing && hasMore && !loadMoreError) {
                 onLoadMore()
             }
         }

@@ -28,7 +28,9 @@ fun DynamicScreen(
             onLoadMore = { viewModel.loadMoreEvents() },
             isRefreshing = uiState.isRefreshing,
             isLoadMore = uiState.isLoadingMore,
-            hasMore = uiState.hasMore
+            hasMore = uiState.hasMore,
+            itemCount = uiState.events.size,
+            loadMoreError = uiState.loadMoreError
         ) {
             items(uiState.events) { event ->
                 EventItem(event = event)
