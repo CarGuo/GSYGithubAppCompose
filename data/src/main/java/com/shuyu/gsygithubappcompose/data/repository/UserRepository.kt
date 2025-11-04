@@ -1,6 +1,7 @@
 package com.shuyu.gsygithubappcompose.data.repository
 
 import com.shuyu.gsygithubappcompose.core.common.datastore.UserPreferencesDataStore
+import com.shuyu.gsygithubappcompose.core.database.AppDatabase
 import com.shuyu.gsygithubappcompose.core.database.dao.EventDao
 import com.shuyu.gsygithubappcompose.core.database.dao.UserDao
 import com.shuyu.gsygithubappcompose.core.database.entity.UserEntity
@@ -22,7 +23,8 @@ class UserRepository @Inject constructor(
     private val apiService: GitHubApiService,
     private val userDao: UserDao,
     private val eventDao: EventDao,
-    private val preferencesDataStore: UserPreferencesDataStore
+    private val preferencesDataStore: UserPreferencesDataStore,
+    private val appDatabase: AppDatabase
 ) {
 
     suspend fun login(token: String): Result<User> {
@@ -66,6 +68,7 @@ class UserRepository @Inject constructor(
 
     suspend fun logout() {
         preferencesDataStore.clearAll()
+        appDatabase.clearAllData()
     }
 
     fun isLoggedIn(): Flow<Boolean> {

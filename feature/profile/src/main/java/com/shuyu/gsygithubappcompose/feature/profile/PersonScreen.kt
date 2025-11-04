@@ -2,10 +2,6 @@ package com.shuyu.gsygithubappcompose.feature.profile
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,8 +16,6 @@ import com.shuyu.gsygithubappcompose.core.ui.components.GSYTopAppBar
 fun PersonScreen(
     modifier: Modifier = Modifier,
     username: String,
-    onBack: () -> Unit,
-    onImageClick: (String) -> Unit,
     viewModel: PersonViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -32,22 +26,16 @@ fun PersonScreen(
 
     Scaffold(
         modifier = modifier, topBar = {
-            GSYTopAppBar(title = {
-                Text(text = username)
-            }, navigationIcon = {
-                IconButton(onClick = onBack) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back"
-                    )
-                }
-            })
+            GSYTopAppBar(
+                title = { Text(text = username) },
+                showBackButton = true
+            )
         }) { paddingValues ->
         Box(modifier = Modifier.padding(paddingValues)) {
             ProfileContent(
                 uiState = uiState,
                 onRefresh = { viewModel.refresh() },
-                onLoadMore = { viewModel.loadMore() },
-                onImageClick = onImageClick
+                onLoadMore = { viewModel.loadMore() }
             )
         }
     }

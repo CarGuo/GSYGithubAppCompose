@@ -13,7 +13,6 @@ import com.shuyu.gsygithubappcompose.core.ui.components.GSYPullRefresh
 
 @Composable
 fun DynamicScreen(
-    onImageClick: (String) -> Unit,
     viewModel: DynamicViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -39,7 +38,7 @@ fun DynamicScreen(
             loadMoreError = uiState.loadMoreError
         ) {
             items(uiState.events) { event ->
-                EventItem(event = event, onImageClick = onImageClick)
+                EventItem(event = event)
             }
         }
     }

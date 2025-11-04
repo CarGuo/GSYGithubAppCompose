@@ -20,11 +20,11 @@ interface RepositoryDao {
     suspend fun insertRepositories(repositories: List<RepositoryEntity>)
 
     @Query("DELETE FROM repositories")
-    suspend fun deleteAllRepositories()
+    suspend fun clearAll()
 
     @Transaction
     suspend fun clearAndInsert(repositories: List<RepositoryEntity>) {
-        deleteAllRepositories()
+        clearAll()
         insertRepositories(repositories)
     }
 }

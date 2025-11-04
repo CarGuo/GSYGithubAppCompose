@@ -28,5 +28,5 @@ interface UserDao {
     suspend fun clearOrgMembers(orgLogin: String)
 
     @Query("DELETE FROM users")
-    suspend fun deleteAllUsers()
+    suspend fun clearAll()
 }

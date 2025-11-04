@@ -3,6 +3,7 @@ package com.shuyu.gsygithubappcompose.feature.profile
 import androidx.lifecycle.viewModelScope
 import com.shuyu.gsygithubappcompose.core.common.datastore.UserPreferencesDataStore
 import com.shuyu.gsygithubappcompose.core.common.util.StringResourceProvider
+import com.shuyu.gsygithubappcompose.core.ui.GSYNavigator
 import com.shuyu.gsygithubappcompose.data.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.first
@@ -25,9 +26,10 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    fun logout() {
+    fun logout(navigator: GSYNavigator) {
         viewModelScope.launch {
             userRepository.logout()
+            navigator.replace("login")
         }
     }
 }

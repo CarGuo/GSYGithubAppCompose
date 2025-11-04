@@ -13,15 +13,16 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
+import com.shuyu.gsygithubappcompose.core.ui.LocalNavigator
 
 @Composable
 fun AvatarImage(
     url: String,
-    username: String = "",
+    username: String,
     modifier: Modifier = Modifier,
     size: Dp = 40.dp,
-    onClick: ((username: String) -> Unit)? = null
 ) {
+    val navigator = LocalNavigator.current
     SubcomposeAsyncImage(
         model = url,
         contentDescription = "Avatar",
@@ -29,7 +30,9 @@ fun AvatarImage(
             .size(size)
             .clip(CircleShape)
             .clickable {
-                onClick?.invoke(username)
+                if (username.isNotEmpty()) {
+                    navigator.navigate("person/$username")
+                }
             },
         contentScale = ContentScale.Crop,
         loading = {

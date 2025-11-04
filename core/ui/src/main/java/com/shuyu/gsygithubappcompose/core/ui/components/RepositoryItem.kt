@@ -23,8 +23,7 @@ import com.shuyu.gsygithubappcompose.core.network.model.Repository
 
 @Composable
 fun RepositoryItem(
-    repository: Repository,
-    onImageClick: ((username: String) -> Unit)? = null
+    repository: Repository
 ) {
     Card(
         modifier = Modifier
@@ -47,8 +46,7 @@ fun RepositoryItem(
                 AvatarImage(
                     url = repository.owner.avatarUrl,
                     size = 40.dp,
-                    username = repository.owner.login,
-                    onClick = onImageClick
+                    username = repository.owner.login
                 )
 
                 Column(modifier = Modifier.weight(1f)) {

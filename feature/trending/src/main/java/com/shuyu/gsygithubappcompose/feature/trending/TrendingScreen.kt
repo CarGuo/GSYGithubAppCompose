@@ -15,7 +15,6 @@ import com.shuyu.gsygithubappcompose.core.ui.components.RepositoryItem
 
 @Composable
 fun TrendingScreen(
-    onImageClick: (String) -> Unit,
     viewModel: TrendingViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -41,7 +40,7 @@ fun TrendingScreen(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(uiState.repositories) { repo ->
-                RepositoryItem(repository = repo, onImageClick = onImageClick)
+                RepositoryItem(repository = repo)
             }
         }
     }

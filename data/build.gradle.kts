@@ -27,7 +27,8 @@ dependencies {
     api(projects.core.network)
     implementation(projects.core.database)
     implementation(projects.core.common)
-    
+
+    implementation(libs.room.runtime)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.compose)

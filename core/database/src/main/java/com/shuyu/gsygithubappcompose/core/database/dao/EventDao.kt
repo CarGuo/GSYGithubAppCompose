@@ -36,4 +36,7 @@ interface EventDao {
         clearUserEvents(userLogin)
         insert(events)
     }
+
+    @Query("DELETE FROM events")
+    suspend fun clearAll()
 }

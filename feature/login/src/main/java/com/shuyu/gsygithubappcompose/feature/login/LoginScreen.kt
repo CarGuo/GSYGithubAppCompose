@@ -17,16 +17,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.shuyu.gsygithubappcompose.core.common.R
+import com.shuyu.gsygithubappcompose.core.ui.LocalNavigator
 
 @Composable
-fun LoginScreen(
-    onLoginSuccess: () -> Unit, viewModel: LoginViewModel = hiltViewModel()
-) {
+fun LoginScreen(viewModel: LoginViewModel = hiltViewModel()) {
     val uiState by viewModel.uiState.collectAsState()
+    val navigator = LocalNavigator.current
 
     LaunchedEffect(uiState.isLoggedIn) {
         if (uiState.isLoggedIn) {
-            onLoginSuccess()
+            navigator.replace("home")
         }
     }
 

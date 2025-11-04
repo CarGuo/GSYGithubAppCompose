@@ -40,7 +40,6 @@ fun ProfileContent(
     uiState: ProfileUiState,
     onRefresh: () -> Unit,
     onLoadMore: () -> Unit,
-    onImageClick: (String) -> Unit,
 ) {
     GSYGeneralLoadState(
         isLoading = uiState.isPageLoading && uiState.user == null,
@@ -60,19 +59,19 @@ fun ProfileContent(
         ) {
             uiState.user?.let {
                 item {
-                    ProfileHeader(user = it, onImageClick = onImageClick)
+                    ProfileHeader(user = it)
                 }
             }
             if (uiState.user?.type == "Organization") {
                 uiState.orgMembers?.let {
                     items(it) { member ->
-                        UserItem(user = member, onImageClick = onImageClick)
+                        UserItem(user = member)
                     }
                 }
             } else {
                 uiState.userEvents?.let {
                     items(it) { event ->
-                        EventItem(event = event, onImageClick = onImageClick)
+                        EventItem(event = event)
                     }
                 }
             }
@@ -81,7 +80,7 @@ fun ProfileContent(
 }
 
 @Composable
-fun ProfileHeader(user: User, onImageClick: (String) -> Unit) {
+fun ProfileHeader(user: User) {
     Column {
         Column(
             modifier = Modifier
@@ -98,8 +97,7 @@ fun ProfileHeader(user: User, onImageClick: (String) -> Unit) {
                     url = user.avatarUrl,
                     size = 80.dp,
                     modifier = Modifier.clip(CircleShape),
-                    username = user.login,
-                    onClick = onImageClick
+                    username = user.login
                 )
 
                 // User Info

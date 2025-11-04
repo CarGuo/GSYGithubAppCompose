@@ -29,8 +29,7 @@ import java.util.TimeZone
 
 @Composable
 fun EventItem(
-    event: Event,
-    onImageClick: ((username: String) -> Unit)? = null
+    event: Event
 ) {
     Card(
         modifier = Modifier
@@ -52,8 +51,7 @@ fun EventItem(
                 url = event.actor.avatarUrl,
                 username = event.actor.login,
                 size = 40.dp,
-                modifier = Modifier.clip(CircleShape),
-                onClick = onImageClick
+                modifier = Modifier.clip(CircleShape)
             )
 
             // Content

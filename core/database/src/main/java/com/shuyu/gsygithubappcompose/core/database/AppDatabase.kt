@@ -22,4 +22,8 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
     abstract fun repositoryDao(): RepositoryDao
     abstract fun eventDao(): EventDao
+
+    fun clearAllData() {
+        clearAllTables()
+    }
 }

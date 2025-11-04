@@ -16,20 +16,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.shuyu.gsygithubappcompose.core.common.R
+import com.shuyu.gsygithubappcompose.core.ui.LocalNavigator
 import kotlinx.coroutines.delay
 
 @Composable
 fun WelcomeScreen(
-    onNavigateToLogin: () -> Unit,
-    onNavigateToHome: () -> Unit,
     isLoggedIn: Boolean
 ) {
+    val navigator = LocalNavigator.current
     LaunchedEffect(isLoggedIn) {
         delay(2000)
         if (isLoggedIn) {
-            onNavigateToHome()
+            navigator.replace("home")
         } else {
-            onNavigateToLogin()
+            navigator.replace("login")
         }
     }
 

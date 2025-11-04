@@ -16,8 +16,7 @@ import com.shuyu.gsygithubappcompose.core.network.model.User
 
 @Composable
 fun UserItem(
-    user: User,
-    onImageClick: ((username: String) -> Unit)? = null
+    user: User
 ) {
     Card(
         modifier = Modifier
@@ -34,8 +33,7 @@ fun UserItem(
             AvatarImage(
                 url = user.avatarUrl,
                 size = 40.dp,
-                username = user.login,
-                onClick = onImageClick
+                username = user.login
             )
             Column {
                 Text(

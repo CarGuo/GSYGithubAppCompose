@@ -24,6 +24,7 @@
 - 初始状态使用 GSYGeneralLoadState 加载首次数据
 - 使用对应的 xxxRepository 获取数据，Repository 内部会先从数据库获取数据，并且再请求网络数据，更新数据库和 UI
 - 之后数据的刷新和加载更多，可以通过 GSYPullRefresh 控件实现，由用户自己操作触发
+- 标题栏有 GSYTopAppBar 实现
 - 基础页面都会有 Screen 和 ViewModel 实现，ViewModel 会继承 BaseViewModel 
 - hilt 现在需要导入的是 androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 
@@ -35,6 +36,9 @@
   *  子类（ProfileViewModel）的 init 代码块和属性初始化器被执行。
 * 所以需要避免在子类的构造函数参数中传递给父类的任何方法调用，这些方法调用依赖于子类的属性，因为这些属性在父类构造期间尚未初始化。
 
+## 导航打开新页面
+
+- 使用 core/ui 下的 GSYNavigator 和 GSYNavHost ，例如  val navigator = LocalNavigator.current
 
 ## 注意：
 - 工作时注意当前是 windows 环境还是 macOS 环境
