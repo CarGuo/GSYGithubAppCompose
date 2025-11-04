@@ -13,12 +13,12 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/Theme.GSYGithubAppCompose">
+        android:theme="@style/Theme.GSYGithubAppCompose.Splash">
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name"
-            android:theme="@style/Theme.GSYGithubAppCompose">
+            android:theme="@style/Theme.GSYGithubAppCompose.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
