@@ -19,6 +19,10 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import com.shuyu.gsygithubappcompose.core.common.R
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYTopAppBar
+import com.shuyu.gsygithubappcompose.feature.detail.file.RepoDetailFileScreen
+import com.shuyu.gsygithubappcompose.feature.detail.info.RepoDetailInfoScreen
+import com.shuyu.gsygithubappcompose.feature.detail.issue.RepoDetailIssueScreen
+import com.shuyu.gsygithubappcompose.feature.detail.readme.RepoDetailReadmeScreen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject

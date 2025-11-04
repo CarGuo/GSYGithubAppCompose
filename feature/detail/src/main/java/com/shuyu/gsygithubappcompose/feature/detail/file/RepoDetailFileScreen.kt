@@ -1,4 +1,4 @@
-package com.shuyu.gsygithubappcompose.feature.detail
+package com.shuyu.gsygithubappcompose.feature.detail.file
 
 import androidx.compose.runtime.Composable
 
