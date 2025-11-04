@@ -59,24 +59,40 @@ abstract class BaseProfileViewModel(
                         }
 
                         if (fetchedUser.type == "Organization") {
-                            userRepository.getOrgMembers(fetchedUser.login).collect { orgMembersRepoResult ->
-                                orgMembersRepoResult.result.fold(onSuccess = { members ->
-                                    _uiState.update {
-                                        val stateWithMembers = it.copy(orgMembers = members)
-                                        if (orgMembersRepoResult.source == DataSource.NETWORK) {
-                                            stateWithMembers.copy(isPageLoading = false, isRefreshing = false, error = null)
-                                        } else {
-                                            stateWithMembers
-                                        }
-                                    }
+
+
+                            userRepository.getOrgMembers(
+                                fetchedUser.login, pageToLoad, NetworkConfig.PER_PAGE
+                            ).collect { orgMembersRepoResult ->
+                                orgMembersRepoResult.result.fold(onSuccess = { newOrgMembers ->
+                                    handleResult(
+                                        newItems = newOrgMembers,
+                                        pageToLoad = pageToLoad,
+                                        isRefresh = isRefresh,
+                                        initialLoad = initialLoad,
+                                        isLoadMore = isLoadMore,
+                                        source = orgMembersRepoResult.source,
+                                        isDbEmpty = orgMembersRepoResult.isDbEmpty,
+                                        updateSuccess = { currentState, items, _, _, _, _ ->
+                                            val currentEvents = currentState.orgMembers.orEmpty()
+                                            val updatedEvents = if (isLoadMore) {
+                                                currentEvents + items
+                                            } else {
+                                                items
+                                            }
+                                            currentState.copy(orgMembers = updatedEvents)
+                                        },
+                                        updateFailure = { currentState, _, _ ->
+                                            currentState.copy(
+                                                orgMembers = if (isLoadMore) currentState.orgMembers else emptyList()
+                                            )
+                                        })
                                 }, onFailure = { exception ->
-                                    if (orgMembersRepoResult.source == DataSource.NETWORK) {
-                                        updateErrorState(
-                                            exception,
-                                            isLoadMore,
-                                            stringResourceProvider.getString(R.string.error_failed_to_load_org_members)
-                                        )
-                                    }
+                                    updateErrorState(
+                                        exception,
+                                        isLoadMore,
+                                        stringResourceProvider.getString(R.string.error_failed_to_load_org_members)
+                                    )
                                 })
                             }
                         } else {

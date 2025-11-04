@@ -9,10 +9,10 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface UserDao {
-    @Query("SELECT * FROM users WHERE login = :login")
+    @Query("SELECT * FROM users WHERE login = :login AND orgLogin = ''")
     fun getUserByLogin(login: String): Flow<UserEntity?>
 
-    @Query("SELECT * FROM users WHERE id = :id")
+    @Query("SELECT * FROM users WHERE id = :id AND orgLogin = ''")
     suspend fun getUserById(id: Long): UserEntity?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -26,6 +26,9 @@ interface UserDao {
 
     @Query("DELETE FROM users WHERE orgLogin = :orgLogin")
     suspend fun clearOrgMembers(orgLogin: String)
+
+    @Query("DELETE FROM users WHERE orgLogin = ''")
+    suspend fun clearPersonalUsers()
 
     @Query("DELETE FROM users")
     suspend fun clearAll()

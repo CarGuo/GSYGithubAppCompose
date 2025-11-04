@@ -3,9 +3,8 @@ package com.shuyu.gsygithubappcompose.core.database.entity
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "users")
+@Entity(tableName = "users", primaryKeys = ["id", "orgLogin"])
 data class UserEntity(
-    @PrimaryKey
     val id: Long,
     val login: String,
     val nodeId: String?,
@@ -43,5 +42,5 @@ data class UserEntity(
     val diskUsage: Int?,
     val collaborators: Int?,
     val twoFactorAuthentication: Boolean?,
-    val orgLogin: String? = null // Added for organization members
+    val orgLogin: String = "" // Changed to non-nullable String with default empty string
 )

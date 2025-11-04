@@ -101,28 +101,47 @@ class UserRepository @Inject constructor(
         return userDao.getUserByLogin(login)
     }
 
-    fun getOrgMembers(org: String): Flow<RepositoryResult<List<User>>> = flow {
-        // 1. Emit data from database if available
-        val cachedMembers = userDao.getOrgMembers(org).first()
-        val isDbEmpty = cachedMembers.isEmpty()
-        if (cachedMembers.isNotEmpty()) {
-            emit(RepositoryResult(Result.success(cachedMembers.map { it.toUser() }), DataSource.CACHE, isDbEmpty))
+    fun getOrgMembers(org: String, page: Int, perPage: Int): Flow<RepositoryResult<List<User>>> =
+        flow {
+
+            var isDbEmpty = false
+            if (page == 1) {
+                // 1. Emit data from database if available
+                val cachedMembers = userDao.getOrgMembers(org).first()
+                isDbEmpty = cachedMembers.isEmpty()
+                if (cachedMembers.isNotEmpty()) {
+                    emit(
+                        RepositoryResult(
+                            Result.success(cachedMembers.map { it.toUser() }),
+                            DataSource.CACHE,
+                            isDbEmpty
+                        )
+                    )
+                }
+            }
+
+            // 2. Fetch from network
+            try {
+                val networkMembers = apiService.getOrgMembers(org, page, perPage)
+                if (page == 1) {
+                    // 3. Update the database
+                    userDao.clearOrgMembers(org)
+                    userDao.insertUsers(networkMembers.map { it.toEntity(org) })
+                }
+                // 4. Emit network data
+                emit(
+                    RepositoryResult(
+                        Result.success(networkMembers), DataSource.NETWORK, isDbEmpty
+                    )
+                )
+            } catch (e: Exception) {
+                emit(RepositoryResult(Result.failure(e), DataSource.NETWORK, isDbEmpty))
+            }
         }
 
-        // 2. Fetch from network
-        try {
-            val networkMembers = apiService.getOrgMembers(org)
-            // 3. Update the database
-            userDao.clearOrgMembers(org)
-            userDao.insertUsers(networkMembers.map { it.toEntity(org) })
-            // 4. Emit network data
-            emit(RepositoryResult(Result.success(networkMembers), DataSource.NETWORK, isDbEmpty))
-        } catch (e: Exception) {
-            emit(RepositoryResult(Result.failure(e), DataSource.NETWORK, isDbEmpty))
-        }
-    }
-
-    fun getUserEvents(username: String, page: Int, perPage: Int): Flow<RepositoryResult<List<Event>>> = flow {
+    fun getUserEvents(
+        username: String, page: Int, perPage: Int
+    ): Flow<RepositoryResult<List<Event>>> = flow {
         var isDbEmpty = false
         // For paginated data, we only check the DB on the first page.
         if (page == 1) {
@@ -138,7 +157,8 @@ class UserRepository @Inject constructor(
             val networkEvents = apiService.getUserEvents(username, page, perPage)
             // If it\'s the first page, update the database
             if (page == 1) {
-                eventDao.clearAndInsertUserEvents(username, networkEvents.map { it.toEntity(false, username) })
+                eventDao.clearAndInsertUserEvents(
+                    username, networkEvents.map { it.toEntity(false, username) })
             }
             // Emit network data
             emit(RepositoryResult(Result.success(networkEvents), DataSource.NETWORK, isDbEmpty))
