@@ -10,6 +10,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.compose.composable
 import com.shuyu.gsygithubappcompose.core.ui.GSYNavHost
 import com.shuyu.gsygithubappcompose.core.ui.theme.GSYGithubAppComposeTheme
+import com.shuyu.gsygithubappcompose.feature.detail.RepoDetailScreen
 import com.shuyu.gsygithubappcompose.feature.dynamic.DynamicScreen
 import com.shuyu.gsygithubappcompose.feature.home.HomeScreen
 import com.shuyu.gsygithubappcompose.feature.login.LoginScreen
@@ -58,6 +59,15 @@ class MainActivity : ComponentActivity() {
                         val username = backStackEntry.arguments?.getString("username") ?: ""
                         PersonScreen(
                             username = username
+                        )
+                    }
+
+                    composable("repo_detail/{userName}/{repoName}") { backStackEntry ->
+                        val userName = backStackEntry.arguments?.getString("userName") ?: ""
+                        val repoName = backStackEntry.arguments?.getString("repoName") ?: ""
+                        RepoDetailScreen(
+                            userName = userName,
+                            repoName = repoName
                         )
                     }
                 }

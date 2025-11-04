@@ -49,6 +49,12 @@
     <string name="trending_language">语言：%s</string>
     <string name="trending_stars">%d 星标</string>
     <string name="trending_forks">%d 分支</string>
+
+    <!-- 仓库详情页 -->
+    <string name="repo_detail_tab_info">详情</string>
+    <string name="repo_detail_tab_readme">Readme</string>
+    <string name="repo_detail_tab_issue">Issue</string>
+    <string name="repo_detail_tab_file">文件</string>
     
     <!-- 通用 -->
     <string name="loading">加载中...</string>

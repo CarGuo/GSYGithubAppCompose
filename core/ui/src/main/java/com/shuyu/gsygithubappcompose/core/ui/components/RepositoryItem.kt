@@ -3,6 +3,7 @@ package com.shuyu.gsygithubappcompose.core.ui.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.shuyu.gsygithubappcompose.core.network.model.Repository
 import com.shuyu.gsygithubappcompose.core.network.model.TrendingRepoModel
+import com.shuyu.gsygithubappcompose.core.ui.LocalNavigator
 
 sealed interface RepoItemDisplayData {
     val fullName: String
@@ -30,6 +32,7 @@ sealed interface RepoItemDisplayData {
     val forkCount: String?
     val avatarUrl: String?
     val ownerName: String?
+    val name: String
 }
 
 data class RepositoryDisplayData(
@@ -39,7 +42,8 @@ data class RepositoryDisplayData(
     override val starCount: String?,
     override val forkCount: String?,
     override val avatarUrl: String?,
-    override val ownerName: String?
+    override val ownerName: String?,
+    override val name: String
 ) : RepoItemDisplayData
 
 data class TrendingDisplayData(
@@ -49,20 +53,24 @@ data class TrendingDisplayData(
     override val starCount: String?,
     override val forkCount: String?,
     override val avatarUrl: String?,
-    override val ownerName: String?
+    override val ownerName: String?,
+    override val name: String
 ) : RepoItemDisplayData
-
 
 
 @Composable
 fun RepositoryItem(
     repoItem: RepoItemDisplayData
 ) {
+    val navigator = LocalNavigator.current
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 5.dp, vertical = 8.dp)
-            .border(BorderStroke(1.dp, MaterialTheme.colorScheme.outline), RoundedCornerShape(8.dp)),
+            .border(BorderStroke(1.dp, MaterialTheme.colorScheme.outline), RoundedCornerShape(8.dp))
+            .clickable {
+                navigator.navigate("repo_detail/${repoItem.ownerName}/${repoItem.name}")
+            },
         shape = RoundedCornerShape(8.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -102,9 +110,7 @@ fun RepositoryItem(
             repoItem.description?.let { desc ->
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = desc,
-                    style = MaterialTheme.typography.bodyMedium,
-                    maxLines = 2
+                    text = desc, style = MaterialTheme.typography.bodyMedium, maxLines = 2
                 )
             }
 
@@ -115,8 +121,7 @@ fun RepositoryItem(
             ) {
                 Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(
-                        text = "⭐",
-                        style = MaterialTheme.typography.bodySmall
+                        text = "⭐", style = MaterialTheme.typography.bodySmall
                     )
                     Text(
                         text = repoItem.starCount.toString(),
@@ -126,8 +131,7 @@ fun RepositoryItem(
 
                 Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(
-                        text = "🔱",
-                        style = MaterialTheme.typography.bodySmall
+                        text = "🔱", style = MaterialTheme.typography.bodySmall
                     )
                     Text(
                         text = repoItem.forkCount.toString(),
@@ -148,7 +152,8 @@ fun TrendingRepoModel.toTrendingDisplayData(): TrendingDisplayData {
         starCount = starCount,
         forkCount = forkCount,
         avatarUrl = contributors?.firstOrNull() ?: "",
-        ownerName = name
+        ownerName = name,
+        name = reposName ?: ""
     )
 }
 
@@ -160,6 +165,7 @@ fun Repository.toRepositoryDisplayData(): RepositoryDisplayData {
         starCount = stargazersCount.toString(),
         forkCount = forksCount.toString(),
         avatarUrl = owner.avatarUrl,
-        ownerName = owner.login
+        ownerName = owner.login,
+        name = name
     )
 }

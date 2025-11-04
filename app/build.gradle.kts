@@ -51,6 +51,7 @@ dependencies {
     implementation(projects.feature.profile)
     implementation(projects.feature.trending)
     implementation(projects.feature.search)
+    implementation(projects.feature.detail)
 
     // Core modules
     implementation(projects.core.ui)

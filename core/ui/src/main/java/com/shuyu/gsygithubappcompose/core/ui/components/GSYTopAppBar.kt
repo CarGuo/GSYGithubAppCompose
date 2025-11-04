@@ -35,6 +35,7 @@ fun GSYTopAppBar(
             }
         },
         actions = actions ?: {},
+
         modifier = modifier,
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.primary,
