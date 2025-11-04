@@ -27,6 +27,7 @@
     <string name="search_repository">Search Repository</string>
     <string name="search_user">Search User</string>
     <string name="search_history">Search History</string>
+    <string name="clear_search">Clear search</string>
     
     <!-- Profile Screen -->
     <string name="profile_repositories">Repositories</string>

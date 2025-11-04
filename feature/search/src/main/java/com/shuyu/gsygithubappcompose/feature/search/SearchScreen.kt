@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -15,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
@@ -47,10 +49,11 @@ fun SearchScreen(
     val hasMoreUser by searchViewModel.hasMoreUser.collectAsState()
     val loadMoreErrorRepo by searchViewModel.loadMoreErrorRepo.collectAsState()
     val loadMoreErrorUser by searchViewModel.loadMoreErrorUser.collectAsState()
-    val searchHistory by searchViewModel.searchHistory.collectAsState(initial = emptyList()) // Corrected initial parameter and type inference
+    val searchHistory by searchViewModel.searchHistory.collectAsState(initial = emptyList<SearchHistoryEntity>())
 
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusRequester = remember { FocusRequester() }
+    val focusManager = LocalFocusManager.current
     var isSearchFieldFocused by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -81,22 +84,31 @@ fun SearchScreen(
                 keyboardActions = KeyboardActions(onSearch = {
                     searchViewModel.performSearch()
                     keyboardController?.hide()
-                    isSearchFieldFocused = false // Hide history after search
+                    focusManager.clearFocus()
                 }),
                 trailingIcon = {
-                    IconButton(
-                        onClick = {
-                            searchViewModel.performSearch()
-                            keyboardController?.hide()
-                            isSearchFieldFocused = false // Hide history after search
-                        }, enabled = searchQuery.isNotBlank()
-                    ) {
-                        Icon(
-                            Icons.Filled.Search,
-                            contentDescription = stringResource(id = R.string.nav_search),
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(28.dp)
-                        )
+                    if (searchQuery.isNotEmpty()) {
+                        IconButton(onClick = { searchViewModel.onSearchQueryChanged("") }) {
+                            Icon(
+                                Icons.Filled.Clear,
+                                contentDescription = stringResource(id = R.string.clear_search),
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    } else {
+                        IconButton(
+                            onClick = {
+                                keyboardController?.hide()
+                                focusManager.clearFocus()
+                            }
+                        ) {
+                            Icon(
+                                Icons.Filled.Search,
+                                contentDescription = stringResource(id = R.string.nav_search),
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(28.dp)
+                            )
+                        }
                     }
                 }
             )
@@ -120,7 +132,7 @@ fun SearchScreen(
                                     searchViewModel.onSearchQueryChanged(historyItem.query)
                                     searchViewModel.performSearch()
                                     keyboardController?.hide()
-                                    isSearchFieldFocused = false
+                                    focusManager.clearFocus()
                                 }
                                 .padding(vertical = 8.dp)
                         )
@@ -133,14 +145,24 @@ fun SearchScreen(
                     horizontalArrangement = Arrangement.SpaceAround
                 ) {
                     Button(
-                        onClick = { searchViewModel.onSearchTypeChanged(SearchType.REPOSITORY); searchViewModel.performSearch() },
+                        onClick = {
+                            searchViewModel.onSearchTypeChanged(SearchType.REPOSITORY)
+                            searchViewModel.performSearch()
+                            keyboardController?.hide()
+                            focusManager.clearFocus()
+                        },
                         enabled = searchQuery.isNotBlank(),
                         colors = ButtonDefaults.buttonColors(containerColor = if (searchType == SearchType.REPOSITORY) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant)
                     ) {
                         Text(stringResource(id = R.string.search_repository))
                     }
                     Button(
-                        onClick = { searchViewModel.onSearchTypeChanged(SearchType.USER); searchViewModel.performSearch() },
+                        onClick = {
+                            searchViewModel.onSearchTypeChanged(SearchType.USER)
+                            searchViewModel.performSearch()
+                            keyboardController?.hide()
+                            focusManager.clearFocus()
+                        },
                         enabled = searchQuery.isNotBlank(),
                         colors = ButtonDefaults.buttonColors(containerColor = if (searchType == SearchType.USER) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant)
                     ) {
