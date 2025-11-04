@@ -45,6 +45,13 @@
 - 使用 core/ui 下的 GSYNavigator 和 GSYNavHost ，例如  val navigator = LocalNavigator.current
 - 使用  navigator.navigate 或者  navigator.replace
 
+## 新增数据库表需要注意
+1、升级 AppDatabase 的版本号
+2、添加新的 Entity 类
+3、添加对应的 Dao 类
+4、添加 DatabaseModule 中的 Dao 提供方法
+
+
 ## 注意：
 - 工作时注意当前是 windows 环境还是 macOS 环境
 - 不允许随意删除我的注释和无用代码

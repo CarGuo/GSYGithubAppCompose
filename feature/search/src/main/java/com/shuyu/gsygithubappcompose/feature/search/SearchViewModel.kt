@@ -37,41 +37,113 @@ class SearchViewModel @Inject constructor(
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
 
+    private val _repoCurrentPage = MutableStateFlow(1)
+    private val _userCurrentPage = MutableStateFlow(1)
+
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
+
+    private val _hasMoreRepo = MutableStateFlow(true)
+    val hasMoreRepo: StateFlow<Boolean> = _hasMoreRepo.asStateFlow()
+
+    private val _hasMoreUser = MutableStateFlow(true)
+    val hasMoreUser: StateFlow<Boolean> = _hasMoreUser.asStateFlow()
+
+    private val _loadMoreErrorRepo = MutableStateFlow(false)
+    val loadMoreErrorRepo: StateFlow<Boolean> = _loadMoreErrorRepo.asStateFlow()
+
+    private val _loadMoreErrorUser = MutableStateFlow(false)
+    val loadMoreErrorUser: StateFlow<Boolean> = _loadMoreErrorUser.asStateFlow()
+
     fun onSearchQueryChanged(query: String) {
         _searchQuery.value = query
     }
 
     fun onSearchTypeChanged(type: SearchType) {
         _searchType.value = type
-        // Clear results when search type changes
+        // Clear results and reset pagination when search type changes
         _repositoryResults.value = emptyList()
         _userResults.value = emptyList()
+        _repoCurrentPage.value = 1
+        _userCurrentPage.value = 1
+        _hasMoreRepo.value = true
+        _hasMoreUser.value = true
+        _loadMoreErrorRepo.value = false
+        _loadMoreErrorUser.value = false
         _error.value = null
     }
 
-    fun performSearch() {
+    fun performSearch(page: Int = 1, isRefresh: Boolean = false) {
         _error.value = null
         if (_searchQuery.value.isBlank()) {
             return
         }
 
-        _isLoading.value = true
+        if (isRefresh) {
+            _isRefreshing.value = true
+        } else if (page == 1) {
+            _isLoading.value = true
+        }
+
         viewModelScope.launch {
             try {
                 when (_searchType.value) {
                     SearchType.REPOSITORY -> {
-                        val response = repositoryRepository.searchRepositories(_searchQuery.value)
-                        _repositoryResults.value = response.items
+                        _loadMoreErrorRepo.value = false
+                        val response =
+                            repositoryRepository.searchRepositories(_searchQuery.value, page)
+                        if (page == 1) {
+                            _repositoryResults.value = response.items
+                        } else {
+                            _repositoryResults.value = _repositoryResults.value + response.items
+                        }
+                        _hasMoreRepo.value = response.items.isNotEmpty()
                     }
+
                     SearchType.USER -> {
-                        val response = userRepository.searchUsers(_searchQuery.value)
-                        _userResults.value = response.items
+                        _loadMoreErrorUser.value = false
+                        val response = userRepository.searchUsers(_searchQuery.value, page)
+                        if (page == 1) {
+                            _userResults.value = response.items
+                        } else {
+                            _userResults.value = _userResults.value + response.items
+                        }
+                        _hasMoreUser.value = response.items.isNotEmpty()
                     }
                 }
             } catch (e: Exception) {
                 _error.value = e.message
+                if (page > 1) {
+                    when (_searchType.value) {
+                        SearchType.REPOSITORY -> _loadMoreErrorRepo.value = true
+                        SearchType.USER -> _loadMoreErrorUser.value = true
+                    }
+                }
             } finally {
                 _isLoading.value = false
+                _isRefreshing.value = false
+            }
+        }
+    }
+
+    fun refreshSearch() {
+        when (_searchType.value) {
+            SearchType.REPOSITORY -> _repoCurrentPage.value = 1
+            SearchType.USER -> _userCurrentPage.value = 1
+        }
+        performSearch(page = 1, isRefresh = true)
+    }
+
+    fun loadNextPage() {
+        when (_searchType.value) {
+            SearchType.REPOSITORY -> {
+                _repoCurrentPage.value++
+                performSearch(page = _repoCurrentPage.value)
+            }
+
+            SearchType.USER -> {
+                _userCurrentPage.value++
+                performSearch(page = _userCurrentPage.value)
             }
         }
     }

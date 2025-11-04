@@ -2,6 +2,7 @@ package com.shuyu.gsygithubappcompose.feature.home
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
@@ -17,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.shuyu.gsygithubappcompose.core.common.R
 import com.shuyu.gsygithubappcompose.core.ui.LocalNavigator
@@ -109,7 +111,9 @@ fun SearchActionIcon(navigator: GSYNavigator) {
     IconButton(onClick = { navigator.navigate("search_route") }) {
         Icon(
             imageVector = Icons.Default.Search,
-            contentDescription = stringResource(id = R.string.nav_search)
+            contentDescription = stringResource(id = R.string.nav_search),
+            tint = Color.White, // Set icon color to white
+            modifier = Modifier.size(28.dp) // Increase icon size
         )
     }
 }
