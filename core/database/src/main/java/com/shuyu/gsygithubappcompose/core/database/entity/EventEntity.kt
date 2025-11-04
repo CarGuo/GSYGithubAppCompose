@@ -4,7 +4,8 @@ import androidx.room.ColumnInfo
 import androidx.room.Embedded
 import androidx.room.Entity
 
-@Entity(tableName = "events", primaryKeys = ["id"])
+@Entity(tableName = "events", primaryKeys = ["id", "is_received_event"])
+
 data class EventEntity(
     val id: String,
     @ColumnInfo(name = "type")

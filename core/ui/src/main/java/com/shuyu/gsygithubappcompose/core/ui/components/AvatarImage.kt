@@ -1,5 +1,6 @@
 package com.shuyu.gsygithubappcompose.core.ui.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -16,15 +17,20 @@ import coil.compose.SubcomposeAsyncImage
 @Composable
 fun AvatarImage(
     url: String,
+    username: String = "",
     modifier: Modifier = Modifier,
-    size: Dp = 40.dp
+    size: Dp = 40.dp,
+    onClick: ((username: String) -> Unit)? = null
 ) {
     SubcomposeAsyncImage(
         model = url,
         contentDescription = "Avatar",
         modifier = modifier
             .size(size)
-            .clip(CircleShape),
+            .clip(CircleShape)
+            .clickable {
+                onClick?.invoke(username)
+            },
         contentScale = ContentScale.Crop,
         loading = {
             Box(

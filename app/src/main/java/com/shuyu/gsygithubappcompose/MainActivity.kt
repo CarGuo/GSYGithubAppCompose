@@ -14,6 +14,7 @@ import com.shuyu.gsygithubappcompose.core.ui.theme.GSYGithubAppComposeTheme
 import com.shuyu.gsygithubappcompose.feature.dynamic.DynamicScreen
 import com.shuyu.gsygithubappcompose.feature.home.HomeScreen
 import com.shuyu.gsygithubappcompose.feature.login.LoginScreen
+import com.shuyu.gsygithubappcompose.feature.profile.PersonScreen
 import com.shuyu.gsygithubappcompose.feature.profile.ProfileScreen
 import com.shuyu.gsygithubappcompose.feature.trending.TrendingScreen
 import com.shuyu.gsygithubappcompose.feature.welcome.WelcomeScreen
@@ -29,7 +30,7 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
                 val viewModel: MainViewModel = hiltViewModel()
                 val isLoggedIn by viewModel.isLoggedIn.collectAsState(initial = false)
-                
+
                 NavHost(
                     navController = navController,
                     startDestination = "welcome"
@@ -49,7 +50,7 @@ class MainActivity : ComponentActivity() {
                             isLoggedIn = isLoggedIn
                         )
                     }
-                    
+
                     composable("login") {
                         LoginScreen(
                             onLoginSuccess = {
@@ -59,19 +60,33 @@ class MainActivity : ComponentActivity() {
                             }
                         )
                     }
-                    
+
                     composable("home") {
                         HomeScreen(
-                            dynamicContent = { DynamicScreen() },
-                            trendingContent = { TrendingScreen() },
-                            profileContent = { 
+                            dynamicContent = { DynamicScreen(onImageClick = { navController.navigate("person/$it") }) },
+                            trendingContent = { TrendingScreen(onImageClick = { navController.navigate("person/$it") }) },
+                            profileContent = {
                                 ProfileScreen(
                                     onLogout = {
                                         navController.navigate("login") {
                                             popUpTo(0) { inclusive = true }
                                         }
+                                    },
+                                    onImageClick = {
+                                        navController.navigate("person/$it")
                                     }
                                 )
+                            }
+                        )
+                    }
+
+                    composable("person/{username}") { backStackEntry ->
+                        val username = backStackEntry.arguments?.getString("username") ?: ""
+                        PersonScreen(
+                            username = username,
+                            onBack = { navController.popBackStack() },
+                            onImageClick = {
+                                navController.navigate("person/$it")
                             }
                         )
                     }

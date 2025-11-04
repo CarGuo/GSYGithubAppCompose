@@ -3,6 +3,7 @@ package com.shuyu.gsygithubappcompose.feature.dynamic
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -12,10 +13,15 @@ import com.shuyu.gsygithubappcompose.core.ui.components.GSYPullRefresh
 
 @Composable
 fun DynamicScreen(
+    onImageClick: (String) -> Unit,
     viewModel: DynamicViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val listState = rememberLazyListState()
+
+    LaunchedEffect(Unit) {
+        viewModel.doInitialLoad()
+    }
 
     GSYGeneralLoadState(
         isLoading = uiState.isPageLoading,
@@ -33,7 +39,7 @@ fun DynamicScreen(
             loadMoreError = uiState.loadMoreError
         ) {
             items(uiState.events) { event ->
-                EventItem(event = event)
+                EventItem(event = event, onImageClick = onImageClick)
             }
         }
     }

@@ -25,10 +25,10 @@ interface EventDao {
         insert(events)
     }
 
-    @Query("SELECT * FROM events WHERE userLogin = :userLogin")
+    @Query("SELECT * FROM events WHERE is_received_event = 0 AND userLogin = :userLogin")
     suspend fun getEventsByUserLogin(userLogin: String): List<EventEntity>
 
-    @Query("DELETE FROM events WHERE userLogin = :userLogin")
+    @Query("DELETE FROM events WHERE is_received_event = 0 AND userLogin = :userLogin")
     suspend fun clearUserEvents(userLogin: String)
 
     @Transaction

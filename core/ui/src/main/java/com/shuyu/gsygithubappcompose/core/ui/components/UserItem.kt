@@ -15,7 +15,10 @@ import androidx.compose.ui.unit.dp
 import com.shuyu.gsygithubappcompose.core.network.model.User
 
 @Composable
-fun UserItem(user: User) {
+fun UserItem(
+    user: User,
+    onImageClick: ((username: String) -> Unit)? = null
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -30,7 +33,9 @@ fun UserItem(user: User) {
         ) {
             AvatarImage(
                 url = user.avatarUrl,
-                size = 40.dp
+                size = 40.dp,
+                username = user.login,
+                onClick = onImageClick
             )
             Column {
                 Text(

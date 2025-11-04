@@ -15,7 +15,7 @@ import com.shuyu.gsygithubappcompose.core.database.entity.UserEntity
         RepositoryEntity::class,
         EventEntity::class
     ],
-    version = 24,
+    version = 25,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {

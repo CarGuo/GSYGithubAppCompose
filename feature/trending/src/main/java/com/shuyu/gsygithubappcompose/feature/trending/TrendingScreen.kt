@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.unit.dp
@@ -14,9 +15,14 @@ import com.shuyu.gsygithubappcompose.core.ui.components.RepositoryItem
 
 @Composable
 fun TrendingScreen(
+    onImageClick: (String) -> Unit,
     viewModel: TrendingViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.doInitialLoad()
+    }
 
     GSYGeneralLoadState(
         isLoading = uiState.isPageLoading && uiState.repositories.isEmpty(),
@@ -35,7 +41,7 @@ fun TrendingScreen(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(uiState.repositories) { repo ->
-                RepositoryItem(repository = repo)
+                RepositoryItem(repository = repo, onImageClick = onImageClick)
             }
         }
     }

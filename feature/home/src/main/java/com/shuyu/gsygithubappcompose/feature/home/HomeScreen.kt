@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.shuyu.gsygithubappcompose.core.common.R
+import com.shuyu.gsygithubappcompose.core.ui.components.GSYTopAppBar
 import kotlinx.coroutines.launch
 
 sealed class BottomNavItem(
@@ -28,7 +29,7 @@ sealed class BottomNavItem(
     object Profile : BottomNavItem("profile", Icons.Default.Person, R.string.nav_profile)
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HomeScreen(
     dynamicContent: @Composable () -> Unit,
@@ -53,12 +54,8 @@ fun HomeScreen(
     }
 
     Scaffold(topBar = {
-        TopAppBar(
+        GSYTopAppBar(
             title = { Text(text = stringResource(id = R.string.app_name)) },
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = MaterialTheme.colorScheme.primary,
-                titleContentColor = MaterialTheme.colorScheme.onPrimary
-            )
         )
     }, bottomBar = {
         NavigationBar(containerColor = MaterialTheme.colorScheme.primary) {

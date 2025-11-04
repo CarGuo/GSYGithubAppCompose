@@ -22,7 +22,10 @@ import androidx.compose.ui.unit.dp
 import com.shuyu.gsygithubappcompose.core.network.model.Repository
 
 @Composable
-fun RepositoryItem(repository: Repository) {
+fun RepositoryItem(
+    repository: Repository,
+    onImageClick: ((username: String) -> Unit)? = null
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -43,7 +46,9 @@ fun RepositoryItem(repository: Repository) {
             ) {
                 AvatarImage(
                     url = repository.owner.avatarUrl,
-                    size = 40.dp
+                    size = 40.dp,
+                    username = repository.owner.login,
+                    onClick = onImageClick
                 )
 
                 Column(modifier = Modifier.weight(1f)) {

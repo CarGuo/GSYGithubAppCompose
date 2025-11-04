@@ -57,9 +57,7 @@ abstract class BaseViewModel<UiState : BaseUiState>(
     protected val _uiState: MutableStateFlow<UiState> = MutableStateFlow(initialUiState)
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
-    init {
-        loadData(initialLoad = true)
-    }
+    private var isInitialLoadStarted = false
 
     protected abstract fun loadData(
         initialLoad: Boolean = false,
@@ -207,6 +205,30 @@ abstract class BaseViewModel<UiState : BaseUiState>(
                 error = exception?.message ?: defaultMessage,
                 loadMoreError = isLoadMore
             )
+        }
+    }
+
+
+
+    /**
+     * Hilt 注入时机注意:
+     * 1、Hilt 创建一个 @HiltViewModel 实例时，它首先调用该类的构造函数，并将所有依赖项（如 userRepository）作为参数传入。
+     * 2.Kotlin 构造顺序: 在 Kotlin 中，当一个子类（ProfileViewModel）被实例化时，其构造过程遵循以下顺序：
+     *  ◦子类的构造函数参数被求值。
+     *  ◦父类（BaseProfileViewModel）的 init 代码块和构造函数被执行。
+     *  ◦子类（ProfileViewModel）的 init 代码块和属性初始化器被执行。
+     * 3.问题根源:
+     *  ◦ ProfileViewModel 将 userRepository 和 preferencesDataStore 传递给了父类 BaseProfileViewModel 的构造函数。
+     *  ◦如果 BaseProfileViewModel 的构造函数或其 init 块直接或间接地调用了 getUserLogin 方法，此时就会出现问题。
+     *  ◦因为 getUserLogin 是一个被 ProfileViewModel 覆写的方法，所以在父类构造期间，调用的将是子类的实现。
+     *  ◦然而，在父类构造函数执行完毕之前，子类 ProfileViewModel 自身的属性（包括从构造函数参数初始化的 userRepository 和 preferencesDataStore）尚未被初始化。它们仍然是 null。
+     *  ◦因此，当 ProfileViewModel 的 getUserLogin 方法被过早调用时，它尝试访问的 userRepository 和 preferencesDataStore 自然就是 null，从而导致 NullPointerException。
+     * */
+     
+    fun doInitialLoad() {
+        if (!isInitialLoadStarted) {
+            isInitialLoadStarted = true
+            loadData(initialLoad = true)
         }
     }
 
