@@ -1,17 +1,12 @@
 package com.shuyu.gsygithubappcompose.feature.dynamic
 
-import androidx.lifecycle.viewModelScope
 import com.shuyu.gsygithubappcompose.core.common.datastore.UserPreferencesDataStore
 import com.shuyu.gsygithubappcompose.core.common.util.StringResourceProvider
-import com.shuyu.gsygithubappcompose.core.network.config.NetworkConfig
 import com.shuyu.gsygithubappcompose.core.network.model.Event
 import com.shuyu.gsygithubappcompose.data.repository.EventRepository
 import com.shuyu.gsygithubappcompose.data.repository.vm.BaseUiState
 import com.shuyu.gsygithubappcompose.data.repository.vm.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 import com.shuyu.gsygithubappcompose.core.common.R
 
@@ -54,34 +49,37 @@ class DynamicViewModel @Inject constructor(
         isLoadMore: Boolean
     ) {
         launchDataLoadWithUser(initialLoad, isRefresh, isLoadMore) { user, pageToLoad ->
-            var emissionCount = 0
-            eventRepository.getReceivedEvents(user, pageToLoad, true).collect {
-                emissionCount++
-                it.fold(onSuccess = { newEvents ->
-                    val currentEvents =
-                        if (isRefresh || initialLoad) emptyList() else _uiState.value.events
-                    val updatedEvents = currentEvents + newEvents
-                    handleResult(
-                        emissionCount,
-                        newEvents,
-                        pageToLoad,
-                        isRefresh,
-                        initialLoad,
-                        isLoadMore,
-                        updateSuccess = { currentState, items, page, isR, initialL, isLM ->
-                            currentState.copy(
-                                events = updatedEvents
-                            )
-                        },
-                        updateFailure = { currentState, errorMessage, isLM ->
-                            currentState.copy(
-                                events = emptyList() // Clear events on failure if no data found
-                            )
-                        }
-                    )
-                }, onFailure = { exception ->
-                    updateErrorState(exception, isLoadMore, stringResourceProvider.getString(R.string.error_failed_to_load_events))
-                })
+            eventRepository.getReceivedEvents(user, pageToLoad, true).collect { repoResult ->
+                repoResult.result.fold(
+                    onSuccess = { newEvents ->
+                        handleResult(
+                            newItems = newEvents,
+                            pageToLoad = pageToLoad,
+                            isRefresh = isRefresh,
+                            initialLoad = initialLoad,
+                            isLoadMore = isLoadMore,
+                            source = repoResult.source,
+                            isDbEmpty = repoResult.isDbEmpty,
+                            updateSuccess = { currentState, items, _, _, _, _ ->
+                                val currentEvents = currentState.events
+                                val updatedEvents = if (isLoadMore) {
+                                    currentEvents + items
+                                } else {
+                                    items
+                                }
+                                currentState.copy(events = updatedEvents)
+                            },
+                            updateFailure = { currentState, _, _ ->
+                                currentState.copy(
+                                    events = if (isLoadMore) currentState.events else emptyList()
+                                )
+                            }
+                        )
+                    },
+                    onFailure = { exception ->
+                        updateErrorState(exception, isLoadMore, stringResourceProvider.getString(R.string.error_failed_to_load_events))
+                    }
+                )
             }
         }
     }

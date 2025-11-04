@@ -3,13 +3,11 @@ package com.shuyu.gsygithubappcompose.feature.trending
 
 import com.shuyu.gsygithubappcompose.core.common.datastore.UserPreferencesDataStore
 import com.shuyu.gsygithubappcompose.core.common.util.StringResourceProvider
-import com.shuyu.gsygithubappcompose.core.network.config.NetworkConfig
 import com.shuyu.gsygithubappcompose.core.network.model.Repository
 import com.shuyu.gsygithubappcompose.data.repository.RepositoryRepository
 import com.shuyu.gsygithubappcompose.data.repository.vm.BaseUiState
 import com.shuyu.gsygithubappcompose.data.repository.vm.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 import com.shuyu.gsygithubappcompose.core.common.R
 
@@ -51,30 +49,30 @@ class TrendingViewModel @Inject constructor(
         isRefresh: Boolean,
         isLoadMore: Boolean
     ) {
-        launchDataLoadWithUser(initialLoad, isRefresh, isLoadMore) { user,pageToLoad ->
-            var emissionCount = 0
-            repositoryRepository.getTrendingRepositories().collect {
-                emissionCount++
-                it.fold(
+        launchDataLoadWithUser(initialLoad, isRefresh, isLoadMore) { _, pageToLoad ->
+            repositoryRepository.getTrendingRepositories(page = pageToLoad).collect { repoResult ->
+                repoResult.result.fold(
                     onSuccess = { newRepos ->
-                        val currentRepos =
-                            if (isRefresh || initialLoad) emptyList() else _uiState.value.repositories
-                        val updatedRepos = currentRepos + newRepos
                         handleResult(
-                            emissionCount,
-                            newRepos,
-                            pageToLoad,
-                            isRefresh,
-                            initialLoad,
-                            isLoadMore,
-                            updateSuccess = { currentState, items, page, isR, initialL, isLM ->
-                                currentState.copy(
-                                    repositories = updatedRepos
-                                )
+                            newItems = newRepos,
+                            pageToLoad = pageToLoad,
+                            isRefresh = isRefresh,
+                            initialLoad = initialLoad,
+                            isLoadMore = isLoadMore,
+                            source = repoResult.source,
+                            isDbEmpty = repoResult.isDbEmpty,
+                            updateSuccess = { currentState, items, _, _, _, _ ->
+                                val currentRepos = currentState.repositories
+                                val updatedRepos = if (isLoadMore) {
+                                    currentRepos + items
+                                } else {
+                                    items
+                                }
+                                currentState.copy(repositories = updatedRepos)
                             },
-                            updateFailure = { currentState, errorMessage, isLM ->
+                            updateFailure = { currentState, _, _ ->
                                 currentState.copy(
-                                    repositories = emptyList() // Clear repositories on failure if no data found
+                                    repositories = if (isLoadMore) currentState.repositories else emptyList()
                                 )
                             }
                         )

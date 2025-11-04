@@ -72,20 +72,24 @@ class UserRepository @Inject constructor(
         return preferencesDataStore.authToken.map { it?.isNotEmpty() == true }
     }
 
-    fun getUser(username: String): Flow<Result<User>> = flow {
+    fun getUser(username: String): Flow<RepositoryResult<User>> = flow {
         // 1. Emit data from database
         val cachedUser = userDao.getUserByLogin(username).first()
+        val isDbEmpty = cachedUser == null
         if (cachedUser != null) {
-            emit(Result.success(cachedUser.toUser()))
+            emit(RepositoryResult(Result.success(cachedUser.toUser()), DataSource.CACHE, isDbEmpty))
         }
 
         // 2. Fetch from network
         try {
             val networkUser = apiService.getUser(username)
             userDao.insertUser(networkUser.toEntity())
-            emit(Result.success(networkUser))
+            // After inserting, we could re-query, but for simplicity we'll just emit the network response
+            emit(RepositoryResult(Result.success(networkUser), DataSource.NETWORK, isDbEmpty))
         } catch (e: Exception) {
-            emit(Result.failure(e))
+            // If network fails, and we have no cached user, we should emit the failure.
+            // If we had a cached user, the UI already has data, and this failure can be handled differently (e.g., a toast).
+            emit(RepositoryResult(Result.failure(e), DataSource.NETWORK, isDbEmpty))
         }
     }
 
@@ -93,11 +97,12 @@ class UserRepository @Inject constructor(
         return userDao.getUserByLogin(login)
     }
 
-    fun getOrgMembers(org: String): Flow<Result<List<User>>> = flow {
+    fun getOrgMembers(org: String): Flow<RepositoryResult<List<User>>> = flow {
         // 1. Emit data from database if available
         val cachedMembers = userDao.getOrgMembers(org).first()
+        val isDbEmpty = cachedMembers.isEmpty()
         if (cachedMembers.isNotEmpty()) {
-            emit(Result.success(cachedMembers.map { it.toUser() }))
+            emit(RepositoryResult(Result.success(cachedMembers.map { it.toUser() }), DataSource.CACHE, isDbEmpty))
         }
 
         // 2. Fetch from network
@@ -107,32 +112,36 @@ class UserRepository @Inject constructor(
             userDao.clearOrgMembers(org)
             userDao.insertUsers(networkMembers.map { it.toEntity(org) })
             // 4. Emit network data
-            emit(Result.success(networkMembers))
+            emit(RepositoryResult(Result.success(networkMembers), DataSource.NETWORK, isDbEmpty))
         } catch (e: Exception) {
-            // Emit network failure. If cached data was already emitted, this failure will follow the cached data.
-            emit(Result.failure(e))
+            emit(RepositoryResult(Result.failure(e), DataSource.NETWORK, isDbEmpty))
         }
     }
 
-    fun getUserEvents(username: String, page: Int, perPage: Int): Flow<Result<List<Event>>> = flow {
-        // 1. Emit data from database if available
-        val cachedEvents = eventDao.getEventsByUserLogin(username).map { it.toEvent() }
-        if (cachedEvents.isNotEmpty()) {
-            emit(Result.success(cachedEvents))
+    fun getUserEvents(username: String, page: Int, perPage: Int): Flow<RepositoryResult<List<Event>>> = flow {
+        var isDbEmpty = false
+        // For paginated data, we only check the DB on the first page.
+        if (page == 1) {
+            val cachedEvents = eventDao.getEventsByUserLogin(username).map { it.toEvent() }
+            isDbEmpty = cachedEvents.isEmpty()
+            if (cachedEvents.isNotEmpty()) {
+                emit(RepositoryResult(Result.success(cachedEvents), DataSource.CACHE, isDbEmpty))
+            }
         }
 
-        // 2. Fetch from network
+        // Fetch from network
         try {
             val networkEvents = apiService.getUserEvents(username, page, perPage)
-            // 3. If it's the first page, update the database
+            // If it's the first page, update the database
             if (page == 1) {
                 eventDao.clearAndInsertUserEvents(username, networkEvents.map { it.toEntity(false, username) })
             }
-            // 4. Emit network data
-            emit(Result.success(networkEvents))
+            // Emit network data
+            emit(RepositoryResult(Result.success(networkEvents), DataSource.NETWORK, isDbEmpty))
         } catch (e: Exception) {
-            // Emit network failure. If cached data was already emitted, this failure will follow the cached data.
-            emit(Result.failure(e))
+            // For load more (page > 1), we need to inform the UI about the failure.
+            // For page 1, this follows the (optional) cached emission.
+            emit(RepositoryResult(Result.failure(e), DataSource.NETWORK, isDbEmpty))
         }
     }
 }

@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import com.shuyu.gsygithubappcompose.core.common.R
+import com.shuyu.gsygithubappcompose.data.repository.DataSource
 
 interface BaseUiState {
     val isPageLoading: Boolean
@@ -28,14 +29,7 @@ abstract class BaseViewModel<UiState : BaseUiState>(
     private val preferencesDataStore: UserPreferencesDataStore? = null,
     private val stringResourceProvider: StringResourceProvider,
     private val commonStateUpdater: (
-        currentState: UiState,
-        isPageLoading: Boolean,
-        isRefreshing: Boolean,
-        isLoadingMore: Boolean,
-        error: String?,
-        currentPage: Int,
-        hasMore: Boolean,
-        loadMoreError: Boolean
+        currentState: UiState, isPageLoading: Boolean, isRefreshing: Boolean, isLoadingMore: Boolean, error: String?, currentPage: Int, hasMore: Boolean, loadMoreError: Boolean
     ) -> UiState
 ) : ViewModel() {
 
@@ -43,14 +37,7 @@ abstract class BaseViewModel<UiState : BaseUiState>(
         initialUiState: UiState,
         stringResourceProvider: StringResourceProvider,
         commonStateUpdater: (
-            currentState: UiState,
-            isPageLoading: Boolean,
-            isRefreshing: Boolean,
-            isLoadingMore: Boolean,
-            error: String?,
-            currentPage: Int,
-            hasMore: Boolean,
-            loadMoreError: Boolean
+            currentState: UiState, isPageLoading: Boolean, isRefreshing: Boolean, isLoadingMore: Boolean, error: String?, currentPage: Int, hasMore: Boolean, loadMoreError: Boolean
         ) -> UiState
     ) : this(initialUiState, null, stringResourceProvider, commonStateUpdater)
 
@@ -60,9 +47,7 @@ abstract class BaseViewModel<UiState : BaseUiState>(
     private var isInitialLoadStarted = false
 
     protected abstract fun loadData(
-        initialLoad: Boolean = false,
-        isRefresh: Boolean = false,
-        isLoadMore: Boolean = false
+        initialLoad: Boolean = false, isRefresh: Boolean = false, isLoadMore: Boolean = false
     )
 
     private fun updateUiStateWithCommonProperties(
@@ -143,37 +128,31 @@ abstract class BaseViewModel<UiState : BaseUiState>(
                 )
             } else if (isLoadMore) {
                 updateUiStateWithCommonProperties(
-                    it,
-                    isLoadingMore = true, error = null, loadMoreError = false
+                    it, isLoadingMore = true, error = null, loadMoreError = false
                 )
             } else if (initialLoad) {
                 updateUiStateWithCommonProperties(
-                    it,
-                    isPageLoading = true, error = null, loadMoreError = false
+                    it, isPageLoading = true, error = null, loadMoreError = false
                 )
             } else it
         }
     }
 
     protected fun <T> handleResult(
-        emissionCount: Int,
         newItems: List<T>,
         pageToLoad: Int,
         isRefresh: Boolean,
         initialLoad: Boolean,
         isLoadMore: Boolean,
+        source: DataSource,
+        isDbEmpty: Boolean,
         updateSuccess: (UiState, List<T>, Int, Boolean, Boolean, Boolean) -> UiState,
         updateFailure: (UiState, String?, Boolean) -> UiState
     ) {
         _uiState.update { currentState ->
             val updatedState = if (newItems.isNotEmpty()) {
                 updateSuccess(
-                    currentState,
-                    newItems,
-                    pageToLoad,
-                    isRefresh,
-                    initialLoad,
-                    isLoadMore
+                    currentState, newItems, pageToLoad, isRefresh, initialLoad, isLoadMore
                 )
             } else {
                 updateFailure(
@@ -182,20 +161,29 @@ abstract class BaseViewModel<UiState : BaseUiState>(
                     isLoadMore
                 )
             }
+
+            // The final emission is when data comes from the network.
+            // This ensures loading indicators are dismissed and pagination states are updated only after network data is received.
+            val isFinalEmission = source == DataSource.NETWORK
+
             updateUiStateWithCommonProperties(
                 updatedState,
-                isPageLoading = if (emissionCount >= 1) false else updatedState.isPageLoading,
-                isRefreshing = if (emissionCount >= 2) false else updatedState.isRefreshing,
-                isLoadingMore = if (emissionCount >= 2) false else updatedState.isLoadingMore,
-                hasMore = if (emissionCount >= 2) newItems.size == NetworkConfig.PER_PAGE else updatedState.hasMore,
-                currentPage = if (emissionCount >= 2) pageToLoad + 1 else updatedState.currentPage,
-                error = if (emissionCount >= 2) null else updatedState.error,
-                loadMoreError = if (emissionCount >= 2) false else updatedState.loadMoreError
+                isPageLoading = false, // Any data arrival should immediately hide the full-screen loading indicator.
+                isRefreshing = if (isFinalEmission) false else updatedState.isRefreshing,
+                isLoadingMore = if (isFinalEmission) false else updatedState.isLoadingMore,
+                hasMore = if (isFinalEmission) newItems.size == NetworkConfig.PER_PAGE else updatedState.hasMore,
+                currentPage = if (isFinalEmission) pageToLoad + 1 else updatedState.currentPage,
+                error = if (isFinalEmission) null else updatedState.error,
+                loadMoreError = if (isFinalEmission) false else updatedState.loadMoreError
             )
         }
     }
 
-    protected fun updateErrorState(exception: Throwable?, isLoadMore: Boolean, defaultMessage: String = stringResourceProvider.getString(R.string.error_unknown)) {
+    protected fun updateErrorState(
+        exception: Throwable?,
+        isLoadMore: Boolean,
+        defaultMessage: String = stringResourceProvider.getString(R.string.error_unknown)
+    ) {
         _uiState.update {
             updateUiStateWithCommonProperties(
                 it,
@@ -207,7 +195,6 @@ abstract class BaseViewModel<UiState : BaseUiState>(
             )
         }
     }
-
 
 
     /**
@@ -224,7 +211,7 @@ abstract class BaseViewModel<UiState : BaseUiState>(
      *  ◦然而，在父类构造函数执行完毕之前，子类 ProfileViewModel 自身的属性（包括从构造函数参数初始化的 userRepository 和 preferencesDataStore）尚未被初始化。它们仍然是 null。
      *  ◦因此，当 ProfileViewModel 的 getUserLogin 方法被过早调用时，它尝试访问的 userRepository 和 preferencesDataStore 自然就是 null，从而导致 NullPointerException。
      * */
-     
+
     fun doInitialLoad() {
         if (!isInitialLoadStarted) {
             isInitialLoadStarted = true

@@ -18,15 +18,18 @@ class EventRepository @Inject constructor(
 
     fun getReceivedEvents(
         username: String, page: Int = 1, isReceivedEvent: Boolean
-    ): Flow<Result<List<Event>>> = flow {
-        // 1. Emit data from database if available
-        val cachedEvents = eventDao.getEvents("", isReceivedEvent).map { it ->
-            it.toEvent()
+    ): Flow<RepositoryResult<List<Event>>> = flow {
+        var isDbEmpty = false
+        // For paginated data, we only check the DB on the first page.
+        if (page == 1) {
+            val cachedEvents = eventDao.getEvents("", isReceivedEvent).map { it ->
+                it.toEvent()
+            }
+            isDbEmpty = cachedEvents.isEmpty()
+            if (cachedEvents.isNotEmpty()) {
+                emit(RepositoryResult(Result.success(cachedEvents), DataSource.CACHE, isDbEmpty))
+            }
         }
-
-
-        emit(Result.success(cachedEvents))
-
 
         // 2. Fetch from network
         try {
@@ -40,10 +43,10 @@ class EventRepository @Inject constructor(
                 eventDao.clearAndInsert("", isReceivedEvent, eventEntities)
             }
             // 4. Emit network data
-            emit(Result.success(networkEvents))
+            emit(RepositoryResult(Result.success(networkEvents), DataSource.NETWORK, isDbEmpty))
         } catch (e: Exception) {
             // Emit network failure. If cached data was already emitted, this failure will follow the cached data.
-            emit(Result.failure(e))
+            emit(RepositoryResult(Result.failure(e), DataSource.NETWORK, isDbEmpty))
         }
     }
 }

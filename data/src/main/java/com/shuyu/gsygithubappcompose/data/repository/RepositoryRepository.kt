@@ -4,13 +4,11 @@ import com.shuyu.gsygithubappcompose.core.database.dao.RepositoryDao
 import com.shuyu.gsygithubappcompose.core.database.entity.RepositoryEntity
 import com.shuyu.gsygithubappcompose.core.network.api.GitHubApiService
 import com.shuyu.gsygithubappcompose.core.network.model.Repository
-import com.shuyu.gsygithubappcompose.core.network.model.User
 import com.shuyu.gsygithubappcompose.data.repository.mapper.toEntity
 import com.shuyu.gsygithubappcompose.data.repository.mapper.toRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -23,16 +21,17 @@ class RepositoryRepository @Inject constructor(
     private val repositoryDao: RepositoryDao
 ) {
 
-    fun getTrendingRepositories(language: String? = null, page: Int = 1): Flow<Result<List<Repository>>> = flow {
-        // 1. Emit data from database
-        val cachedRepos = repositoryDao.getTrendingRepositories().map {
-            it.map { repoEntity ->
-                repoEntity.toRepository()
+    fun getTrendingRepositories(language: String? = null, page: Int = 1): Flow<RepositoryResult<List<Repository>>> = flow {
+        var isDbEmpty = false
+        // For paginated data, we only check the DB on the first page.
+        if (page == 1) {
+            val cachedRepoEntities = repositoryDao.getTrendingRepositories().first()
+            isDbEmpty = cachedRepoEntities.isEmpty()
+            if (!isDbEmpty) {
+                val cachedRepos = cachedRepoEntities.map { it.toRepository() }
+                emit(RepositoryResult(Result.success(cachedRepos), DataSource.CACHE, isDbEmpty))
             }
         }
-        //不需要collect阻塞
-        //cachedRepos.collect { emit(Result.success(it)) }
-        emit(Result.success(cachedRepos.first()))
 
         // 2. Fetch from network
         try {
@@ -56,9 +55,9 @@ class RepositoryRepository @Inject constructor(
             }
 
             // 4. Emit network data
-            emit(Result.success(response.items))
+            emit(RepositoryResult(Result.success(response.items), DataSource.NETWORK, isDbEmpty))
         } catch (e: Exception) {
-            emit(Result.failure(e))
+            emit(RepositoryResult(Result.failure(e), DataSource.NETWORK, isDbEmpty))
         }
     }
 

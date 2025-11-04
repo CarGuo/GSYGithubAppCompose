@@ -10,6 +10,7 @@ import com.shuyu.gsygithubappcompose.data.repository.vm.BaseUiState
 import com.shuyu.gsygithubappcompose.data.repository.vm.BaseViewModel
 import kotlinx.coroutines.flow.update
 import com.shuyu.gsygithubappcompose.core.common.R
+import com.shuyu.gsygithubappcompose.data.repository.DataSource
 
 data class ProfileUiState(
     val user: User? = null,
@@ -51,51 +52,58 @@ abstract class BaseProfileViewModel(
     ) {
         getUserLogin { userLogin ->
             launchDataLoadWithUser(initialLoad, isRefresh, isLoadMore) { _, pageToLoad ->
-                var emissionCount = 0
-                userRepository.getUser(userLogin).collect {
-                    emissionCount++
-                    it.fold(onSuccess = { fetchedUser ->
+                userRepository.getUser(userLogin).collect { userRepoResult ->
+                    userRepoResult.result.fold(onSuccess = { fetchedUser ->
                         _uiState.update { currentState ->
-                            currentState.copy(
-                                user = fetchedUser
-                            )
+                            currentState.copy(user = fetchedUser)
                         }
 
                         if (fetchedUser.type == "Organization") {
-                            userRepository.getOrgMembers(fetchedUser.login).collect { orgResult ->
-                                orgResult.fold(onSuccess = { members ->
-                                    _uiState.update { it.copy(orgMembers = members) }
+                            userRepository.getOrgMembers(fetchedUser.login).collect { orgMembersRepoResult ->
+                                orgMembersRepoResult.result.fold(onSuccess = { members ->
+                                    _uiState.update {
+                                        val stateWithMembers = it.copy(orgMembers = members)
+                                        if (orgMembersRepoResult.source == DataSource.NETWORK) {
+                                            stateWithMembers.copy(isPageLoading = false, isRefreshing = false, error = null)
+                                        } else {
+                                            stateWithMembers
+                                        }
+                                    }
                                 }, onFailure = { exception ->
-                                    updateErrorState(
-                                        exception,
-                                        isLoadMore,
-                                        stringResourceProvider.getString(R.string.error_failed_to_load_org_members)
-                                    )
+                                    if (orgMembersRepoResult.source == DataSource.NETWORK) {
+                                        updateErrorState(
+                                            exception,
+                                            isLoadMore,
+                                            stringResourceProvider.getString(R.string.error_failed_to_load_org_members)
+                                        )
+                                    }
                                 })
                             }
                         } else {
                             userRepository.getUserEvents(
                                 fetchedUser.login, pageToLoad, NetworkConfig.PER_PAGE
-                            ).collect { eventResult ->
-                                eventResult.fold(onSuccess = { newEvents ->
-                                    val currentEvents =
-                                        if (isRefresh || initialLoad) emptyList() else _uiState.value.userEvents.orEmpty()
-                                    val updatedEvents = currentEvents + newEvents
+                            ).collect { eventRepoResult ->
+                                eventRepoResult.result.fold(onSuccess = { newEvents ->
                                     handleResult(
-                                        emissionCount,
-                                        newEvents,
-                                        pageToLoad,
-                                        isRefresh,
-                                        initialLoad,
-                                        isLoadMore,
-                                        updateSuccess = { currentState, _, _, _, _, _ ->
-                                            currentState.copy(
-                                                userEvents = updatedEvents
-                                            )
+                                        newItems = newEvents,
+                                        pageToLoad = pageToLoad,
+                                        isRefresh = isRefresh,
+                                        initialLoad = initialLoad,
+                                        isLoadMore = isLoadMore,
+                                        source = eventRepoResult.source,
+                                        isDbEmpty = eventRepoResult.isDbEmpty,
+                                        updateSuccess = { currentState, items, _, _, _, _ ->
+                                            val currentEvents = currentState.userEvents.orEmpty()
+                                            val updatedEvents = if (isLoadMore) {
+                                                currentEvents + items
+                                            } else {
+                                                items
+                                            }
+                                            currentState.copy(userEvents = updatedEvents)
                                         },
                                         updateFailure = { currentState, _, _ ->
                                             currentState.copy(
-                                                userEvents = emptyList() // Clear events on failure if no data found
+                                                userEvents = if (isLoadMore) currentState.userEvents else emptyList()
                                             )
                                         })
                                 }, onFailure = { exception ->
