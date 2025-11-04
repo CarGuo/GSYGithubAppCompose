@@ -5,12 +5,14 @@ import com.shuyu.gsygithubappcompose.core.common.util.StringResourceProvider
 import com.shuyu.gsygithubappcompose.core.network.config.NetworkConfig
 import com.shuyu.gsygithubappcompose.core.network.model.Event
 import com.shuyu.gsygithubappcompose.core.network.model.User
+import com.shuyu.gsygithubappcompose.data.repository.DataSource
+import com.shuyu.gsygithubappcompose.data.repository.RepositoryResult
 import com.shuyu.gsygithubappcompose.data.repository.UserRepository
 import com.shuyu.gsygithubappcompose.data.repository.vm.BaseUiState
 import com.shuyu.gsygithubappcompose.data.repository.vm.BaseViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.update
 import com.shuyu.gsygithubappcompose.core.common.R
-import com.shuyu.gsygithubappcompose.data.repository.DataSource
 
 data class ProfileUiState(
     val user: User? = null,
@@ -53,83 +55,61 @@ abstract class BaseProfileViewModel(
         getUserLogin { userLogin ->
             launchDataLoadWithUser(initialLoad, isRefresh, isLoadMore) { _, pageToLoad ->
                 userRepository.getUser(userLogin).collect { userRepoResult ->
-                    userRepoResult.result.fold(onSuccess = { fetchedUser ->
+                    userRepoResult.data.fold(onSuccess = { fetchedUser ->
                         _uiState.update { currentState ->
                             currentState.copy(user = fetchedUser)
                         }
 
                         if (fetchedUser.type == "Organization") {
-
-
-                            userRepository.getOrgMembers(
-                                fetchedUser.login, pageToLoad, NetworkConfig.PER_PAGE
-                            ).collect { orgMembersRepoResult ->
-                                orgMembersRepoResult.result.fold(onSuccess = { newOrgMembers ->
-                                    handleResult(
-                                        newItems = newOrgMembers,
-                                        pageToLoad = pageToLoad,
-                                        isRefresh = isRefresh,
-                                        initialLoad = initialLoad,
-                                        isLoadMore = isLoadMore,
-                                        source = orgMembersRepoResult.source,
-                                        isDbEmpty = orgMembersRepoResult.isDbEmpty,
-                                        updateSuccess = { currentState, items, _, _, _, _ ->
-                                            val currentEvents = currentState.orgMembers.orEmpty()
-                                            val updatedEvents = if (isLoadMore) {
-                                                currentEvents + items
-                                            } else {
-                                                items
-                                            }
-                                            currentState.copy(orgMembers = updatedEvents)
-                                        },
-                                        updateFailure = { currentState, _, _ ->
-                                            currentState.copy(
-                                                orgMembers = if (isLoadMore) currentState.orgMembers else emptyList()
-                                            )
-                                        })
-                                }, onFailure = { exception ->
-                                    updateErrorState(
-                                        exception,
-                                        isLoadMore,
-                                        stringResourceProvider.getString(R.string.error_failed_to_load_org_members)
+                            collectAndHandleListResult(
+                                repoFlow = userRepository.getOrgMembers(
+                                    fetchedUser.login, pageToLoad, NetworkConfig.PER_PAGE
+                                ),
+                                pageToLoad = pageToLoad,
+                                isRefresh = isRefresh,
+                                initialLoad = initialLoad,
+                                isLoadMore = isLoadMore,
+                                updateSuccess = { currentState, items, _, _, _, _ ->
+                                    val currentItems = currentState.orgMembers.orEmpty()
+                                    val updatedItems = if (isLoadMore) {
+                                        currentItems + items
+                                    } else {
+                                        items
+                                    }
+                                    currentState.copy(orgMembers = updatedItems)
+                                },
+                                updateFailure = { currentState, errorMsg: String?, _ ->
+                                    currentState.copy(
+                                        orgMembers = if (isLoadMore) currentState.orgMembers else emptyList()
                                     )
-                                })
-                            }
+                                },
+                                updateFailureMessage = stringResourceProvider.getString(R.string.error_failed_to_load_org_members)
+                            )
                         } else {
-                            userRepository.getUserEvents(
-                                fetchedUser.login, pageToLoad, NetworkConfig.PER_PAGE
-                            ).collect { eventRepoResult ->
-                                eventRepoResult.result.fold(onSuccess = { newEvents ->
-                                    handleResult(
-                                        newItems = newEvents,
-                                        pageToLoad = pageToLoad,
-                                        isRefresh = isRefresh,
-                                        initialLoad = initialLoad,
-                                        isLoadMore = isLoadMore,
-                                        source = eventRepoResult.source,
-                                        isDbEmpty = eventRepoResult.isDbEmpty,
-                                        updateSuccess = { currentState, items, _, _, _, _ ->
-                                            val currentEvents = currentState.userEvents.orEmpty()
-                                            val updatedEvents = if (isLoadMore) {
-                                                currentEvents + items
-                                            } else {
-                                                items
-                                            }
-                                            currentState.copy(userEvents = updatedEvents)
-                                        },
-                                        updateFailure = { currentState, _, _ ->
-                                            currentState.copy(
-                                                userEvents = if (isLoadMore) currentState.userEvents else emptyList()
-                                            )
-                                        })
-                                }, onFailure = { exception ->
-                                    updateErrorState(
-                                        exception,
-                                        isLoadMore,
-                                        stringResourceProvider.getString(R.string.error_failed_to_load_events)
+                            collectAndHandleListResult(
+                                repoFlow = userRepository.getUserEvents(
+                                    fetchedUser.login, pageToLoad, NetworkConfig.PER_PAGE
+                                ),
+                                pageToLoad = pageToLoad,
+                                isRefresh = isRefresh,
+                                initialLoad = initialLoad,
+                                isLoadMore = isLoadMore,
+                                updateSuccess = { currentState, items, _, _, _, _ ->
+                                    val currentItems = currentState.userEvents.orEmpty()
+                                    val updatedItems = if (isLoadMore) {
+                                        currentItems + items
+                                    } else {
+                                        items
+                                    }
+                                    currentState.copy(userEvents = updatedItems)
+                                },
+                                updateFailure = { currentState, errorMsg: String?, _ ->
+                                    currentState.copy(
+                                        userEvents = if (isLoadMore) currentState.userEvents else emptyList()
                                     )
-                                })
-                            }
+                                },
+                                updateFailureMessage = stringResourceProvider.getString(R.string.error_failed_to_load_events)
+                            )
                         }
                     }, onFailure = { exception ->
                         updateErrorState(
@@ -140,6 +120,42 @@ abstract class BaseProfileViewModel(
                     })
                 }
             }
+        }
+    }
+
+    protected suspend fun <T> collectAndHandleListResult(
+        repoFlow: Flow<RepositoryResult<List<T>>>,
+        pageToLoad: Int,
+        isRefresh: Boolean,
+        initialLoad: Boolean,
+        isLoadMore: Boolean,
+        updateSuccess: (ProfileUiState, List<T>, Int, Boolean, Boolean, Boolean) -> ProfileUiState,
+        updateFailure: (ProfileUiState, String?, Boolean) -> ProfileUiState,
+        updateFailureMessage: String
+    ) {
+        repoFlow.collect { repoResult ->
+            repoResult.data.fold(
+                onSuccess = { newItems ->
+                    handleResult(
+                        newItems = newItems,
+                        pageToLoad = pageToLoad,
+                        isRefresh = isRefresh,
+                        initialLoad = initialLoad,
+                        isLoadMore = isLoadMore,
+                        source = repoResult.dataSource,
+                        isDbEmpty = repoResult.isDbEmpty,
+                        updateSuccess = updateSuccess,
+                        updateFailure = updateFailure
+                    )
+                },
+                onFailure = { exception ->
+                    updateErrorState(
+                        exception,
+                        isLoadMore,
+                        updateFailureMessage
+                    )
+                }
+            )
         }
     }
 

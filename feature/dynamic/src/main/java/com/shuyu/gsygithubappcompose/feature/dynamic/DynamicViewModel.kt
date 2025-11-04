@@ -50,7 +50,7 @@ class DynamicViewModel @Inject constructor(
     ) {
         launchDataLoadWithUser(initialLoad, isRefresh, isLoadMore) { user, pageToLoad ->
             eventRepository.getReceivedEvents(user, pageToLoad, true).collect { repoResult ->
-                repoResult.result.fold(
+                repoResult.data.fold(
                     onSuccess = { newEvents ->
                         handleResult(
                             newItems = newEvents,
@@ -58,7 +58,7 @@ class DynamicViewModel @Inject constructor(
                             isRefresh = isRefresh,
                             initialLoad = initialLoad,
                             isLoadMore = isLoadMore,
-                            source = repoResult.source,
+                            source = repoResult.dataSource,
                             isDbEmpty = repoResult.isDbEmpty,
                             updateSuccess = { currentState, items, _, _, _, _ ->
                                 val currentEvents = currentState.events

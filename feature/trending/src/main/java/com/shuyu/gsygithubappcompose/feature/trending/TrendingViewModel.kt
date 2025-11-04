@@ -53,7 +53,7 @@ class TrendingViewModel @Inject constructor(
         // isLoadMore will effectively be ignored for this API.
         launchDataLoadWithUser(initialLoad, isRefresh, isLoadMore) { _, _ ->
             trendingRepository.getTrendingRepositories(since = "daily", languageType = null).collect { repoResult ->
-                repoResult.result.fold(
+                repoResult.data.fold(
                     onSuccess = { newRepos ->
                         handleResult(
                             newItems = newRepos,
@@ -61,7 +61,7 @@ class TrendingViewModel @Inject constructor(
                             isRefresh = isRefresh,
                             initialLoad = initialLoad,
                             isLoadMore = false, // No load more for trending
-                            source = repoResult.source,
+                            source = repoResult.dataSource,
                             isDbEmpty = repoResult.isDbEmpty,
                             updateSuccess = { currentState, items, _, _, _, _ ->
                                 currentState.copy(repositories = items, hasMore = false) // No more pages
