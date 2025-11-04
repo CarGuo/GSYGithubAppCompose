@@ -1,5 +1,6 @@
 package com.shuyu.gsygithubappcompose.core.ui.components
 
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material.icons.Icons
@@ -15,11 +16,15 @@ import com.shuyu.gsygithubappcompose.core.ui.LocalNavigator
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GSYTopAppBar(
-    modifier: Modifier = Modifier, title: @Composable () -> Unit, showBackButton: Boolean = false
+    modifier: Modifier = Modifier,
+    title: @Composable () -> Unit,
+    showBackButton: Boolean = false,
+    actions: @Composable (RowScope.() -> Unit)? = null
 ) {
     val navigator = LocalNavigator.current
     TopAppBar(
-        title = title, navigationIcon = {
+        title = title,
+        navigationIcon = {
             if (showBackButton) {
                 IconButton(onClick = { navigator.back() }) {
                     Icon(
@@ -28,7 +33,10 @@ fun GSYTopAppBar(
                     )
                 }
             }
-        }, modifier = modifier, colors = TopAppBarDefaults.topAppBarColors(
+        },
+        actions = actions ?: {},
+        modifier = modifier,
+        colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.primary,
             titleContentColor = MaterialTheme.colorScheme.onPrimary,
             navigationIconContentColor = MaterialTheme.colorScheme.onPrimary

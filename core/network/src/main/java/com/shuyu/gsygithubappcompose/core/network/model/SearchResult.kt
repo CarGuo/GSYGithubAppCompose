@@ -1,7 +1,6 @@
 package com.shuyu.gsygithubappcompose.core.network.model
 
 import com.google.gson.annotations.SerializedName
-
 data class UserSearchResponse(
     @SerializedName("total_count")
     val totalCount: Int,

@@ -21,6 +21,12 @@
     <string name="nav_trending">Trending</string>
     <string name="nav_profile">My</string>
     
+    <!-- Search Screen -->
+    <string name="nav_search">Search</string>
+    <string name="search_hint">Search GitHub</string>
+    <string name="search_repository">Search Repository</string>
+    <string name="search_user">Search User</string>
+    
     <!-- Profile Screen -->
     <string name="profile_repositories">Repositories</string>
     <string name="profile_followers">Followers</string>
@@ -48,7 +54,7 @@
     <string name="no_more_data">No more data</string>
     <string name="error">Error</string>
     <string name="retry">Retry</string>
-    <string name="back">Back</string>
+    <string name="nav_back">Back</string>
     <string name="load_failed_click_to_retry">Load failed, click to retry</string>
     <string name="error_no_username_found">No username found</string>
     <string name="error_failed_to_load_events">Failed to load events</string>

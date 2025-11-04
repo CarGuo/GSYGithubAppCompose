@@ -4,6 +4,7 @@ import com.shuyu.gsygithubappcompose.core.database.dao.RepositoryDao
 import com.shuyu.gsygithubappcompose.core.database.entity.RepositoryEntity
 import com.shuyu.gsygithubappcompose.core.network.api.GitHubApiService
 import com.shuyu.gsygithubappcompose.core.network.model.Repository
+import com.shuyu.gsygithubappcompose.core.network.model.RepositorySearchResponse
 import com.shuyu.gsygithubappcompose.data.repository.mapper.toEntity
 import com.shuyu.gsygithubappcompose.data.repository.mapper.toRepository
 import kotlinx.coroutines.flow.Flow
@@ -17,11 +18,12 @@ import javax.inject.Singleton
 
 @Singleton
 class RepositoryRepository @Inject constructor(
-    private val apiService: GitHubApiService,
-    private val repositoryDao: RepositoryDao
+    private val apiService: GitHubApiService, private val repositoryDao: RepositoryDao
 ) {
 
-    fun getTrendingRepositories(language: String? = null, page: Int = 1): Flow<RepositoryResult<List<Repository>>> = flow {
+    fun getTrendingRepositories(
+        language: String? = null, page: Int = 1
+    ): Flow<RepositoryResult<List<Repository>>> = flow {
         var isDbEmpty = false
         // For paginated data, we only check the DB on the first page.
         if (page == 1) {
@@ -49,7 +51,7 @@ class RepositoryRepository @Inject constructor(
 
             val response = apiService.searchRepositories(query, page = page)
 
-            // 3. If it's the first page, update the database
+            // 3. If it\'s the first page, update the database
             if (page == 1) {
                 repositoryDao.clearAndInsert(response.items.map { it.toEntity() })
             }
@@ -75,4 +77,7 @@ class RepositoryRepository @Inject constructor(
         return repositoryDao.getTrendingRepositories(limit)
     }
 
+    suspend fun searchRepositories(query: String, page: Int = 1): RepositorySearchResponse {
+        return apiService.searchRepositories(query, page = page)
+    }
 }

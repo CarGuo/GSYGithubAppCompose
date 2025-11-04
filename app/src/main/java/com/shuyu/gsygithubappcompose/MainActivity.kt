@@ -15,6 +15,7 @@ import com.shuyu.gsygithubappcompose.feature.home.HomeScreen
 import com.shuyu.gsygithubappcompose.feature.login.LoginScreen
 import com.shuyu.gsygithubappcompose.feature.profile.PersonScreen
 import com.shuyu.gsygithubappcompose.feature.profile.ProfileScreen
+import com.shuyu.gsygithubappcompose.feature.search.SearchScreen
 import com.shuyu.gsygithubappcompose.feature.trending.TrendingScreen
 import com.shuyu.gsygithubappcompose.feature.welcome.WelcomeScreen
 import dagger.hilt.android.AndroidEntryPoint
@@ -47,6 +48,10 @@ class MainActivity : ComponentActivity() {
                             trendingContent = { TrendingScreen() },
                             profileContent = { ProfileScreen() }
                         )
+                    }
+
+                    composable("search_route") {
+                        SearchScreen()
                     }
 
                     composable("person/{username}") { backStackEntry ->

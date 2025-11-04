@@ -8,6 +8,7 @@ import com.shuyu.gsygithubappcompose.core.database.entity.UserEntity
 import com.shuyu.gsygithubappcompose.core.network.api.GitHubApiService
 import com.shuyu.gsygithubappcompose.core.network.model.Event
 import com.shuyu.gsygithubappcompose.core.network.model.User
+import com.shuyu.gsygithubappcompose.core.network.model.UserSearchResponse
 import com.shuyu.gsygithubappcompose.data.repository.mapper.toEntity
 import com.shuyu.gsygithubappcompose.data.repository.mapper.toEvent
 import com.shuyu.gsygithubappcompose.data.repository.mapper.toUser
@@ -87,7 +88,7 @@ class UserRepository @Inject constructor(
         try {
             val networkUser = apiService.getUser(username)
             userDao.insertUser(networkUser.toEntity())
-            // After inserting, we could re-query, but for simplicity we'll just emit the network response
+            // After inserting, we could re-query, but for simplicity we\'ll just emit the network response
             emit(RepositoryResult(Result.success(networkUser), DataSource.NETWORK, isDbEmpty))
         } catch (e: Exception) {
             // If network fails, and we have no cached user, we should emit the failure.
@@ -135,7 +136,7 @@ class UserRepository @Inject constructor(
         // Fetch from network
         try {
             val networkEvents = apiService.getUserEvents(username, page, perPage)
-            // If it's the first page, update the database
+            // If it\'s the first page, update the database
             if (page == 1) {
                 eventDao.clearAndInsertUserEvents(username, networkEvents.map { it.toEntity(false, username) })
             }
@@ -146,5 +147,9 @@ class UserRepository @Inject constructor(
             // For page 1, this follows the (optional) cached emission.
             emit(RepositoryResult(Result.failure(e), DataSource.NETWORK, isDbEmpty))
         }
+    }
+
+    suspend fun searchUsers(query: String, page: Int = 1): UserSearchResponse {
+        return apiService.searchUsers(query, page = page)
     }
 }

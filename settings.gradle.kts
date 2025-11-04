@@ -28,4 +28,5 @@ include(":feature:home")
 include(":feature:dynamic")
 include(":feature:profile")
 include(":feature:trending")
+include(":feature:search")
  

@@ -8,6 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Timeline
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
@@ -18,6 +19,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.shuyu.gsygithubappcompose.core.common.R
+import com.shuyu.gsygithubappcompose.core.ui.LocalNavigator
+import com.shuyu.gsygithubappcompose.core.ui.GSYNavigator
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYTopAppBar
 import kotlinx.coroutines.launch
 
@@ -38,6 +41,7 @@ fun HomeScreen(
 ) {
     val pagerState = rememberPagerState(pageCount = { 3 })
     val coroutineScope = rememberCoroutineScope()
+    val navigator = LocalNavigator.current
 
     val items = listOf(
         BottomNavItem.Dynamic, BottomNavItem.Trending, BottomNavItem.Profile
@@ -56,6 +60,10 @@ fun HomeScreen(
     Scaffold(topBar = {
         GSYTopAppBar(
             title = { Text(text = stringResource(id = R.string.app_name)) },
+            showBackButton = false, // Explicitly set to false
+            actions = {
+                SearchActionIcon(navigator = navigator)
+            }
         )
     }, bottomBar = {
         NavigationBar(containerColor = MaterialTheme.colorScheme.primary) {
@@ -93,5 +101,15 @@ fun HomeScreen(
                 2 -> profileContent()
             }
         }
+    }
+}
+
+@Composable
+fun SearchActionIcon(navigator: GSYNavigator) {
+    IconButton(onClick = { navigator.navigate("search_route") }) {
+        Icon(
+            imageVector = Icons.Default.Search,
+            contentDescription = stringResource(id = R.string.nav_search)
+        )
     }
 }

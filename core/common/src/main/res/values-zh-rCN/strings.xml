@@ -21,6 +21,12 @@
     <string name="nav_trending">趋势</string>
     <string name="nav_profile">我的</string>
     
+    <!-- 搜索页 -->
+    <string name="nav_search">搜索</string>
+    <string name="search_hint">搜索 GitHub</string>
+    <string name="search_repository">搜索仓库</string>
+    <string name="search_user">搜索用户</string>
+    
     <!-- 个人中心 -->
     <string name="profile_repositories">仓库</string>
     <string name="profile_followers">粉丝</string>
@@ -48,7 +54,7 @@
     <string name="no_more_data">后面没有数据了</string>
     <string name="error">错误</string>
     <string name="retry">重试</string>
-    <string name="back">返回</string>
+    <string name="nav_back">返回</string>
     <string name="load_failed_click_to_retry">加载失败，点击重试</string>
     <string name="error_no_username_found">未找到用户名</string>
     <string name="error_failed_to_load_events">加载事件失败</string>

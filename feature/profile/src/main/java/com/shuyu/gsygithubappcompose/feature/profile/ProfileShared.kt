@@ -26,6 +26,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.shuyu.gsygithubappcompose.core.common.R
 import com.shuyu.gsygithubappcompose.core.network.model.User
+import com.shuyu.gsygithubappcompose.core.ui.LocalNavigator
 import com.shuyu.gsygithubappcompose.core.ui.components.AvatarImage
 import com.shuyu.gsygithubappcompose.core.ui.components.EventItem
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYGeneralLoadState
@@ -41,6 +42,7 @@ fun ProfileContent(
     onRefresh: () -> Unit,
     onLoadMore: () -> Unit,
 ) {
+    val navigator = LocalNavigator.current
     GSYGeneralLoadState(
         isLoading = uiState.isPageLoading && uiState.user == null,
         error = uiState.error,
@@ -65,7 +67,9 @@ fun ProfileContent(
             if (uiState.user?.type == "Organization") {
                 uiState.orgMembers?.let {
                     items(it) { member ->
-                        UserItem(user = member)
+                        UserItem(user = member) { user ->
+                            navigator.navigate("person/${user.login}")
+                        }
                     }
                 }
             } else {

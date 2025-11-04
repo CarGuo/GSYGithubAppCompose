@@ -32,16 +32,18 @@
 - hilt 现在需要导入的是 androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 
 ## Hilt 使用注意避免：
-* 1、Hilt 创建一个 @HiltViewModel 实例时，它首先调用该类的构造函数，并将所有依赖项（如 userRepository）作为参数传入。
-* 2.Kotlin 构造顺序: 在 Kotlin 中，当一个子类（ProfileViewModel）被实例化时，其构造过程遵循以下顺序：
+* hilt 现在需要导入的是 androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel，不要导入错误
+* Hilt 创建一个 @HiltViewModel 实例时，它首先调用该类的构造函数，并将所有依赖项（如 userRepository）作为参数传入。
+* Kotlin 构造顺序: 在 Kotlin 中，当一个子类（ProfileViewModel）被实例化时，其构造过程遵循以下顺序：
   *  子类的构造函数参数被求值。
   *  父类（BaseProfileViewModel）的 init 代码块和构造函数被执行。
   *  子类（ProfileViewModel）的 init 代码块和属性初始化器被执行。
 * 所以需要避免在子类的构造函数参数中传递给父类的任何方法调用，这些方法调用依赖于子类的属性，因为这些属性在父类构造期间尚未初始化。
 
 ## 导航打开新页面
-
+- 导入的是 import com.shuyu.gsygithubappcompose.core.ui.LocalNavigator
 - 使用 core/ui 下的 GSYNavigator 和 GSYNavHost ，例如  val navigator = LocalNavigator.current
+- 使用  navigator.navigate 或者  navigator.replace
 
 ## 注意：
 - 工作时注意当前是 windows 环境还是 macOS 环境

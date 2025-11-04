@@ -579,10 +579,4 @@ interface GitHubApiService {
         @Query("languageType") languageType: String?
     ): List<TrendingRepoModel>
 
-    // The following are not GitHub API endpoints and are not added:
-    // getAuthorization() - This is for OAuth token exchange, already handled by getAccessToken
-    // getOAuthUrl() - Client-side URL construction
-    // trending() - Web scraping endpoint
-    // trendingApi() - Custom API endpoint
-    // getPageParams() - Helper function
 }
