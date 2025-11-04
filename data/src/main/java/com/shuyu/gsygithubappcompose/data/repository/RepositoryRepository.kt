@@ -47,7 +47,7 @@ class RepositoryRepository @Inject constructor(
                 }
             }
 
-            val response = apiService.getTrendingRepositories(query, page = page)
+            val response = apiService.searchRepositories(query, page = page)
 
             // 3. If it's the first page, update the database
             if (page == 1) {
