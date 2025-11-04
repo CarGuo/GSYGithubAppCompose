@@ -26,6 +26,7 @@
     <string name="search_hint">搜索 GitHub</string>
     <string name="search_repository">搜索仓库</string>
     <string name="search_user">搜索用户</string>
+    <string name="search_history">搜索历史</string>
     
     <!-- 个人中心 -->
     <string name="profile_repositories">仓库</string>

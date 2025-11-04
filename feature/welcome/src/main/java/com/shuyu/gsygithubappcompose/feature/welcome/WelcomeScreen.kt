@@ -64,7 +64,7 @@ fun WelcomeScreen(
 
                 // Subtitle
                 Text(
-                    text = "by CarGuo",
+                    text = "Jetpack Compose",
                     style = MaterialTheme.typography.bodyLarge.copy(
                         fontSize = 18.sp
                     ),

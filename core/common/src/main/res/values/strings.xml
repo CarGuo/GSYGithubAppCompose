@@ -26,6 +26,7 @@
     <string name="search_hint">Search GitHub</string>
     <string name="search_repository">Search Repository</string>
     <string name="search_user">Search User</string>
+    <string name="search_history">Search History</string>
     
     <!-- Profile Screen -->
     <string name="profile_repositories">Repositories</string>
