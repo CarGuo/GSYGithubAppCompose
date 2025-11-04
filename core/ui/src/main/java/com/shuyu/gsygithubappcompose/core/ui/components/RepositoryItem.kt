@@ -20,10 +20,43 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.shuyu.gsygithubappcompose.core.network.model.Repository
+import com.shuyu.gsygithubappcompose.core.network.model.TrendingRepoModel
+
+sealed interface RepoItemDisplayData {
+    val fullName: String
+    val description: String?
+    val language: String?
+    val starCount: String?
+    val forkCount: String?
+    val avatarUrl: String?
+    val ownerName: String?
+}
+
+data class RepositoryDisplayData(
+    override val fullName: String,
+    override val description: String?,
+    override val language: String?,
+    override val starCount: String?,
+    override val forkCount: String?,
+    override val avatarUrl: String?,
+    override val ownerName: String?
+) : RepoItemDisplayData
+
+data class TrendingDisplayData(
+    override val fullName: String,
+    override val description: String?,
+    override val language: String?,
+    override val starCount: String?,
+    override val forkCount: String?,
+    override val avatarUrl: String?,
+    override val ownerName: String?
+) : RepoItemDisplayData
+
+
 
 @Composable
 fun RepositoryItem(
-    repository: Repository
+    repoItem: RepoItemDisplayData
 ) {
     Card(
         modifier = Modifier
@@ -44,19 +77,19 @@ fun RepositoryItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 AvatarImage(
-                    url = repository.owner.avatarUrl,
+                    url = repoItem.avatarUrl ?: "",
                     size = 40.dp,
-                    username = repository.owner.login
+                    username = repoItem.ownerName,
                 )
 
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = repository.fullName,
+                        text = repoItem.fullName,
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.primary
                     )
 
-                    repository.language?.let { lang ->
+                    repoItem.language?.let { lang ->
                         Text(
                             text = lang,
                             style = MaterialTheme.typography.bodySmall,
@@ -66,7 +99,7 @@ fun RepositoryItem(
                 }
             }
 
-            repository.description?.let { desc ->
+            repoItem.description?.let { desc ->
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = desc,
@@ -86,7 +119,7 @@ fun RepositoryItem(
                         style = MaterialTheme.typography.bodySmall
                     )
                     Text(
-                        text = repository.stargazersCount.toString(),
+                        text = repoItem.starCount.toString(),
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
@@ -97,11 +130,36 @@ fun RepositoryItem(
                         style = MaterialTheme.typography.bodySmall
                     )
                     Text(
-                        text = repository.forksCount.toString(),
+                        text = repoItem.forkCount.toString(),
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
             }
         }
     }
+}
+
+
+fun TrendingRepoModel.toTrendingDisplayData(): TrendingDisplayData {
+    return TrendingDisplayData(
+        fullName = fullName ?: "",
+        description = description,
+        language = language,
+        starCount = starCount,
+        forkCount = forkCount,
+        avatarUrl = contributors?.firstOrNull() ?: "",
+        ownerName = name
+    )
+}
+
+fun Repository.toRepositoryDisplayData(): RepositoryDisplayData {
+    return RepositoryDisplayData(
+        fullName = fullName,
+        description = description,
+        language = language,
+        starCount = stargazersCount.toString(),
+        forkCount = forksCount.toString(),
+        avatarUrl = owner.avatarUrl,
+        ownerName = owner.login
+    )
 }

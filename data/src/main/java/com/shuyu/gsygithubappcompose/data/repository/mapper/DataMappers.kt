@@ -2,12 +2,13 @@ package com.shuyu.gsygithubappcompose.data.repository.mapper
 
 import com.shuyu.gsygithubappcompose.core.database.entity.EventEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.RepositoryEntity
+import com.shuyu.gsygithubappcompose.core.database.entity.TrendingEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.UserEntity
 import com.shuyu.gsygithubappcompose.core.network.model.Event
 import com.shuyu.gsygithubappcompose.core.network.model.EventRepo
-import com.shuyu.gsygithubappcompose.core.network.model.User
 import com.shuyu.gsygithubappcompose.core.network.model.Repository
-
+import com.shuyu.gsygithubappcompose.core.network.model.TrendingRepoModel
+import com.shuyu.gsygithubappcompose.core.network.model.User
 fun User.toEntity(): UserEntity {
     return UserEntity(
         id = id,
@@ -301,3 +302,42 @@ fun EventEntity.toEvent(): Event {
         createdAt = createdAt ?: "" // Provide a default empty string if createdAt is null
     )
 }
+
+
+
+
+
+fun TrendingRepoModel.toTrendingEntity(): TrendingEntity {
+    return TrendingEntity(
+        fullName = fullName ?: "",
+        url = url,
+        description = description,
+        language = language,
+        meta = meta,
+        contributors = contributors?.joinToString(","),
+        contributorsUrl = contributorsUrl,
+        starCount = starCount,
+        forkCount = forkCount,
+        name = name,
+        reposName = reposName
+    )
+}
+
+fun TrendingEntity.toTrendingRepoModel(): TrendingRepoModel {
+    return TrendingRepoModel(
+        fullName = fullName,
+        url = url,
+        description = description,
+        language = language,
+        meta = meta,
+        contributors = contributors?.split(","),
+        contributorsUrl = contributorsUrl,
+        starCount = starCount,
+        forkCount = forkCount,
+        name = name,
+        reposName = reposName
+    )
+}
+
+
+

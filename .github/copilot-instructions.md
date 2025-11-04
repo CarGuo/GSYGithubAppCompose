@@ -2,6 +2,8 @@
 
 ## Modules
 
+开发需求要，要先了解整个项目的结构和可用的模块，记住下方模块的要求和特点
+
 ### core/common
 - 存放 `DataStore<Preferences>` 和用户 token 等，另外多语言文本（/res/values/ 和 /res/values-zh-rCN）和图片资源等公共资源也放在这个模块
 
@@ -15,7 +17,8 @@
 - 是所有数据库模块，包括所有数据库能力，有 xxDao、xxEntiny，而每次修改数据库如果设计增删字段，需要修改增加 AppDatabase 的数据库版本
 
 ### data
-- 模块是数据操作处理，包括所有 mediator/xxxMediator 、xxxRepository ，另外所有数据库的  toEntity 和 toXXX 网络数据的实体，都写在 mapper/DataMapper 内统一处理
+- 模块是数据操作处理，包括所有 mediator/xxxMediator 、xxxRepository ，另外所有数据库的  toEntity 和 toXXX 网络数据的实体，都写在 mapper/DataMappers 内统一处理
+- data 模块不存放实体 Model , 实体 Model 在 core/network 的 model/ 目录下
 
 ### feature
 - 模块是页面功能模块，内部每个模块每个模块的页面 xxxScreen 和 xxxViewModel

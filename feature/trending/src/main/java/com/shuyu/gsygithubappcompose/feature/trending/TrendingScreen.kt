@@ -12,6 +12,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYGeneralLoadState
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYPullRefresh
 import com.shuyu.gsygithubappcompose.core.ui.components.RepositoryItem
+import com.shuyu.gsygithubappcompose.core.ui.components.toTrendingDisplayData
 
 @Composable
 fun TrendingScreen(
@@ -31,16 +32,16 @@ fun TrendingScreen(
         GSYPullRefresh(
             isRefreshing = uiState.isRefreshing,
             onRefresh = { viewModel.refresh() },
-            isLoadMore = uiState.isLoadingMore,
-            onLoadMore = { viewModel.loadMore() },
-            hasMore = uiState.hasMore,
+            isLoadMore = false, // Trending API does not support load more
+            onLoadMore = { /* No-op */ }, // Trending API does not support load more
+            hasMore = false, // Trending API does not support load more
             itemCount = uiState.repositories.size,
-            loadMoreError = uiState.loadMoreError,
+            loadMoreError = false, // Trending API does not support load more
             contentPadding = PaddingValues(5.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(uiState.repositories) { repo ->
-                RepositoryItem(repository = repo)
+                RepositoryItem(repoItem = repo.toTrendingDisplayData())
             }
         }
     }

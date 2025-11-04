@@ -18,7 +18,7 @@ import com.shuyu.gsygithubappcompose.core.ui.LocalNavigator
 @Composable
 fun AvatarImage(
     url: String,
-    username: String,
+    username: String?,
     modifier: Modifier = Modifier,
     size: Dp = 40.dp,
 ) {
@@ -30,8 +30,8 @@ fun AvatarImage(
             .size(size)
             .clip(CircleShape)
             .clickable {
-                if (username.isNotEmpty()) {
-                    navigator.navigate("person/$username")
+                username?.apply {
+                    navigator.navigate("person/$this")
                 }
             },
         contentScale = ContentScale.Crop,

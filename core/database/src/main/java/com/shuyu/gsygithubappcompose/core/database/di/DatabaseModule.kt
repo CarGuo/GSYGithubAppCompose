@@ -5,6 +5,7 @@ import androidx.room.Room
 import com.shuyu.gsygithubappcompose.core.database.AppDatabase
 import com.shuyu.gsygithubappcompose.core.database.dao.EventDao
 import com.shuyu.gsygithubappcompose.core.database.dao.RepositoryDao
+import com.shuyu.gsygithubappcompose.core.database.dao.TrendingDao
 import com.shuyu.gsygithubappcompose.core.database.dao.UserDao
 import dagger.Module
 import dagger.Provides
@@ -43,5 +44,11 @@ object DatabaseModule {
     @Singleton
     fun provideEventDao(database: AppDatabase): EventDao {
         return database.eventDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideTrendingDao(database: AppDatabase): TrendingDao {
+        return database.trendingDao()
     }
 }

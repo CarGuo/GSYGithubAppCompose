@@ -17,6 +17,7 @@ import com.shuyu.gsygithubappcompose.core.network.model.Repository
 import com.shuyu.gsygithubappcompose.core.network.model.RepositorySearchResponse
 import com.shuyu.gsygithubappcompose.core.network.model.User
 import com.shuyu.gsygithubappcompose.core.network.model.UserSearchResponse
+import com.shuyu.gsygithubappcompose.core.network.model.TrendingRepoModel
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -567,6 +568,16 @@ interface GitHubApiService {
      */
     @PUT("notifications")
     suspend fun markAllNotificationsAsRead(): Unit
+
+    /**
+     * Get trending repositories from custom API
+     */
+    @GET("https://guoshuyu.cn/github/trend/list")
+    suspend fun getTrendingRepos(
+        @Header("api-token") apiToken: String = NetworkConfig.API_TOKEN,
+        @Query("since") since: String,
+        @Query("languageType") languageType: String?
+    ): List<TrendingRepoModel>
 
     // The following are not GitHub API endpoints and are not added:
     // getAuthorization() - This is for OAuth token exchange, already handled by getAccessToken
