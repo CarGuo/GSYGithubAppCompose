@@ -41,6 +41,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -50,6 +51,7 @@ import com.shuyu.gsygithubappcompose.core.network.model.RepositoryDetailModel
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.Date
+import com.shuyu.gsygithubappcompose.core.common.R
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -209,7 +211,7 @@ fun RepositoryDetailInfoHeader(
 
                     if (createdAtDate != null) {
                         Text(
-                            text = "Created: ${outputDateFormat.format(createdAtDate)}",
+                            text = stringResource(id = R.string.repo_detail_created, outputDateFormat.format(createdAtDate)),
                             style = TextStyle(
                                 color = Color.White.copy(alpha = 0.6f),
                                 fontSize = 12.sp,
@@ -220,7 +222,8 @@ fun RepositoryDetailInfoHeader(
                         )
                     } else {
                         Text(
-                            text = "Created: Invalid Date", style = TextStyle(
+                            text = stringResource(id = R.string.repo_detail_created, "Invalid Date"),
+                            style = TextStyle(
                                 color = Color.White.copy(alpha = 0.6f),
                                 fontSize = 12.sp,
                                 shadow = Shadow(
@@ -243,7 +246,7 @@ fun RepositoryDetailInfoHeader(
 
                         if (pushedAtDate != null) {
                             Text(
-                                text = "Last Commit: ${outputDateFormat.format(pushedAtDate)}",
+                                text = stringResource(id = R.string.repo_detail_last_commit, outputDateFormat.format(pushedAtDate)),
                                 style = TextStyle(
                                     color = Color.White.copy(alpha = 0.6f),
                                     fontSize = 12.sp,
@@ -255,7 +258,8 @@ fun RepositoryDetailInfoHeader(
                             )
                         } else {
                             Text(
-                                text = "Last Commit: Invalid Date", style = TextStyle(
+                                text = stringResource(id = R.string.repo_detail_last_commit, "Invalid Date"),
+                                style = TextStyle(
                                     color = Color.White.copy(alpha = 0.6f),
                                     fontSize = 12.sp,
                                     shadow = Shadow(

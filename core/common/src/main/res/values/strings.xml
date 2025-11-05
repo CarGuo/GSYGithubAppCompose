@@ -47,14 +47,16 @@
     <string name="trending_empty">No trending repositories</string>
     <string name="trending_loading">Loading trending...</string>
     <string name="trending_language">Language: %s</string>
-    <string name="trending_stars">%d stars</string>
-    <string name="trending_forks">%d forks</string>
+    <string name="trending_stars">\%d stars</string>
+    <string name="trending_forks">\%d forks</string>
 
     <!-- Repo Detail Screen -->
     <string name="repo_detail_tab_info">Info</string>
     <string name="repo_detail_tab_readme">Readme</string>
     <string name="repo_detail_tab_issue">Issue</string>
     <string name="repo_detail_tab_file">File</string>
+    <string name="repo_detail_created">Created: %s</string>
+    <string name="repo_detail_last_commit">Last Commit: %s</string>
     
     <!-- Common -->
     <string name="loading">Loading...</string>

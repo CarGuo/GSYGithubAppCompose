@@ -55,6 +55,8 @@
     <string name="repo_detail_tab_readme">Readme</string>
     <string name="repo_detail_tab_issue">Issue</string>
     <string name="repo_detail_tab_file">文件</string>
+    <string name="repo_detail_created">创建时间：%s</string>
+    <string name="repo_detail_last_commit">最后提交：%s</string>
     
     <!-- 通用 -->
     <string name="loading">加载中...</string>
