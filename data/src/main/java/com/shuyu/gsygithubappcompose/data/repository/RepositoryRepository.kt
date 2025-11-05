@@ -6,6 +6,7 @@ import com.shuyu.gsygithubappcompose.core.database.dao.RepositoryDetailDao
 import com.shuyu.gsygithubappcompose.core.database.entity.RepositoryEntity
 import com.shuyu.gsygithubappcompose.core.network.api.GitHubApiService
 import com.shuyu.gsygithubappcompose.core.network.graphql.GetRepositoryDetailQuery
+import com.shuyu.gsygithubappcompose.core.network.model.RepoCommit
 import com.shuyu.gsygithubappcompose.core.network.model.Repository
 import com.shuyu.gsygithubappcompose.core.network.model.RepositoryDetailModel
 import com.shuyu.gsygithubappcompose.core.network.model.RepositorySearchResponse
@@ -124,6 +125,17 @@ class RepositoryRepository @Inject constructor(
             val repos = apiService.getUserRepositories(username)
             repositoryDao.insertRepositories(repos.map { it.toEntity() })
             Result.success(repos)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getRepoCommits(
+        owner: String, repoName: String, page: Int = 1
+    ): Result<List<RepoCommit>> {
+        return try {
+            val commits = apiService.getRepositoryCommits(owner, repoName, page)
+            Result.success(commits)
         } catch (e: Exception) {
             Result.failure(e)
         }

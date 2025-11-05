@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.CoroutineScope
 
 interface BaseUiState {
     val isPageLoading: Boolean
@@ -76,7 +77,7 @@ abstract class BaseViewModel<UiState : BaseUiState>(
         initialLoad: Boolean,
         isRefresh: Boolean,
         isLoadMore: Boolean,
-        dataLoad: suspend (username: String, pageToLoad: Int) -> Unit
+        dataLoad: suspend CoroutineScope.(username: String, pageToLoad: Int) -> Unit
     ) {
         viewModelScope.launch {
             updateLoadingState(initialLoad, isRefresh, isLoadMore)
@@ -111,7 +112,7 @@ abstract class BaseViewModel<UiState : BaseUiState>(
             }
 
             val pageToLoad = if (isRefresh) 1 else _uiState.value.currentPage
-            dataLoad(username, pageToLoad)
+            this.dataLoad(username, pageToLoad)
         }
     }
 
@@ -120,12 +121,12 @@ abstract class BaseViewModel<UiState : BaseUiState>(
         initialLoad: Boolean,
         isRefresh: Boolean,
         isLoadMore: Boolean,
-        dataLoad: suspend (pageToLoad: Int) -> Unit
+        dataLoad: suspend CoroutineScope.(pageToLoad: Int) -> Unit
     ) {
         viewModelScope.launch {
             updateLoadingState(initialLoad, isRefresh, isLoadMore)
             val pageToLoad = if (isRefresh) 1 else _uiState.value.currentPage
-            dataLoad(pageToLoad)
+            this.dataLoad(pageToLoad)
         }
     }
 

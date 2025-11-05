@@ -14,11 +14,20 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import com.shuyu.gsygithubappcompose.core.common.R
+import com.shuyu.gsygithubappcompose.data.repository.EventRepository
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import com.shuyu.gsygithubappcompose.core.network.config.NetworkConfig
+import com.shuyu.gsygithubappcompose.core.network.model.Event
+import com.shuyu.gsygithubappcompose.core.network.model.RepoCommit
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineName
 
 // Define the UI state for RepoDetailInfoViewModel
 data class RepoDetailInfoUiState(
     val repoDetail: RepositoryDetailModel? = null,
-    val repoDetailList: List<Any> = emptyList(), // Placeholder for related items like commits, issues, etc.
+    val repoDetailList: List<RepoDetailListItem> = emptyList(), // Placeholder for related items like commits, issues, etc.
     val owner: String? = null,
     val repoName: String? = null,
     override val isPageLoading: Boolean = false,
@@ -33,6 +42,7 @@ data class RepoDetailInfoUiState(
 @HiltViewModel
 class RepoDetailInfoViewModel @Inject constructor(
     private val repositoryRepository: RepositoryRepository,
+    private val eventRepository: EventRepository, // Inject EventRepository
     preferencesDataStore: UserPreferencesDataStore,
     private val stringResourceProvider: StringResourceProvider
 ) : BaseViewModel<RepoDetailInfoUiState>(
@@ -49,8 +59,7 @@ class RepoDetailInfoViewModel @Inject constructor(
             hasMore = hasMore,
             loadMoreError = loadMoreError
         )
-    }
-) {
+    }) {
 
     // This function is now responsible for setting the owner and repoName, then triggering a data load.
     fun loadRepoDetailInfo(owner: String, repoName: String) {
@@ -66,15 +75,10 @@ class RepoDetailInfoViewModel @Inject constructor(
     override fun loadData(initialLoad: Boolean, isRefresh: Boolean, isLoadMore: Boolean) {
         val owner = _uiState.value.owner
         val repoName = _uiState.value.repoName
+        val currentPage = _uiState.value.currentPage
 
         if (owner == null || repoName == null) {
-            // If owner or repoName are not set, we cannot load data.
-            // This might happen if loadRepoDetailInfo hasn't been called yet.
-            // Update the UI state to reflect an error or simply do nothing if it's an expected initial state.
             if (initialLoad) {
-                // For initial load, we might want to show a specific message or state.
-                // For now, we'll just log and return.
-                // Or, if we want to show an error:
                 updateErrorState(
                     Exception("Owner or repository name not provided for initial load."),
                     isLoadMore,
@@ -85,28 +89,91 @@ class RepoDetailInfoViewModel @Inject constructor(
         }
 
         launchDataLoad(initialLoad, isRefresh, isLoadMore) {
+            // This 'this' refers to the CoroutineScope provided by launchDataLoad
+            val scopeForAsync = this
+
+            // Fetch repository detail
             repositoryRepository.getRepositoryDetail(owner, repoName)
-                .flowOn(Dispatchers.IO)
+                .flowOn(Dispatchers.IO + CoroutineName("RepoDetailFlow"))
                 .collectLatest { repositoryResult ->
-                    repositoryResult.data.fold(
-                        onSuccess = { fetchedRepoDetail ->
-                            _uiState.update { currentState ->
-                                currentState.copy(repoDetail = fetchedRepoDetail)
-                            }
-                            // If there are related lists to load (e.g., commits, issues),
-                            // this is where you would call corresponding repository methods
-                            // and update `repoDetailList` in the UI state.
-                            // For now, `repoDetailList` remains empty as per the original code's intent.
-                        },
-                        onFailure = { exception ->
-                            updateErrorState(
-                                exception,
-                                isLoadMore,
-                                stringResourceProvider.getString(R.string.error_failed_to_load_repo_detail) // Assuming this string resource exists
+                    repositoryResult.data.fold(onSuccess = { fetchedRepoDetail ->
+                        _uiState.update { currentState ->
+                            currentState.copy(repoDetail = fetchedRepoDetail)
+                        }
+                        // After fetching repo detail, fetch events and commits
+                        // Launch fetchEventsAndCommits within the correct scope
+                        scopeForAsync.launch {
+                            fetchEventsAndCommits(
+                                scopeForAsync, owner, repoName, currentPage, isLoadMore
                             )
                         }
-                    )
+                    }, onFailure = { exception ->
+                        updateErrorState(
+                            exception,
+                            isLoadMore,
+                            stringResourceProvider.getString(R.string.error_failed_to_load_repo_detail)
+                        )
+                    })
                 }
+        }
+    }
+
+    private suspend fun fetchEventsAndCommits(
+        coroutineScope: CoroutineScope,
+        owner: String,
+        repoName: String,
+        page: Int,
+        isLoadMore: Boolean
+    ) {
+        val eventsDeferred: Deferred<Result<List<Event>>> =
+            (coroutineScope as CoroutineScope).async(Dispatchers.IO + CoroutineName("EventsFetch")) {
+                eventRepository.getRepositoryEvents(owner, repoName, page)
+            }
+        val commitsDeferred: Deferred<Result<List<RepoCommit>>> =
+            (coroutineScope as CoroutineScope).async(Dispatchers.IO + CoroutineName("CommitsFetch")) {
+                repositoryRepository.getRepoCommits(owner, repoName, page)
+            }
+
+        val deferredResults = awaitAll(eventsDeferred, commitsDeferred)
+        val eventsResult = deferredResults[0] as Result<List<Event>>
+        val commitsResult = deferredResults[1] as Result<List<RepoCommit>>
+
+        val currentList =
+            if (isLoadMore) _uiState.value.repoDetailList.toMutableList() else mutableListOf()
+        var hasMoreEvents = false
+        var hasMoreCommits = false
+
+        eventsResult.onSuccess { events ->
+            currentList.addAll(events.map { RepoDetailListItem.EventItem(it) })
+            hasMoreEvents = events.size == NetworkConfig.PER_PAGE
+        }.onFailure { exception ->
+            updateErrorState(
+                exception,
+                isLoadMore,
+                stringResourceProvider.getString(R.string.error_failed_to_load_events)
+            )
+        }
+
+        commitsResult.onSuccess { commits ->
+            currentList.addAll(commits.map { RepoDetailListItem.CommitItem(it) })
+            hasMoreCommits = commits.size == NetworkConfig.PER_PAGE
+        }.onFailure { exception ->
+            updateErrorState(
+                exception,
+                isLoadMore,
+                stringResourceProvider.getString(R.string.error_failed_to_load_commits)
+            )
+        }
+
+        // Sort the combined list by date if possible, or maintain insertion order
+        // For now, we'll just maintain insertion order (events then commits)
+        // If a specific sort order is needed, it should be implemented here.
+
+        _uiState.update { currentState ->
+            currentState.copy(
+                repoDetailList = currentList,
+                hasMore = hasMoreEvents || hasMoreCommits // If either has more, then overall has more
+            )
         }
     }
 
@@ -116,10 +183,6 @@ class RepoDetailInfoViewModel @Inject constructor(
     }
 
     fun loadMoreRepoDetailList() {
-        // This assumes that `repoDetailList` will eventually be populated via `loadData`
-        // or a similar mechanism, and `hasMore` will be managed by `BaseViewModel`.
-        // If `repoDetailList` is for a separate paginated API, you'd need to implement
-        // `collectAndHandleListResult` for it within `loadData` or a dedicated function.
         if (!_uiState.value.isLoadingMore && _uiState.value.hasMore) {
             loadMore()
         }

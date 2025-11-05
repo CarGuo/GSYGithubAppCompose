@@ -49,4 +49,16 @@ class EventRepository @Inject constructor(
             emit(RepositoryResult(Result.failure(e), DataSource.NETWORK, isDbEmpty))
         }
     }
+
+    // New function to get repository events
+    suspend fun getRepositoryEvents(
+        owner: String, repoName: String, page: Int = 1
+    ): Result<List<Event>> {
+        return try {
+            val events = apiService.getRepositoryEvents(owner, repoName, page)
+            Result.success(events)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }

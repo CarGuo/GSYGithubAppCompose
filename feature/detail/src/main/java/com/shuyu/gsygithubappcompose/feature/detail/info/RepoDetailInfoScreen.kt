@@ -11,6 +11,9 @@ import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYGeneralLoadState
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYPullRefresh
+import com.shuyu.gsygithubappcompose.core.ui.components.UserItem
+import com.shuyu.gsygithubappcompose.core.ui.components.CommitItem
+import com.shuyu.gsygithubappcompose.core.ui.components.EventItem
 
 @Composable
 fun RepoDetailInfoScreen(
@@ -46,8 +49,14 @@ fun RepoDetailInfoScreen(
             }
             uiState.repoDetailList.let { listItems ->
                 items(listItems) { item ->
-                    // Replace this Text composable with your actual item composable
-                    Text(text = item.toString())
+                    when (item) {
+                        is RepoDetailListItem.EventItem -> {
+                            EventItem(event = item.event) // Assuming UserItem can display Event.actor
+                        }
+                        is RepoDetailListItem.CommitItem -> {
+                            CommitItem(commit = item.commit)
+                        }
+                    }
                 }
             }
         }
