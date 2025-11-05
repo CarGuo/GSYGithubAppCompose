@@ -1,3 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">GSYGithubAppCompose</string>
+    <!-- App Name -->
+    <string name="app_name">GSY GitHub App</string>
+
 </resources>

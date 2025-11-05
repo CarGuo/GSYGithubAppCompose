@@ -1,0 +1,30 @@
+query getTrendUser($location: String!){
+  search(type: USER, query: $location, first: 100) {
+    pageInfo {
+      endCursor
+    }
+    user: edges {
+      user: node {
+      		... on User {
+            name,
+            avatarUrl,
+            followers {
+              totalCount
+            },
+            bio,
+            login,
+            lang: repositories(orderBy: {field: STARGAZERS, direction: DESC}, first:1) {
+              nodes{
+                name
+                languages(first:1)  {
+                  nodes {
+                    name
+                  }
+                }
+              }
+            }
+          }
+      }
+    }
+  }
+}

@@ -4,44 +4,74 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.shuyu.gsygithubappcompose.ui.theme.GSYGithubAppComposeTheme
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.navigation.compose.composable
+import com.shuyu.gsygithubappcompose.core.ui.GSYNavHost
+import com.shuyu.gsygithubappcompose.core.ui.theme.GSYGithubAppComposeTheme
+import com.shuyu.gsygithubappcompose.feature.detail.RepoDetailScreen
+import com.shuyu.gsygithubappcompose.feature.dynamic.DynamicScreen
+import com.shuyu.gsygithubappcompose.feature.home.HomeScreen
+import com.shuyu.gsygithubappcompose.feature.login.LoginScreen
+import com.shuyu.gsygithubappcompose.feature.profile.PersonScreen
+import com.shuyu.gsygithubappcompose.feature.profile.ProfileScreen
+import com.shuyu.gsygithubappcompose.feature.search.SearchScreen
+import com.shuyu.gsygithubappcompose.feature.trending.TrendingScreen
+import com.shuyu.gsygithubappcompose.feature.welcome.WelcomeScreen
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        setTheme(R.style.Theme_GSYGithubAppCompose)
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             GSYGithubAppComposeTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                val viewModel: MainViewModel = hiltViewModel()
+                val isLoggedIn by viewModel.isLoggedIn.collectAsState(initial = false)
+
+                GSYNavHost(
+                    startDestination = "welcome"
+                ) {
+                    composable("welcome") {
+                        WelcomeScreen(isLoggedIn = isLoggedIn)
+                    }
+
+                    composable("login") {
+                        LoginScreen()
+                    }
+
+                    composable("home") {
+                        HomeScreen(
+                            dynamicContent = { DynamicScreen() },
+                            trendingContent = { TrendingScreen() },
+                            profileContent = { ProfileScreen() }
+                        )
+                    }
+
+                    composable("search_route") {
+                        SearchScreen()
+                    }
+
+                    composable("person/{username}") { backStackEntry ->
+                        val username = backStackEntry.arguments?.getString("username") ?: ""
+                        PersonScreen(
+                            username = username
+                        )
+                    }
+
+                    composable("repo_detail/{userName}/{repoName}") { backStackEntry ->
+                        val userName = backStackEntry.arguments?.getString("userName") ?: ""
+                        val repoName = backStackEntry.arguments?.getString("repoName") ?: ""
+                        RepoDetailScreen(
+                            userName = userName,
+                            repoName = repoName
+                        )
+                    }
                 }
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    GSYGithubAppComposeTheme {
-        Greeting("Android")
     }
 }
