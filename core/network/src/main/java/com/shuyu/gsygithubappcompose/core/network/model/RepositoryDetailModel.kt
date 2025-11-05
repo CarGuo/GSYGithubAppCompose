@@ -29,4 +29,5 @@ data class RepositoryDetailModel(
     val nameWithOwner: String,
     val parentNameWithOwner: String?,
     val parentFullName: String?,
+    val size: Int?,
 )

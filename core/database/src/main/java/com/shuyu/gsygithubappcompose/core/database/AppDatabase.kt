@@ -25,7 +25,7 @@ import com.shuyu.gsygithubappcompose.core.database.entity.UserEntity
         SearchHistoryEntity::class,
         RepositoryDetailEntity::class
     ],
-    version = 35,
+    version = 36,
     exportSchema = false
 )
 @TypeConverters(DateConverter::class)

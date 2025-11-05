@@ -60,4 +60,6 @@ data class RepositoryDetailEntity(
     val parentNameWithOwner: String?,
     @ColumnInfo(name = "parent_full_name")
     val parentFullName: String?,
+    @ColumnInfo(name = "size")
+    val size: Int?,
 )

@@ -179,6 +179,7 @@ fun GetRepositoryDetailQuery.Repository.toEntity(): RepositoryDetailEntity {
         viewerSubscription = fields.viewerSubscription?.name,
         defaultBranchRef = fields.defaultBranchRef?.name,
         isFork = fields.isFork,
+        size = fields.languages?.totalSize,
         languages = fields.languages?.nodes?.joinToString(", ") { it?.name.toString() },
         createdAt = fields.createdAt as Date,
         pushedAt = fields.pushedAt as Date?,
@@ -223,7 +224,8 @@ fun RepositoryDetailEntity.toRepositoryDetailModel(): RepositoryDetailModel {
         issuesTotal = this.issuesTotal,
         nameWithOwner = this.nameWithOwner,
         parentNameWithOwner = this.parentNameWithOwner,
-        parentFullName = this.parentFullName
+        parentFullName = this.parentFullName,
+        size = size,
     )
 }
 
