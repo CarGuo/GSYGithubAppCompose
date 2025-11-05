@@ -5,6 +5,7 @@ import androidx.room.Room
 import com.shuyu.gsygithubappcompose.core.database.AppDatabase
 import com.shuyu.gsygithubappcompose.core.database.dao.EventDao
 import com.shuyu.gsygithubappcompose.core.database.dao.RepositoryDao
+import com.shuyu.gsygithubappcompose.core.database.dao.RepositoryDetailDao
 import com.shuyu.gsygithubappcompose.core.database.dao.SearchHistoryDao
 import com.shuyu.gsygithubappcompose.core.database.dao.TrendingDao
 import com.shuyu.gsygithubappcompose.core.database.dao.UserDao
@@ -39,6 +40,12 @@ object DatabaseModule {
     @Singleton
     fun provideRepositoryDao(database: AppDatabase): RepositoryDao {
         return database.repositoryDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideRepositoryDetailDao(database: AppDatabase): RepositoryDetailDao {
+        return database.repositoryDetailDao()
     }
 
     @Provides

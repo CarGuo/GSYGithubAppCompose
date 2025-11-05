@@ -17,7 +17,7 @@
 - 是所有数据库模块，包括所有数据库能力，有 xxDao、xxEntiny，而每次修改数据库如果设计增删字段，需要修改增加 AppDatabase 的数据库版本
 
 ### data
-- 模块是数据操作处理，包括所有 mediator/xxxMediator 、xxxRepository ，另外所有数据库的  toEntity 和 toXXX 网络数据的实体，都写在 mapper/DataMappers 内统一处理
+- 模块是数据操作处理，包括所有 xxxRepository ，另外所有数据库的  toEntity 和 toXXX 网络数据的实体，都写在 mapper/DataMappers.kt 内统一处理
 - data 模块不存放实体 Model , 实体 Model 在 core/network 的 model/ 目录下
 
 ### feature

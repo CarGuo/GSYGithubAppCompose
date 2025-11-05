@@ -1,14 +1,20 @@
 package com.shuyu.gsygithubappcompose.data.repository.mapper
 
 import com.shuyu.gsygithubappcompose.core.database.entity.EventEntity
+import com.shuyu.gsygithubappcompose.core.database.entity.RepositoryDetailEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.RepositoryEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.TrendingEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.UserEntity
+import com.shuyu.gsygithubappcompose.core.network.graphql.GetRepositoryDetailQuery
+import com.shuyu.gsygithubappcompose.core.network.graphql.fragment.ComparisonFields
 import com.shuyu.gsygithubappcompose.core.network.model.Event
 import com.shuyu.gsygithubappcompose.core.network.model.EventRepo
 import com.shuyu.gsygithubappcompose.core.network.model.Repository
+import com.shuyu.gsygithubappcompose.core.network.model.RepositoryDetailModel
 import com.shuyu.gsygithubappcompose.core.network.model.TrendingRepoModel
 import com.shuyu.gsygithubappcompose.core.network.model.User
+import java.util.Date
+
 fun User.toEntity(): UserEntity {
     return UserEntity(
         id = id,
@@ -154,6 +160,70 @@ fun Repository.toEntity(): RepositoryEntity {
         openIssuesCount = openIssuesCount,
         createdAt = createdAt,
         updatedAt = updatedAt
+    )
+}
+
+fun GetRepositoryDetailQuery.Repository.toEntity(): RepositoryDetailEntity {
+    val fields = this.comparisonFields
+    return RepositoryDetailEntity(
+        id = fields.id,
+        name = fields.name,
+        owner = fields.owner.login,
+        ownerAvatarUrl = fields.owner.avatarUrl as String?,
+        license = fields.licenseInfo?.name,
+        forkCount = fields.forkCount,
+        stargazersCount = fields.stargazers.totalCount,
+        watchersCount = fields.watchers.totalCount,
+        hasIssuesEnabled = fields.hasIssuesEnabled,
+        viewerHasStarred = fields.viewerHasStarred,
+        viewerSubscription = fields.viewerSubscription?.name,
+        defaultBranchRef = fields.defaultBranchRef?.name,
+        isFork = fields.isFork,
+        languages = fields.languages?.nodes?.joinToString(", ") { it?.name.toString() },
+        createdAt = fields.createdAt as Date,
+        pushedAt = fields.pushedAt as Date?,
+        sshUrl = fields.sshUrl  as String?,
+        url = fields.url as String?,
+        shortDescriptionHTML = fields.shortDescriptionHTML as String?,
+        topics = fields.repositoryTopics.nodes?.joinToString(", ") { it?.topic?.name.toString() },
+        issuesClosed = fields.issuesClosed.totalCount,
+        issuesOpen = fields.issuesOpen.totalCount,
+        issuesTotal = fields.issues.totalCount,
+        nameWithOwner = fields.nameWithOwner,
+        parentNameWithOwner = this.parent?.comparisonFields?.nameWithOwner,
+        parentFullName = this.parent?.comparisonFields?.nameWithOwner
+    )
+}
+
+
+fun RepositoryDetailEntity.toRepositoryDetailModel(): RepositoryDetailModel {
+    return RepositoryDetailModel(
+        id = this.id,
+        name = this.name,
+        owner = this.owner,
+        ownerAvatarUrl = this.ownerAvatarUrl,
+        license = this.license,
+        forkCount = this.forkCount,
+        stargazersCount = this.stargazersCount,
+        watchersCount = this.watchersCount,
+        hasIssuesEnabled = this.hasIssuesEnabled,
+        viewerHasStarred = this.viewerHasStarred,
+        viewerSubscription = this.viewerSubscription,
+        defaultBranchRef = this.defaultBranchRef,
+        isFork = this.isFork,
+        languages = this.languages?.split(", "),
+        createdAt = this.createdAt,
+        pushedAt = this.pushedAt,
+        sshUrl = this.sshUrl,
+        url = this.url,
+        shortDescriptionHTML = this.shortDescriptionHTML,
+        topics = this.topics?.split(", "),
+        issuesClosed = this.issuesClosed,
+        issuesOpen = this.issuesOpen,
+        issuesTotal = this.issuesTotal,
+        nameWithOwner = this.nameWithOwner,
+        parentNameWithOwner = this.parentNameWithOwner,
+        parentFullName = this.parentFullName
     )
 }
 
@@ -338,6 +408,4 @@ fun TrendingEntity.toTrendingRepoModel(): TrendingRepoModel {
         reposName = reposName
     )
 }
-
-
 

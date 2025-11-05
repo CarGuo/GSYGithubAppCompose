@@ -51,7 +51,7 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
 
     // Apollo
-    implementation(libs.apollo.runtime)
+    api(libs.apollo.runtime)
     implementation(libs.apollo.api)
     implementation(libs.apollo.adapters)
 
