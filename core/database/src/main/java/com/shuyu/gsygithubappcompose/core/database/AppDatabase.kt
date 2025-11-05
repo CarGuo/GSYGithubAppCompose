@@ -6,6 +6,7 @@ import androidx.room.TypeConverters
 import com.shuyu.gsygithubappcompose.core.database.dao.CommitDao
 import com.shuyu.gsygithubappcompose.core.database.dao.EventDao
 import com.shuyu.gsygithubappcompose.core.database.dao.FileContentDao
+import com.shuyu.gsygithubappcompose.core.database.dao.IssueDao
 import com.shuyu.gsygithubappcompose.core.database.dao.RepositoryDao
 import com.shuyu.gsygithubappcompose.core.database.dao.RepositoryDetailDao
 import com.shuyu.gsygithubappcompose.core.database.dao.SearchHistoryDao
@@ -14,6 +15,7 @@ import com.shuyu.gsygithubappcompose.core.database.dao.UserDao
 import com.shuyu.gsygithubappcompose.core.database.entity.CommitEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.EventEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.FileContentEntity
+import com.shuyu.gsygithubappcompose.core.database.entity.IssueEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.RepositoryDetailEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.RepositoryEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.SearchHistoryEntity
@@ -29,9 +31,10 @@ import com.shuyu.gsygithubappcompose.core.database.entity.UserEntity
         TrendingEntity::class,
         SearchHistoryEntity::class,
         RepositoryDetailEntity::class,
-        FileContentEntity::class
+        FileContentEntity::class,
+        IssueEntity::class
     ],
-    version = 44,
+    version = 47,
     exportSchema = false
 )
 @TypeConverters(DateConverter::class)
@@ -44,6 +47,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun searchHistoryDao(): SearchHistoryDao
     abstract fun repositoryDetailDao(): RepositoryDetailDao
     abstract fun fileContentDao(): FileContentDao
+    abstract fun issueDao(): IssueDao
 
     fun clearAllData() {
         clearAllTables()

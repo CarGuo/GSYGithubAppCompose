@@ -59,6 +59,10 @@
     <string name="repo_detail_last_commit">最后提交：%s</string>
     <string name="events">事件</string>
     <string name="commits">提交</string>
+    <string name="search_issue">搜索 Issue</string>
+    <string name="all">所有</string>
+    <string name="open">打开</string>
+    <string name="closed">关闭</string>
     
     <!-- 通用 -->
     <string name="loading">加载中...</string>

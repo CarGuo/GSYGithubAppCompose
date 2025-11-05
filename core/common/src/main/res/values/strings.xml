@@ -59,6 +59,10 @@
     <string name="repo_detail_last_commit">Last Commit: %s</string>
     <string name="events">Events</string>
     <string name="commits">Commits</string>
+    <string name="search_issue">Search Issue</string>
+    <string name="all">All</string>
+    <string name="open">Open</string>
+    <string name="closed">Closed</string>
     
     <!-- Common -->
     <string name="loading">Loading...</string>

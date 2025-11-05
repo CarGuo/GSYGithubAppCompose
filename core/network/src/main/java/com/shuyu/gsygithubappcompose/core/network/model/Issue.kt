@@ -8,7 +8,7 @@ data class Issue(
     val nodeId: String?,
     val number: Int,
     val title: String,
-    val user: User,
+    val user: User?,
     val labels: List<IssueLabel>?,
     val state: String,
     val locked: Boolean?,

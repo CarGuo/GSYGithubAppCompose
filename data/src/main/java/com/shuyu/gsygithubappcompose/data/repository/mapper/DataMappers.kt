@@ -4,6 +4,7 @@ import com.shuyu.gsygithubappcompose.core.database.entity.CommitEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.CommitUserEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.EventEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.FileContentEntity
+import com.shuyu.gsygithubappcompose.core.database.entity.IssueEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.RepositoryDetailEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.RepositoryEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.TrendingEntity
@@ -14,6 +15,8 @@ import com.shuyu.gsygithubappcompose.core.network.model.CommitUser
 import com.shuyu.gsygithubappcompose.core.network.model.Event
 import com.shuyu.gsygithubappcompose.core.network.model.EventRepo
 import com.shuyu.gsygithubappcompose.core.network.model.FileContent
+import com.shuyu.gsygithubappcompose.core.network.model.Issue
+import com.shuyu.gsygithubappcompose.core.network.model.IssueLabel
 import com.shuyu.gsygithubappcompose.core.network.model.RepoCommit
 import com.shuyu.gsygithubappcompose.core.network.model.Repository
 import com.shuyu.gsygithubappcompose.core.network.model.RepositoryDetailModel
@@ -496,4 +499,62 @@ fun FileContentEntity.toFileContent(): FileContent {
         downloadUrl = downloadUrl,
         links = null // Not stored in entity
     )
+}
+
+fun Issue.toIssueEntity(owner: String, repoName: String, page: Int): IssueEntity {
+    return IssueEntity(
+        id = id,
+        nodeId = nodeId,
+        number = number,
+        title = title,
+        user = user?.toEntity(),
+        labels = labels?.joinToString(",") { it.name },
+        state = state,
+        locked = locked,
+        assignee = assignee?.toEntity(),
+        comments = comments,
+        createdAt = createdAt,
+        updatedAt = updatedAt,
+        closedAt = closedAt,
+        body = body,
+        htmlUrl = htmlUrl,
+        repositoryUrl = repositoryUrl,
+        owner = owner,
+        repoName = repoName,
+        page = page
+    )
+}
+
+fun List<IssueEntity>.toIssue(): List<Issue> {
+    return this.map { entity ->
+        Issue(
+            id = entity.id,
+            nodeId = entity.nodeId,
+            number = entity.number,
+            title = entity.title,
+            user = entity.user?.toUser(), // Handle null user
+            labels = entity.labels?.split(",")?.map { labelName ->
+                IssueLabel(
+                    id = 0, // Not stored in entity
+                    nodeId = null, // Not stored in entity
+                    url = null, // Not stored in entity
+                    name = labelName,
+                    color = "", // Not stored in entity
+                    default = null // Not stored in entity
+                )
+            } ?: emptyList(),
+            state = entity.state,
+            locked = entity.locked,
+            assignee = entity.assignee?.toUser(),
+            assignees = null, // Not stored in entity
+            comments = entity.comments,
+            createdAt = entity.createdAt,
+            updatedAt = entity.updatedAt,
+            closedAt = entity.closedAt,
+            body = entity.body,
+            bodyHtml = null, // Not stored in entity
+            htmlUrl = entity.htmlUrl,
+            repositoryUrl = entity.repositoryUrl
+        )
+    }
 }

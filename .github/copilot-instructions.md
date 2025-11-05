@@ -219,6 +219,7 @@
 
 *   所有数据库的 `toEntity` 和网络数据的 `toXXX` 实体转换都写在 `mapper/DataMappers.kt` 内统一处理。
 *   例如：`toTrendingEntity()` (网络模型 -> 数据库实体), `toTrendingRepoModel()` (数据库实体 -> 业务模型)。
+*   在映射的时候，需要确保 Model 和 Entity 的字段是对应的，不要自己想象出来多余的字段
 
 ### 6. 多语言支持
 
