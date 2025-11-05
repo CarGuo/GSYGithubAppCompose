@@ -2,7 +2,6 @@ package com.shuyu.gsygithubappcompose.feature.detail.file
 
 import androidx.lifecycle.SavedStateHandle
 import com.shuyu.gsygithubappcompose.core.network.model.FileContent
-import com.shuyu.gsygithubappcompose.data.repository.DataSource
 import com.shuyu.gsygithubappcompose.data.repository.FileContentRepository
 import com.shuyu.gsygithubappcompose.data.repository.vm.BaseUiState
 import com.shuyu.gsygithubappcompose.data.repository.vm.BaseViewModel
@@ -106,7 +105,7 @@ class RepoDetailFileViewModel @Inject constructor(
             }
             uiState.copy(currentPath = path, pathSegments = newPathSegments, fileContents = emptyList())
         }
-        doInitialLoad() // Use public method
+        refresh() // Use public method
     }
 
     fun navigateUp() {

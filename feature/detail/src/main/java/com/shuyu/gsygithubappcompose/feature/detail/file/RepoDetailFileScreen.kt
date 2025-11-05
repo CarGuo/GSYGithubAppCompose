@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material3.*
@@ -15,11 +14,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.shuyu.gsygithubappcompose.core.common.R
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYGeneralLoadState
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYPullRefresh
 
@@ -45,7 +43,7 @@ fun RepoDetailFileScreen(
                     val path = uiState.pathSegments.subList(0, index + 1).joinToString("/")
                     viewModel.navigateToPath(path)
                 },
-                onNavigateUp = { viewModel.navigateUp() },
+                //onNavigateUp = { viewModel.navigateUp() },
                 isLoading = uiState.isPageLoading || uiState.isRefreshing || uiState.isLoadingMore
             )
 
@@ -75,18 +73,11 @@ fun RepoDetailFileScreen(
 fun PathNavigator(
     pathSegments: List<String>,
     onSegmentClick: (Int) -> Unit,
-    onNavigateUp: () -> Unit,
     isLoading: Boolean
 ) {
-    Surface(modifier = Modifier.fillMaxWidth(), tonalElevation = 2.dp) {
+    Surface(modifier = Modifier.fillMaxWidth(), color = Color.White) { // Using PrimaryLight directly
         Column {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = { onNavigateUp() }, enabled = !isLoading) {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = stringResource(id = R.string.back)
-                    )
-                }
                 LazyRow(Modifier.padding(8.dp), state = rememberLazyListState()) {
                     item {
                         Text(
