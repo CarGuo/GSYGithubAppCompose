@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
+    alias(libs.plugins.apollo)
 }
 
 android {
@@ -24,6 +25,13 @@ android {
     }
 }
 
+apollo {
+    service("github") {
+        packageName.set("com.shuyu.gsygithubappcompose.core.network.graphql")
+        srcDir("src/main/graphql/github")
+    }
+}
+
 dependencies {
     implementation(libs.androidx.core.ktx)
 
@@ -31,16 +39,21 @@ dependencies {
     // Hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
-    
+
     // Retrofit & OkHttp
     implementation(libs.retrofit)
     implementation(libs.retrofit.converter.gson)
     implementation(libs.retrofit.converter.serialization)
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging)
-    
+
     // Kotlinx Serialization
     implementation(libs.kotlinx.serialization.json)
-    
+
+    // Apollo
+    implementation(libs.apollo.runtime)
+    implementation(libs.apollo.api)
+    implementation(libs.apollo.adapters)
+
     testImplementation(libs.junit)
 }
