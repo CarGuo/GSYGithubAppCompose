@@ -30,13 +30,13 @@ class IssueRepository @Inject constructor(
         try {
             val networkIssues = if (query.isNotEmpty()) {
                 // If there's a search query, use the search API
-                val query = if (state == "all") {
-                    "$query+repo%3A$owner%2F$repoName";
+                val searchQuery = if (state == "all") {
+                    "$query+repo:$owner/$repoName"
                 } else {
-                    "$query+repo%3A$owner%2F$repoName+state%3A$state";
+                    "$query+repo:$owner/$repoName+state:$state"
                 }
                 githubApiService.searchIssues(
-                    query = query, page = page, perPage = NetworkConfig.PER_PAGE
+                    query = searchQuery, page = page, perPage = NetworkConfig.PER_PAGE
                 ).items
             } else {
                 // Otherwise, use the getRepositoryIssues API
