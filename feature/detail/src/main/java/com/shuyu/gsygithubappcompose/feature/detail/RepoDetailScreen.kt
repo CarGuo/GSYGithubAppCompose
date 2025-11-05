@@ -74,7 +74,7 @@ fun RepoDetailScreen(
                 0 -> RepoDetailInfoScreen(userName, repoName)
                 1 -> RepoDetailReadmeScreen()
                 2 -> RepoDetailIssueScreen()
-                3 -> RepoDetailFileScreen()
+                3 -> RepoDetailFileScreen(userName, repoName)
             }
         }
     }

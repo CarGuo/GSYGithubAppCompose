@@ -78,4 +78,5 @@
     <string name="error_failed_to_load_repositories">加载仓库失败</string>
     <string name="error_failed_to_load_repo_detail">加载仓库详情失败</string>
     <string name="error_failed_to_load_commits">加载提交失败</string>
+    <string name="back">返回</string>
 </resources>

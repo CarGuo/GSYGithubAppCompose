@@ -421,23 +421,13 @@ interface GitHubApiService {
     /**
      * Get repository contents
      */
-    @GET("repos/{owner}/{repo}/contents")
+    @GET("repos/{owner}/{repo}/contents/{path}")
     suspend fun getRepositoryContents(
         @Path("owner") reposOwner: String,
         @Path("repo") reposName: String,
+        @Path("path") path: String = "",
         @Query("ref") branch: String? = null // branch or tag name
     ): List<FileContent>
-
-    /**
-     * Get repository contents at a specific path
-     */
-    @GET("repos/{owner}/{repo}/contents/{path}")
-    suspend fun getRepositoryContentsAtPath(
-        @Path("owner") reposOwner: String,
-        @Path("repo") reposName: String,
-        @Path("path") path: String,
-        @Query("ref") branch: String? = null // branch or tag name
-    ): FileContent
 
     /**
      * Get README file

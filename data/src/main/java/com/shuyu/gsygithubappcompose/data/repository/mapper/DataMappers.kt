@@ -3,6 +3,7 @@ package com.shuyu.gsygithubappcompose.data.repository.mapper
 import com.shuyu.gsygithubappcompose.core.database.entity.CommitEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.CommitUserEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.EventEntity
+import com.shuyu.gsygithubappcompose.core.database.entity.FileContentEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.RepositoryDetailEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.RepositoryEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.TrendingEntity
@@ -12,6 +13,7 @@ import com.shuyu.gsygithubappcompose.core.network.model.CommitDetail
 import com.shuyu.gsygithubappcompose.core.network.model.CommitUser
 import com.shuyu.gsygithubappcompose.core.network.model.Event
 import com.shuyu.gsygithubappcompose.core.network.model.EventRepo
+import com.shuyu.gsygithubappcompose.core.network.model.FileContent
 import com.shuyu.gsygithubappcompose.core.network.model.RepoCommit
 import com.shuyu.gsygithubappcompose.core.network.model.Repository
 import com.shuyu.gsygithubappcompose.core.network.model.RepositoryDetailModel
@@ -464,3 +466,34 @@ fun TrendingEntity.toTrendingRepoModel(): TrendingRepoModel {
     )
 }
 
+fun FileContent.toFileContentEntity(repoOwner: String, repoName: String): FileContentEntity {
+    return FileContentEntity(
+        repoOwner = repoOwner,
+        repoName = repoName,
+        type = type,
+        name = name,
+        path = path,
+        sha = sha,
+        url = url,
+        gitUrl = gitUrl,
+        htmlUrl = htmlUrl,
+        downloadUrl = downloadUrl
+    )
+}
+
+fun FileContentEntity.toFileContent(): FileContent {
+    return FileContent(
+        type = type,
+        encoding = null, // Not stored in entity
+        size = 0, // Not stored in entity
+        name = name,
+        path = path,
+        content = null, // Not stored in entity
+        sha = sha,
+        url = url,
+        gitUrl = gitUrl,
+        htmlUrl = htmlUrl,
+        downloadUrl = downloadUrl,
+        links = null // Not stored in entity
+    )
+}
