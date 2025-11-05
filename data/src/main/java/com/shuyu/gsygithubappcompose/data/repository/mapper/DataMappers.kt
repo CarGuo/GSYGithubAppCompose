@@ -1,19 +1,23 @@
 package com.shuyu.gsygithubappcompose.data.repository.mapper
 
+import com.shuyu.gsygithubappcompose.core.database.entity.CommitEntity
+import com.shuyu.gsygithubappcompose.core.database.entity.CommitUserEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.EventEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.RepositoryDetailEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.RepositoryEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.TrendingEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.UserEntity
 import com.shuyu.gsygithubappcompose.core.network.graphql.GetRepositoryDetailQuery
-import com.shuyu.gsygithubappcompose.core.network.graphql.fragment.ComparisonFields
+import com.shuyu.gsygithubappcompose.core.network.model.CommitDetail
+import com.shuyu.gsygithubappcompose.core.network.model.CommitUser
 import com.shuyu.gsygithubappcompose.core.network.model.Event
 import com.shuyu.gsygithubappcompose.core.network.model.EventRepo
+import com.shuyu.gsygithubappcompose.core.network.model.RepoCommit
 import com.shuyu.gsygithubappcompose.core.network.model.Repository
 import com.shuyu.gsygithubappcompose.core.network.model.RepositoryDetailModel
 import com.shuyu.gsygithubappcompose.core.network.model.TrendingRepoModel
 import com.shuyu.gsygithubappcompose.core.network.model.User
-import java.util.Date
+
 
 fun User.toEntity(): UserEntity {
     return UserEntity(
@@ -183,7 +187,7 @@ fun GetRepositoryDetailQuery.Repository.toEntity(): RepositoryDetailEntity {
         languages = fields.languages?.nodes?.joinToString(", ") { it?.name.toString() },
         createdAt = fields.createdAt as String,
         pushedAt = fields.pushedAt as String?,
-        sshUrl = fields.sshUrl  as String?,
+        sshUrl = fields.sshUrl as String?,
         url = fields.url as String?,
         shortDescriptionHTML = fields.shortDescriptionHTML as String?,
         topics = fields.repositoryTopics.nodes?.joinToString(", ") { it?.topic?.name.toString() },
@@ -244,7 +248,6 @@ fun RepositoryEntity.toRepository(): Repository {
             url = null, // Not available in RepositoryEntity
             htmlUrl = null, // Not available in RepositoryEntity
             followersUrl = null, // Not available in RepositoryEntity
-            followingUrl = null, // Not available in RepositoryEntity
             gistsUrl = null, // Not available in RepositoryEntity
             starredUrl = null, // Not available in RepositoryEntity
             subscriptionsUrl = null, // Not available in RepositoryEntity
@@ -272,7 +275,8 @@ fun RepositoryEntity.toRepository(): Repository {
             ownedPrivateRepos = null, // Not available in RepositoryEntity
             diskUsage = null, // Not available in RepositoryEntity
             collaborators = null, // Not available in RepositoryEntity
-            twoFactorAuthentication = null // Not available in RepositoryEntity
+            twoFactorAuthentication = null, // Not available in RepositoryEntity
+            followingUrl = null,// Not available in RepositoryEntity
         ),
         private = isPrivate,
         htmlUrl = htmlUrl,
@@ -287,7 +291,12 @@ fun RepositoryEntity.toRepository(): Repository {
     )
 }
 
-fun Event.toEntity(isReceivedEvent: Boolean, userLogin: String? = null): EventEntity {
+fun Event.toEntity(
+    isReceivedEvent: Boolean,
+    userLogin: String? = null,
+    repoOwnerLogin: String? = null,
+    repoName: String? = null
+): EventEntity {
     return EventEntity(
         id = id,
         type = type,
@@ -316,7 +325,9 @@ fun Event.toEntity(isReceivedEvent: Boolean, userLogin: String? = null): EventEn
         public = null,
         orgId = null,
         isReceivedEvent = isReceivedEvent,
-        userLogin = userLogin
+        userLogin = userLogin,
+        repoOwnerLogin = repoOwnerLogin ?: "",
+        repoFullName = repoName ?: "",
     )
 }
 
@@ -333,7 +344,6 @@ fun EventEntity.toEvent(): Event {
             url = null,
             htmlUrl = null,
             followersUrl = null,
-            followingUrl = null,
             gistsUrl = null,
             starredUrl = null,
             subscriptionsUrl = null,
@@ -361,7 +371,8 @@ fun EventEntity.toEvent(): Event {
             ownedPrivateRepos = null,
             diskUsage = null,
             collaborators = null,
-            twoFactorAuthentication = null
+            twoFactorAuthentication = null,
+            followingUrl = null
         ),
         repo = repo?.let { repositoryEntity ->
             EventRepo(
@@ -375,8 +386,50 @@ fun EventEntity.toEvent(): Event {
     )
 }
 
+fun RepoCommit.toEntity(repoOwnerLogin: String, repoName: String): CommitEntity {
+    return CommitEntity(
+        sha = sha,
+        message = commit.message,
+        author = commit.author?.toCommitUserEntity(),
+        committer = commit.committer?.toCommitUserEntity(),
+        repoOwnerLogin = repoOwnerLogin,
+        repoName = repoName
+    )
+}
 
+fun CommitUser.toCommitUserEntity(): CommitUserEntity {
+    return CommitUserEntity(
+        name = name, email = email, date = date
+    )
+}
 
+fun CommitEntity.toRepoCommit(): RepoCommit {
+    return RepoCommit(
+        sha = sha,
+        nodeId = null, // Not stored in entity
+        commit = CommitDetail(
+            author = author?.toNetworkCommitAuthor(),
+            committer = committer?.toNetworkCommitAuthor(),
+            message = message ?: "",
+            tree = null, // Not stored in entity
+            url = null, // Not stored in entity
+            commentCount = null, // Not stored in entity
+            verification = null // Not stored in entity
+        ),
+        url = null, // Not stored in entity
+        htmlUrl = null, // Not stored in entity
+        commentsUrl = null, // Not stored in entity
+        author = null, // Not enough info in CommitUserEntity to create a full User object
+        committer = null, // Not enough info in CommitUserEntity to create a full User object
+        parents = null // Not stored in entity
+    )
+}
+
+fun CommitUserEntity.toNetworkCommitAuthor(): CommitUser {
+    return CommitUser(
+        name = name, email = email, date = date
+    )
+}
 
 
 fun TrendingRepoModel.toTrendingEntity(): TrendingEntity {

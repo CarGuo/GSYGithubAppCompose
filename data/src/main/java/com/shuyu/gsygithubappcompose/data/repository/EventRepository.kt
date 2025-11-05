@@ -50,15 +50,27 @@ class EventRepository @Inject constructor(
         }
     }
 
-    // New function to get repository events
-    suspend fun getRepositoryEvents(
+    fun getRepositoryEvents(
         owner: String, repoName: String, page: Int = 1
-    ): Result<List<Event>> {
-        return try {
-            val events = apiService.getRepositoryEvents(owner, repoName, page)
-            Result.success(events)
+    ): Flow<RepositoryResult<List<Event>>> = flow {
+        var isDbEmpty = false
+        if (page == 1) {
+            val cachedEvents = eventDao.getRepoEvents(owner, repoName).map { it.toEvent() }
+            isDbEmpty = cachedEvents.isEmpty()
+            if (cachedEvents.isNotEmpty()) {
+                emit(RepositoryResult(Result.success(cachedEvents), DataSource.CACHE, isDbEmpty))
+            }
+        }
+
+        try {
+            val networkEvents = apiService.getRepositoryEvents(owner, repoName, page)
+            if (page == 1) {
+                val eventEntities = networkEvents.map { it.toEntity(false, null, owner, repoName) }
+                eventDao.clearAndInsertRepoEvents(owner, repoName, eventEntities)
+            }
+            emit(RepositoryResult(Result.success(networkEvents), DataSource.NETWORK, isDbEmpty))
         } catch (e: Exception) {
-            Result.failure(e)
+            emit(RepositoryResult(Result.failure(e), DataSource.NETWORK, isDbEmpty))
         }
     }
 }

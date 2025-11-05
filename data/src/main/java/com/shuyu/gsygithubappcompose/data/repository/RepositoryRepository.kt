@@ -1,6 +1,7 @@
 package com.shuyu.gsygithubappcompose.data.repository
 
 import com.apollographql.apollo3.ApolloClient
+import com.shuyu.gsygithubappcompose.core.database.dao.CommitDao
 import com.shuyu.gsygithubappcompose.core.database.dao.RepositoryDao
 import com.shuyu.gsygithubappcompose.core.database.dao.RepositoryDetailDao
 import com.shuyu.gsygithubappcompose.core.database.entity.RepositoryEntity
@@ -11,6 +12,7 @@ import com.shuyu.gsygithubappcompose.core.network.model.Repository
 import com.shuyu.gsygithubappcompose.core.network.model.RepositoryDetailModel
 import com.shuyu.gsygithubappcompose.core.network.model.RepositorySearchResponse
 import com.shuyu.gsygithubappcompose.data.repository.mapper.toEntity
+import com.shuyu.gsygithubappcompose.data.repository.mapper.toRepoCommit
 import com.shuyu.gsygithubappcompose.data.repository.mapper.toRepository
 import com.shuyu.gsygithubappcompose.data.repository.mapper.toRepositoryDetailModel
 import kotlinx.coroutines.flow.Flow
@@ -27,6 +29,7 @@ class RepositoryRepository @Inject constructor(
     private val apiService: GitHubApiService,
     private val repositoryDao: RepositoryDao,
     private val repositoryDetailDao: RepositoryDetailDao,
+    private val commitDao: CommitDao, // Inject CommitDao
     private val apolloClient: ApolloClient
 ) {
 
@@ -130,14 +133,27 @@ class RepositoryRepository @Inject constructor(
         }
     }
 
-    suspend fun getRepoCommits(
+    fun getRepoCommits(
         owner: String, repoName: String, page: Int = 1
-    ): Result<List<RepoCommit>> {
-        return try {
-            val commits = apiService.getRepositoryCommits(owner, repoName, page)
-            Result.success(commits)
+    ): Flow<RepositoryResult<List<RepoCommit>>> = flow {
+        var isDbEmpty = false
+        if (page == 1) {
+            val cachedCommits = commitDao.getRepoCommits(owner, repoName).map { it.toRepoCommit() }
+            isDbEmpty = cachedCommits.isEmpty()
+            if (cachedCommits.isNotEmpty()) {
+                emit(RepositoryResult(Result.success(cachedCommits), DataSource.CACHE, isDbEmpty))
+            }
+        }
+
+        try {
+            val networkCommits = apiService.getRepositoryCommits(owner, repoName, page)
+            if (page == 1) {
+                val commitEntities = networkCommits.map { it.toEntity(owner, repoName) }
+                commitDao.clearAndInsertRepoCommits(owner, repoName, commitEntities)
+            }
+            emit(RepositoryResult(Result.success(networkCommits), DataSource.NETWORK, isDbEmpty))
         } catch (e: Exception) {
-            Result.failure(e)
+            emit(RepositoryResult(Result.failure(e), DataSource.NETWORK, isDbEmpty))
         }
     }
 

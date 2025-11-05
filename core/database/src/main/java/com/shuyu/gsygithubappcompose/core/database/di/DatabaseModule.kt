@@ -3,6 +3,7 @@ package com.shuyu.gsygithubappcompose.core.database.di
 import android.content.Context
 import androidx.room.Room
 import com.shuyu.gsygithubappcompose.core.database.AppDatabase
+import com.shuyu.gsygithubappcompose.core.database.dao.CommitDao
 import com.shuyu.gsygithubappcompose.core.database.dao.EventDao
 import com.shuyu.gsygithubappcompose.core.database.dao.RepositoryDao
 import com.shuyu.gsygithubappcompose.core.database.dao.RepositoryDetailDao
@@ -64,5 +65,11 @@ object DatabaseModule {
     @Singleton
     fun provideSearchHistory(database: AppDatabase): SearchHistoryDao {
         return database.searchHistoryDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideCommitDao(database: AppDatabase): CommitDao {
+        return database.commitDao()
     }
 }

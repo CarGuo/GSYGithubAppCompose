@@ -14,15 +14,12 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import com.shuyu.gsygithubappcompose.core.common.R
+import com.shuyu.gsygithubappcompose.data.repository.DataSource
 import com.shuyu.gsygithubappcompose.data.repository.EventRepository
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import com.shuyu.gsygithubappcompose.core.network.config.NetworkConfig
-import com.shuyu.gsygithubappcompose.core.network.model.Event
-import com.shuyu.gsygithubappcompose.core.network.model.RepoCommit
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineName
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 enum class RepoDetailItemType {
     EVENT,
@@ -36,6 +33,7 @@ data class RepoDetailInfoUiState(
     val owner: String? = null,
     val repoName: String? = null,
     val selectedItemType: RepoDetailItemType = RepoDetailItemType.EVENT, // New state for selected item type
+    val isSwitchingItemType: Boolean = false, // New state to prevent multiple requests when switching
     override val isPageLoading: Boolean = false,
     override val isRefreshing: Boolean = false,
     override val isLoadingMore: Boolean = false,
@@ -79,8 +77,8 @@ class RepoDetailInfoViewModel @Inject constructor(
     }
 
     fun setSelectedItemType(itemType: RepoDetailItemType) {
-        if (_uiState.value.selectedItemType != itemType) {
-            _uiState.update { it.copy(selectedItemType = itemType) }
+        if (_uiState.value.selectedItemType != itemType && !_uiState.value.isSwitchingItemType) {
+            _uiState.update { it.copy(selectedItemType = itemType, isSwitchingItemType = true) }
             refresh() // Refresh data when item type changes
         }
     }
@@ -117,7 +115,7 @@ class RepoDetailInfoViewModel @Inject constructor(
                         // After fetching repo detail, fetch events or commits based on selectedItemType
                         scopeForAsync.launch {
                             fetchItems(
-                                scopeForAsync, owner, repoName, currentPage, isLoadMore, selectedItemType
+                                owner, repoName, currentPage, isLoadMore, selectedItemType
                             )
                         }
                     }, onFailure = { exception ->
@@ -132,7 +130,6 @@ class RepoDetailInfoViewModel @Inject constructor(
     }
 
     private suspend fun fetchItems(
-        coroutineScope: CoroutineScope,
         owner: String,
         repoName: String,
         page: Int,
@@ -144,38 +141,61 @@ class RepoDetailInfoViewModel @Inject constructor(
 
         when (itemType) {
             RepoDetailItemType.EVENT -> {
-                val eventsResult = eventRepository.getRepositoryEvents(owner, repoName, page)
-                eventsResult.onSuccess { events ->
-                    currentList.addAll(events.map { RepoDetailListItem.EventItem(it) })
-                    hasMoreItems = events.size == NetworkConfig.PER_PAGE
-                }.onFailure { exception ->
-                    updateErrorState(
-                        exception,
-                        isLoadMore,
-                        stringResourceProvider.getString(R.string.error_failed_to_load_events)
-                    )
-                }
+                eventRepository.getRepositoryEvents(owner, repoName, page)
+                    .flowOn(Dispatchers.IO + CoroutineName("RepoEventsFlow"))
+                    .collectLatest { eventsResult ->
+                        eventsResult.data.fold(onSuccess = { events ->
+                            if (!isLoadMore) {
+                                currentList.clear()
+                            }
+                            currentList.addAll(events.map { RepoDetailListItem.EventItem(it) })
+                            hasMoreItems = events.size == NetworkConfig.PER_PAGE
+
+                            _uiState.update { currentState ->
+                                currentState.copy(
+                                    repoDetailList = currentList,
+                                    hasMore = hasMoreItems,
+                                    isSwitchingItemType = false // Reset switching state
+                                )
+                            }
+                        }, onFailure = { exception ->
+                            updateErrorState(
+                                exception,
+                                isLoadMore,
+                                stringResourceProvider.getString(R.string.error_failed_to_load_events)
+                            )
+                            _uiState.update { it.copy(isSwitchingItemType = false) }
+                        })
+                    }
             }
             RepoDetailItemType.COMMIT -> {
-                val commitsResult = repositoryRepository.getRepoCommits(owner, repoName, page)
-                commitsResult.onSuccess { commits ->
-                    currentList.addAll(commits.map { RepoDetailListItem.CommitItem(it) })
-                    hasMoreItems = commits.size == NetworkConfig.PER_PAGE
-                }.onFailure { exception ->
-                    updateErrorState(
-                        exception,
-                        isLoadMore,
-                        stringResourceProvider.getString(R.string.error_failed_to_load_commits)
-                    )
-                }
-            }
-        }
+                repositoryRepository.getRepoCommits(owner, repoName, page)
+                    .flowOn(Dispatchers.IO + CoroutineName("RepoCommitsFlow"))
+                    .collectLatest { commitsResult ->
+                        commitsResult.data.fold(onSuccess = { commits ->
+                            if (!isLoadMore) {
+                                currentList.clear()
+                            }
+                            currentList.addAll(commits.map { RepoDetailListItem.CommitItem(it) })
+                            hasMoreItems = commits.size == NetworkConfig.PER_PAGE
 
-        _uiState.update { currentState ->
-            currentState.copy(
-                repoDetailList = currentList,
-                hasMore = hasMoreItems
-            )
+                            _uiState.update { currentState ->
+                                currentState.copy(
+                                    repoDetailList = currentList,
+                                    hasMore = hasMoreItems,
+                                    isSwitchingItemType = false // Reset switching state
+                                )
+                            }
+                        }, onFailure = { exception ->
+                            updateErrorState(
+                                exception,
+                                isLoadMore,
+                                stringResourceProvider.getString(R.string.error_failed_to_load_commits)
+                            )
+                            _uiState.update { it.copy(isSwitchingItemType = false) }
+                        })
+                    }
+            }
         }
     }
 
@@ -185,7 +205,7 @@ class RepoDetailInfoViewModel @Inject constructor(
     }
 
     fun loadMoreRepoDetailList() {
-        if (!_uiState.value.isLoadingMore && _uiState.value.hasMore) {
+        if (!_uiState.value.isLoadingMore && _uiState.value.hasMore && !_uiState.value.isSwitchingItemType) {
             loadMore()
         }
     }
