@@ -4,23 +4,13 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.shuyu.gsygithubappcompose.core.common.R
 import com.shuyu.gsygithubappcompose.core.ui.LocalNavigator
@@ -29,6 +19,7 @@ import com.shuyu.gsygithubappcompose.core.ui.components.RepositoryItem
 import com.shuyu.gsygithubappcompose.core.ui.components.UserItem
 import com.shuyu.gsygithubappcompose.core.ui.components.toRepositoryDisplayData
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYPullRefresh
+import com.shuyu.gsygithubappcompose.core.ui.components.GSYSearchInput
 import com.shuyu.gsygithubappcompose.core.database.entity.SearchHistoryEntity
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -51,8 +42,6 @@ fun SearchScreen(
     val loadMoreErrorUser by searchViewModel.loadMoreErrorUser.collectAsState()
     val searchHistory by searchViewModel.searchHistory.collectAsState(initial = emptyList<SearchHistoryEntity>())
 
-    val keyboardController = LocalSoftwareKeyboardController.current
-    val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
     var isSearchFieldFocused by remember { mutableStateOf(false) }
 
@@ -69,48 +58,12 @@ fun SearchScreen(
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
-            OutlinedTextField(
+            GSYSearchInput(
                 value = searchQuery,
                 onValueChange = { searchViewModel.onSearchQueryChanged(it) },
-                label = { Text(stringResource(id = R.string.search_hint)) },
-                singleLine = true,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .focusRequester(focusRequester)
-                    .onFocusChanged { focusState ->
-                        isSearchFieldFocused = focusState.isFocused
-                    },
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                keyboardActions = KeyboardActions(onSearch = {
-                    searchViewModel.performSearch()
-                    keyboardController?.hide()
-                    focusManager.clearFocus()
-                }),
-                trailingIcon = {
-                    if (searchQuery.isNotEmpty()) {
-                        IconButton(onClick = { searchViewModel.onSearchQueryChanged("") }) {
-                            Icon(
-                                Icons.Filled.Clear,
-                                contentDescription = stringResource(id = R.string.clear_search),
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                    } else {
-                        IconButton(
-                            onClick = {
-                                keyboardController?.hide()
-                                focusManager.clearFocus()
-                            }
-                        ) {
-                            Icon(
-                                Icons.Filled.Search,
-                                contentDescription = stringResource(id = R.string.nav_search),
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(28.dp)
-                            )
-                        }
-                    }
-                }
+                onSearch = { searchViewModel.performSearch() },
+                label = stringResource(id = R.string.search_hint),
+                onFocusChanged = { isSearchFieldFocused = it }
             )
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -131,7 +84,6 @@ fun SearchScreen(
                                 .clickable {
                                     searchViewModel.onSearchQueryChanged(historyItem.query)
                                     searchViewModel.performSearch()
-                                    keyboardController?.hide()
                                     focusManager.clearFocus()
                                 }
                                 .padding(vertical = 8.dp)
@@ -148,7 +100,6 @@ fun SearchScreen(
                         onClick = {
                             searchViewModel.onSearchTypeChanged(SearchType.REPOSITORY)
                             searchViewModel.performSearch()
-                            keyboardController?.hide()
                             focusManager.clearFocus()
                         },
                         enabled = searchQuery.isNotBlank(),
@@ -160,7 +111,6 @@ fun SearchScreen(
                         onClick = {
                             searchViewModel.onSearchTypeChanged(SearchType.USER)
                             searchViewModel.performSearch()
-                            keyboardController?.hide()
                             focusManager.clearFocus()
                         },
                         enabled = searchQuery.isNotBlank(),
