@@ -14,16 +14,14 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import com.shuyu.gsygithubappcompose.core.common.R
-import com.shuyu.gsygithubappcompose.data.repository.DataSource
 import com.shuyu.gsygithubappcompose.data.repository.EventRepository
-import com.shuyu.gsygithubappcompose.core.network.config.NetworkConfig
 import kotlinx.coroutines.CoroutineName
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import com.shuyu.gsygithubappcompose.data.repository.RepositoryResult
+import kotlinx.coroutines.flow.Flow
+
 
 enum class RepoDetailItemType {
-    EVENT,
-    COMMIT
+    EVENT, COMMIT
 }
 
 // Define the UI state for RepoDetailInfoViewModel
@@ -136,66 +134,90 @@ class RepoDetailInfoViewModel @Inject constructor(
         isLoadMore: Boolean,
         itemType: RepoDetailItemType
     ) {
-        val currentList = if (isLoadMore) _uiState.value.repoDetailList.toMutableList() else mutableListOf()
-        var hasMoreItems = false
-
         when (itemType) {
             RepoDetailItemType.EVENT -> {
-                eventRepository.getRepositoryEvents(owner, repoName, page)
-                    .flowOn(Dispatchers.IO + CoroutineName("RepoEventsFlow"))
-                    .collectLatest { eventsResult ->
-                        eventsResult.data.fold(onSuccess = { events ->
-                            if (!isLoadMore) {
-                                currentList.clear()
-                            }
-                            currentList.addAll(events.map { RepoDetailListItem.EventItem(it) })
-                            hasMoreItems = events.size == NetworkConfig.PER_PAGE
-
-                            _uiState.update { currentState ->
-                                currentState.copy(
-                                    repoDetailList = currentList,
-                                    hasMore = hasMoreItems,
-                                    isSwitchingItemType = false // Reset switching state
-                                )
-                            }
-                        }, onFailure = { exception ->
-                            updateErrorState(
-                                exception,
-                                isLoadMore,
-                                stringResourceProvider.getString(R.string.error_failed_to_load_events)
-                            )
-                            _uiState.update { it.copy(isSwitchingItemType = false) }
-                        })
-                    }
+                collectAndHandleRepoDetailListResult(
+                    repoFlow = eventRepository.getRepositoryEvents(owner, repoName, page),
+                    pageToLoad = page,
+                    isRefresh = !isLoadMore, // If not load more, it's a refresh or initial load
+                    initialLoad = false, // Handled by loadData
+                    isLoadMore = isLoadMore,
+                    updateSuccess = { currentState, items, _, _, _, _ ->
+                        val currentItems =
+                            if (isLoadMore) currentState.repoDetailList else emptyList()
+                        val updatedItems =
+                            currentItems + items.map { RepoDetailListItem.EventItem(it) }
+                        currentState.copy(
+                            repoDetailList = updatedItems, isSwitchingItemType = false
+                        )
+                    },
+                    updateFailure = { currentState, _, _ ->
+                        currentState.copy(
+                            repoDetailList = if (isLoadMore) currentState.repoDetailList else emptyList(),
+                            isSwitchingItemType = false
+                        )
+                    },
+                    updateFailureMessage = stringResourceProvider.getString(R.string.error_failed_to_load_events)
+                )
             }
+
             RepoDetailItemType.COMMIT -> {
-                repositoryRepository.getRepoCommits(owner, repoName, page)
-                    .flowOn(Dispatchers.IO + CoroutineName("RepoCommitsFlow"))
-                    .collectLatest { commitsResult ->
-                        commitsResult.data.fold(onSuccess = { commits ->
-                            if (!isLoadMore) {
-                                currentList.clear()
-                            }
-                            currentList.addAll(commits.map { RepoDetailListItem.CommitItem(it) })
-                            hasMoreItems = commits.size == NetworkConfig.PER_PAGE
-
-                            _uiState.update { currentState ->
-                                currentState.copy(
-                                    repoDetailList = currentList,
-                                    hasMore = hasMoreItems,
-                                    isSwitchingItemType = false // Reset switching state
-                                )
-                            }
-                        }, onFailure = { exception ->
-                            updateErrorState(
-                                exception,
-                                isLoadMore,
-                                stringResourceProvider.getString(R.string.error_failed_to_load_commits)
-                            )
-                            _uiState.update { it.copy(isSwitchingItemType = false) }
-                        })
-                    }
+                collectAndHandleRepoDetailListResult(
+                    repoFlow = repositoryRepository.getRepoCommits(owner, repoName, page),
+                    pageToLoad = page,
+                    isRefresh = !isLoadMore, // If not load more, it's a refresh or initial load
+                    initialLoad = false, // Handled by loadData
+                    isLoadMore = isLoadMore,
+                    updateSuccess = { currentState, items, _, _, _, _ ->
+                        val currentItems =
+                            if (isLoadMore) currentState.repoDetailList else emptyList()
+                        val updatedItems =
+                            currentItems + items.map { RepoDetailListItem.CommitItem(it) }
+                        currentState.copy(
+                            repoDetailList = updatedItems, isSwitchingItemType = false
+                        )
+                    },
+                    updateFailure = { currentState, _, _ ->
+                        currentState.copy(
+                            repoDetailList = if (isLoadMore) currentState.repoDetailList else emptyList(),
+                            isSwitchingItemType = false
+                        )
+                    },
+                    updateFailureMessage = stringResourceProvider.getString(R.string.error_failed_to_load_commits)
+                )
             }
+        }
+    }
+
+    private suspend fun <T> collectAndHandleRepoDetailListResult(
+        repoFlow: Flow<RepositoryResult<List<T>>>,
+        pageToLoad: Int,
+        isRefresh: Boolean,
+        initialLoad: Boolean,
+        isLoadMore: Boolean,
+        updateSuccess: (RepoDetailInfoUiState, List<T>, Int, Boolean, Boolean, Boolean) -> RepoDetailInfoUiState,
+        updateFailure: (RepoDetailInfoUiState, String?, Boolean) -> RepoDetailInfoUiState,
+        updateFailureMessage: String
+    ) {
+        repoFlow.flowOn(Dispatchers.IO).collectLatest { repoResult ->
+            repoResult.data.fold(onSuccess = { newItems ->
+                handleResult(
+                    newItems = newItems,
+                    pageToLoad = pageToLoad,
+                    isRefresh = isRefresh,
+                    initialLoad = initialLoad,
+                    isLoadMore = isLoadMore,
+                    source = repoResult.dataSource,
+                    isDbEmpty = repoResult.isDbEmpty,
+                    updateSuccess = updateSuccess,
+                    updateFailure = updateFailure
+                )
+            }, onFailure = { exception ->
+                updateErrorState(
+                    exception, isLoadMore, updateFailureMessage
+                )
+                _uiState.update { it.copy(isSwitchingItemType = false) }
+            })
         }
     }
 
