@@ -1,13 +1,16 @@
 package com.shuyu.gsygithubappcompose.core.network.graphql
 
 import com.apollographql.apollo3.ApolloClient
+import com.apollographql.apollo3.network.http.LoggingInterceptor
 import com.apollographql.apollo3.network.okHttpClient
+import com.shuyu.gsygithubappcompose.core.network.config.NetworkConfig
 import com.shuyu.gsygithubappcompose.core.network.interceptor.TokenInterceptor
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import javax.inject.Singleton
 
 @Module
@@ -17,13 +20,14 @@ object GraphQLProvider {
     @Provides
     @Singleton
     fun provideApolloClient(tokenInterceptor: TokenInterceptor): ApolloClient {
-        val okHttpClient = OkHttpClient.Builder()
-            .addInterceptor(tokenInterceptor)
-            .build()
+        val loggingInterceptor = HttpLoggingInterceptor().apply {
+            level = HttpLoggingInterceptor.Level.BODY
+        }
 
-        return ApolloClient.Builder()
-            .serverUrl("https://api.github.com/graphql")
-            .okHttpClient(okHttpClient)
-            .build()
+        val okHttpClient = OkHttpClient.Builder().addInterceptor(loggingInterceptor)
+            .addInterceptor(tokenInterceptor).build()
+
+        return ApolloClient.Builder().serverUrl(NetworkConfig.BASE_GRAPHQL_URL)
+            .okHttpClient(okHttpClient).build()
     }
 }

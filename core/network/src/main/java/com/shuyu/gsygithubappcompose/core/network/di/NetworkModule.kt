@@ -1,6 +1,7 @@
 package com.shuyu.gsygithubappcompose.core.network.di
 
 import com.shuyu.gsygithubappcompose.core.network.api.GitHubApiService
+import com.shuyu.gsygithubappcompose.core.network.config.NetworkConfig
 import com.shuyu.gsygithubappcompose.core.network.interceptor.TokenInterceptor
 import dagger.Module
 import dagger.Provides
@@ -16,8 +17,7 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
-    
-    private const val BASE_URL = "https://api.github.com/"
+
     
     @Provides
     @Singleton
@@ -39,7 +39,7 @@ object NetworkModule {
     @Singleton
     fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
         return Retrofit.Builder()
-            .baseUrl(BASE_URL)
+            .baseUrl(NetworkConfig.BASE_URL)
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
