@@ -56,4 +56,5 @@ dependencies {
     implementation(libs.apollo.adapters)
 
     testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
 }

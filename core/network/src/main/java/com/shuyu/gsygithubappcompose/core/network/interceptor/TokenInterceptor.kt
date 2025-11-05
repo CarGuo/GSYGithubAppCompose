@@ -1,6 +1,6 @@
 package com.shuyu.gsygithubappcompose.core.network.interceptor
 
-import com.shuyu.gsygithubappcompose.core.common.datastore.UserPreferencesDataStore
+import com.shuyu.gsygithubappcompose.core.common.datastore.IUserPreferencesDataStore
 import okhttp3.Interceptor
 import okhttp3.Response
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,7 +15,7 @@ import javax.inject.Singleton
 
 @Singleton
 class TokenInterceptor @Inject constructor(
-    private val userPreferencesDataStore: UserPreferencesDataStore
+    private val userPreferencesDataStore: IUserPreferencesDataStore
 ) : Interceptor {
 
     private val _token = MutableStateFlow<String?>(null)
