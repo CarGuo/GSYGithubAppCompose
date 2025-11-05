@@ -24,12 +24,18 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineName
 
+enum class RepoDetailItemType {
+    EVENT,
+    COMMIT
+}
+
 // Define the UI state for RepoDetailInfoViewModel
 data class RepoDetailInfoUiState(
     val repoDetail: RepositoryDetailModel? = null,
     val repoDetailList: List<RepoDetailListItem> = emptyList(), // Placeholder for related items like commits, issues, etc.
     val owner: String? = null,
     val repoName: String? = null,
+    val selectedItemType: RepoDetailItemType = RepoDetailItemType.EVENT, // New state for selected item type
     override val isPageLoading: Boolean = false,
     override val isRefreshing: Boolean = false,
     override val isLoadingMore: Boolean = false,
@@ -72,10 +78,18 @@ class RepoDetailInfoViewModel @Inject constructor(
         }
     }
 
+    fun setSelectedItemType(itemType: RepoDetailItemType) {
+        if (_uiState.value.selectedItemType != itemType) {
+            _uiState.update { it.copy(selectedItemType = itemType) }
+            refresh() // Refresh data when item type changes
+        }
+    }
+
     override fun loadData(initialLoad: Boolean, isRefresh: Boolean, isLoadMore: Boolean) {
         val owner = _uiState.value.owner
         val repoName = _uiState.value.repoName
         val currentPage = _uiState.value.currentPage
+        val selectedItemType = _uiState.value.selectedItemType
 
         if (owner == null || repoName == null) {
             if (initialLoad) {
@@ -100,11 +114,10 @@ class RepoDetailInfoViewModel @Inject constructor(
                         _uiState.update { currentState ->
                             currentState.copy(repoDetail = fetchedRepoDetail)
                         }
-                        // After fetching repo detail, fetch events and commits
-                        // Launch fetchEventsAndCommits within the correct scope
+                        // After fetching repo detail, fetch events or commits based on selectedItemType
                         scopeForAsync.launch {
-                            fetchEventsAndCommits(
-                                scopeForAsync, owner, repoName, currentPage, isLoadMore
+                            fetchItems(
+                                scopeForAsync, owner, repoName, currentPage, isLoadMore, selectedItemType
                             )
                         }
                     }, onFailure = { exception ->
@@ -118,61 +131,50 @@ class RepoDetailInfoViewModel @Inject constructor(
         }
     }
 
-    private suspend fun fetchEventsAndCommits(
+    private suspend fun fetchItems(
         coroutineScope: CoroutineScope,
         owner: String,
         repoName: String,
         page: Int,
-        isLoadMore: Boolean
+        isLoadMore: Boolean,
+        itemType: RepoDetailItemType
     ) {
-        val eventsDeferred: Deferred<Result<List<Event>>> =
-            (coroutineScope as CoroutineScope).async(Dispatchers.IO + CoroutineName("EventsFetch")) {
-                eventRepository.getRepositoryEvents(owner, repoName, page)
+        val currentList = if (isLoadMore) _uiState.value.repoDetailList.toMutableList() else mutableListOf()
+        var hasMoreItems = false
+
+        when (itemType) {
+            RepoDetailItemType.EVENT -> {
+                val eventsResult = eventRepository.getRepositoryEvents(owner, repoName, page)
+                eventsResult.onSuccess { events ->
+                    currentList.addAll(events.map { RepoDetailListItem.EventItem(it) })
+                    hasMoreItems = events.size == NetworkConfig.PER_PAGE
+                }.onFailure { exception ->
+                    updateErrorState(
+                        exception,
+                        isLoadMore,
+                        stringResourceProvider.getString(R.string.error_failed_to_load_events)
+                    )
+                }
             }
-        val commitsDeferred: Deferred<Result<List<RepoCommit>>> =
-            (coroutineScope as CoroutineScope).async(Dispatchers.IO + CoroutineName("CommitsFetch")) {
-                repositoryRepository.getRepoCommits(owner, repoName, page)
+            RepoDetailItemType.COMMIT -> {
+                val commitsResult = repositoryRepository.getRepoCommits(owner, repoName, page)
+                commitsResult.onSuccess { commits ->
+                    currentList.addAll(commits.map { RepoDetailListItem.CommitItem(it) })
+                    hasMoreItems = commits.size == NetworkConfig.PER_PAGE
+                }.onFailure { exception ->
+                    updateErrorState(
+                        exception,
+                        isLoadMore,
+                        stringResourceProvider.getString(R.string.error_failed_to_load_commits)
+                    )
+                }
             }
-
-        val deferredResults = awaitAll(eventsDeferred, commitsDeferred)
-        val eventsResult = deferredResults[0] as Result<List<Event>>
-        val commitsResult = deferredResults[1] as Result<List<RepoCommit>>
-
-        val currentList =
-            if (isLoadMore) _uiState.value.repoDetailList.toMutableList() else mutableListOf()
-        var hasMoreEvents = false
-        var hasMoreCommits = false
-
-        eventsResult.onSuccess { events ->
-            currentList.addAll(events.map { RepoDetailListItem.EventItem(it) })
-            hasMoreEvents = events.size == NetworkConfig.PER_PAGE
-        }.onFailure { exception ->
-            updateErrorState(
-                exception,
-                isLoadMore,
-                stringResourceProvider.getString(R.string.error_failed_to_load_events)
-            )
         }
-
-        commitsResult.onSuccess { commits ->
-            currentList.addAll(commits.map { RepoDetailListItem.CommitItem(it) })
-            hasMoreCommits = commits.size == NetworkConfig.PER_PAGE
-        }.onFailure { exception ->
-            updateErrorState(
-                exception,
-                isLoadMore,
-                stringResourceProvider.getString(R.string.error_failed_to_load_commits)
-            )
-        }
-
-        // Sort the combined list by date if possible, or maintain insertion order
-        // For now, we'll just maintain insertion order (events then commits)
-        // If a specific sort order is needed, it should be implemented here.
 
         _uiState.update { currentState ->
             currentState.copy(
                 repoDetailList = currentList,
-                hasMore = hasMoreEvents || hasMoreCommits // If either has more, then overall has more
+                hasMore = hasMoreItems
             )
         }
     }

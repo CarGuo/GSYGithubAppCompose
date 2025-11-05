@@ -57,6 +57,8 @@
     <string name="repo_detail_tab_file">File</string>
     <string name="repo_detail_created">Created: %s</string>
     <string name="repo_detail_last_commit">Last Commit: %s</string>
+    <string name="events">Events</string>
+    <string name="commits">Commits</string>
     
     <!-- Common -->
     <string name="loading">Loading...</string>

@@ -1,19 +1,24 @@
 package com.shuyu.gsygithubappcompose.feature.detail.info
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYGeneralLoadState
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYPullRefresh
-import com.shuyu.gsygithubappcompose.core.ui.components.UserItem
 import com.shuyu.gsygithubappcompose.core.ui.components.CommitItem
 import com.shuyu.gsygithubappcompose.core.ui.components.EventItem
+import com.shuyu.gsygithubappcompose.core.ui.components.SegmentedButton
+import com.shuyu.gsygithubappcompose.core.common.R
 
 @Composable
 fun RepoDetailInfoScreen(
@@ -47,15 +52,36 @@ fun RepoDetailInfoScreen(
                     RepositoryDetailInfoHeader(repositoryDetailModel = headerData)
                 }
             }
-            uiState.repoDetailList.let { listItems ->
-                items(listItems) { item ->
-                    when (item) {
-                        is RepoDetailListItem.EventItem -> {
-                            EventItem(event = item.event) // Assuming UserItem can display Event.actor
+
+            item {
+                SegmentedButton(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    items = listOf(
+                        stringResource(R.string.events),
+                        stringResource(R.string.commits)
+                    ),
+                    selectedIndex = when (uiState.selectedItemType) {
+                        RepoDetailItemType.EVENT -> 0
+                        RepoDetailItemType.COMMIT -> 1
+                    },
+                    onItemSelected = { index ->
+                        when (index) {
+                            0 -> viewModel.setSelectedItemType(RepoDetailItemType.EVENT)
+                            1 -> viewModel.setSelectedItemType(RepoDetailItemType.COMMIT)
                         }
-                        is RepoDetailListItem.CommitItem -> {
-                            CommitItem(commit = item.commit)
-                        }
+                    }
+                )
+            }
+
+            items(uiState.repoDetailList) { item ->
+                when (item) {
+                    is RepoDetailListItem.EventItem -> {
+                        EventItem(event = item.event)
+                    }
+                    is RepoDetailListItem.CommitItem -> {
+                        CommitItem(commit = item.commit)
                     }
                 }
             }
