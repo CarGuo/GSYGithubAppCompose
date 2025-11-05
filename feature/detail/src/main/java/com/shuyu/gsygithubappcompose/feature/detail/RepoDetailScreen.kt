@@ -71,7 +71,7 @@ fun RepoDetailScreen(
                 .padding(paddingValues)
         ) {
             when (it) {
-                0 -> RepoDetailInfoScreen()
+                0 -> RepoDetailInfoScreen(userName, repoName)
                 1 -> RepoDetailReadmeScreen()
                 2 -> RepoDetailIssueScreen()
                 3 -> RepoDetailFileScreen()

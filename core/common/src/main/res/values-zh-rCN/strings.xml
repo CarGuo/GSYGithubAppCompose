@@ -72,4 +72,5 @@
     <string name="error_no_data_found">未找到数据</string>
     <string name="error_unknown">未知错误</string>
     <string name="error_failed_to_load_repositories">加载仓库失败</string>
+    <string name="error_failed_to_load_repo_detail">加载仓库详情失败</string>
 </resources>

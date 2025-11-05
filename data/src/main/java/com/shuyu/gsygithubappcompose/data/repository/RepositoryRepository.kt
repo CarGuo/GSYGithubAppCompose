@@ -1,12 +1,17 @@
 package com.shuyu.gsygithubappcompose.data.repository
 
+import com.apollographql.apollo3.ApolloClient
 import com.shuyu.gsygithubappcompose.core.database.dao.RepositoryDao
+import com.shuyu.gsygithubappcompose.core.database.dao.RepositoryDetailDao
 import com.shuyu.gsygithubappcompose.core.database.entity.RepositoryEntity
 import com.shuyu.gsygithubappcompose.core.network.api.GitHubApiService
+import com.shuyu.gsygithubappcompose.core.network.graphql.GetRepositoryDetailQuery
 import com.shuyu.gsygithubappcompose.core.network.model.Repository
+import com.shuyu.gsygithubappcompose.core.network.model.RepositoryDetailModel
 import com.shuyu.gsygithubappcompose.core.network.model.RepositorySearchResponse
 import com.shuyu.gsygithubappcompose.data.repository.mapper.toEntity
 import com.shuyu.gsygithubappcompose.data.repository.mapper.toRepository
+import com.shuyu.gsygithubappcompose.data.repository.mapper.toRepositoryDetailModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
@@ -18,7 +23,10 @@ import javax.inject.Singleton
 
 @Singleton
 class RepositoryRepository @Inject constructor(
-    private val apiService: GitHubApiService, private val repositoryDao: RepositoryDao
+    private val apiService: GitHubApiService,
+    private val repositoryDao: RepositoryDao,
+    private val repositoryDetailDao: RepositoryDetailDao,
+    private val apolloClient: ApolloClient
 ) {
 
     fun getTrendingRepositories(
@@ -58,6 +66,54 @@ class RepositoryRepository @Inject constructor(
 
             // 4. Emit network data
             emit(RepositoryResult(Result.success(response.items), DataSource.NETWORK, isDbEmpty))
+        } catch (e: Exception) {
+            emit(RepositoryResult(Result.failure(e), DataSource.NETWORK, isDbEmpty))
+        }
+    }
+
+    fun getRepositoryDetail(
+        owner: String, name: String
+    ): Flow<RepositoryResult<RepositoryDetailModel>> = flow {
+        var isDbEmpty = false
+
+        // Try to get from database first
+        val cachedDetail = repositoryDetailDao.getRepositoryDetail("$owner/$name")
+        if (cachedDetail != null) {
+            emit(
+                RepositoryResult(
+                    Result.success(cachedDetail.toRepositoryDetailModel()),
+                    DataSource.CACHE,
+                    isDbEmpty
+                )
+            )
+        } else {
+            isDbEmpty = true;
+        }
+
+        // Fetch from network
+        try {
+            val response = apolloClient.query(GetRepositoryDetailQuery(owner, name)).execute()
+            val repository = response.data?.repository
+
+            if (repository != null) {
+                val detailEntity = repository.toEntity()
+                repositoryDetailDao.insert(detailEntity)
+                emit(
+                    RepositoryResult(
+                        Result.success(detailEntity.toRepositoryDetailModel()),
+                        DataSource.NETWORK,
+                        isDbEmpty
+                    )
+                )
+            } else {
+                emit(
+                    RepositoryResult(
+                        Result.failure(Throwable("Repository null")),
+                        DataSource.NETWORK,
+                        isDbEmpty
+                    )
+                )
+            }
         } catch (e: Exception) {
             emit(RepositoryResult(Result.failure(e), DataSource.NETWORK, isDbEmpty))
         }

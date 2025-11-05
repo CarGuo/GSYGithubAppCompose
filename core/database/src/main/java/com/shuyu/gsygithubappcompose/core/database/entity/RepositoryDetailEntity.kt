@@ -37,9 +37,9 @@ data class RepositoryDetailEntity(
     @ColumnInfo(name = "languages")
     val languages: String?,
     @ColumnInfo(name = "created_at")
-    val createdAt: Date,
+    val createdAt: String,
     @ColumnInfo(name = "pushed_at")
-    val pushedAt: Date?,
+    val pushedAt: String?,
     @ColumnInfo(name = "ssh_url")
     val sshUrl: String?,
     @ColumnInfo(name = "url")

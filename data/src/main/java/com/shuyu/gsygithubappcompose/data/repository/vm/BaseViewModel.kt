@@ -2,17 +2,17 @@ package com.shuyu.gsygithubappcompose.data.repository.vm
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.shuyu.gsygithubappcompose.core.common.R
 import com.shuyu.gsygithubappcompose.core.common.datastore.UserPreferencesDataStore
 import com.shuyu.gsygithubappcompose.core.common.util.StringResourceProvider
 import com.shuyu.gsygithubappcompose.core.network.config.NetworkConfig
+import com.shuyu.gsygithubappcompose.data.repository.DataSource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import com.shuyu.gsygithubappcompose.core.common.R
-import com.shuyu.gsygithubappcompose.data.repository.DataSource
 
 interface BaseUiState {
     val isPageLoading: Boolean
@@ -112,6 +112,20 @@ abstract class BaseViewModel<UiState : BaseUiState>(
 
             val pageToLoad = if (isRefresh) 1 else _uiState.value.currentPage
             dataLoad(username, pageToLoad)
+        }
+    }
+
+
+    protected fun launchDataLoad(
+        initialLoad: Boolean,
+        isRefresh: Boolean,
+        isLoadMore: Boolean,
+        dataLoad: suspend (pageToLoad: Int) -> Unit
+    ) {
+        viewModelScope.launch {
+            updateLoadingState(initialLoad, isRefresh, isLoadMore)
+            val pageToLoad = if (isRefresh) 1 else _uiState.value.currentPage
+            dataLoad(pageToLoad)
         }
     }
 
