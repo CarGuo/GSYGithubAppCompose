@@ -72,7 +72,7 @@ fun RepoDetailScreen(
         ) {
             when (it) {
                 0 -> RepoDetailInfoScreen(userName, repoName)
-                1 -> RepoDetailReadmeScreen()
+                1 -> RepoDetailReadmeScreen(userName, repoName, null)
                 2 -> RepoDetailIssueScreen(userName, repoName)
                 3 -> RepoDetailFileScreen(userName, repoName)
             }
