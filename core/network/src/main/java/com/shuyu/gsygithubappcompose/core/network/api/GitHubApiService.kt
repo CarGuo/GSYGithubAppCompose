@@ -65,7 +65,8 @@ interface GitHubApiService {
     /**
      * Get user received events
      */
-    @GET("users/{username}/received_events")
+    @GET(
+        "users/{username}/received_events")
     suspend fun getReceivedEvents(
         @Path("username") username: String,
         @Query("page") page: Int = 1,
@@ -221,7 +222,8 @@ interface GitHubApiService {
      */
     @GET("repos/{owner}/{repo}/releases")
     suspend fun getRepositoryReleases(
-        @Path("owner") reposOwner: String,
+        @Path(
+            "owner") reposOwner: String,
         @Path("repo") reposName: String,
         @Query("page") page: Int = 1,
         @Query("per_page") perPage: Int = NetworkConfig.PER_PAGE
@@ -431,13 +433,26 @@ interface GitHubApiService {
     ): List<FileContent>
 
     /**
+     * Get file content
+     */
+    @Headers("Accept: application/vnd.github.html")
+    @GET("repos/{owner}/{repo}/contents/{path}")
+    suspend fun getFileContents(
+        @Path("owner") reposOwner: String,
+        @Path("repo") reposName: String,
+        @Path("path", encoded = true) path: String = "",
+        @Query("ref") branch: String? = null // branch or tag name
+    ): ResponseBody
+
+    /**
      * Get README file
      */
     @Headers("Accept: application/vnd.github.html")
     @GET("repos/{owner}/{repo}/readme")
     suspend fun getReadme(
         @Path("owner") reposOwner: String,
-        @Path("repo") reposName: String,
+        @Path(
+            "repo") reposName: String,
         @Query("ref") branch: String? = null // branch or tag name
     ): ResponseBody
 
@@ -520,7 +535,8 @@ interface GitHubApiService {
     @GET("repos/{owner}/{repo}/forks")
     suspend fun getRepositoryForksSorted(
         @Path("owner") reposOwner: String,
-        @Path("repo") reposName: String,
+        @Path(
+            "repo") reposName: String,
         @Query("sort") sort: String = "newest",
         @Query("page") page: Int = 1,
         @Query("per_page") perPage: Int = NetworkConfig.PER_PAGE

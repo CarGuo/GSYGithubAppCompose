@@ -10,6 +10,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.compose.composable
 import com.shuyu.gsygithubappcompose.core.ui.GSYNavHost
 import com.shuyu.gsygithubappcompose.core.ui.theme.GSYGithubAppComposeTheme
+import com.shuyu.gsygithubappcompose.feature.code.FileCodeViewScreen
 import com.shuyu.gsygithubappcompose.feature.detail.RepoDetailScreen
 import com.shuyu.gsygithubappcompose.feature.dynamic.DynamicScreen
 import com.shuyu.gsygithubappcompose.feature.home.HomeScreen
@@ -68,6 +69,19 @@ class MainActivity : ComponentActivity() {
                         RepoDetailScreen(
                             userName = userName,
                             repoName = repoName
+                        )
+                    }
+
+                    composable("file_code/{owner}/{repo}/{path}?branch={branch}") { backStackEntry ->
+                        val owner = backStackEntry.arguments?.getString("owner") ?: ""
+                        val repo = backStackEntry.arguments?.getString("repo") ?: ""
+                        val path = backStackEntry.arguments?.getString("path") ?: ""
+                        val branch = backStackEntry.arguments?.getString("branch")
+                        FileCodeViewScreen(
+                            owner = owner,
+                            repo = repo,
+                            path = path,
+                            branch = branch
                         )
                     }
                 }

@@ -157,6 +157,17 @@ class RepositoryRepository @Inject constructor(
         }
     }
 
+    fun getFileContents(
+        owner: String, repoName: String, path: String, branch: String? = "main"
+    ): Flow<RepositoryResult<String>> = flow {
+        try {
+            val response = apiService.getFileContents(owner, repoName, path, branch)
+            emit(RepositoryResult(Result.success(response.string()), DataSource.NETWORK, true))
+        } catch (e: Exception) {
+            emit(RepositoryResult(Result.failure(e), DataSource.NETWORK, true))
+        }
+    }
+
     fun getCachedTrendingRepositories(limit: Int = 30): Flow<List<RepositoryEntity>> {
         return repositoryDao.getTrendingRepositories(limit)
     }
