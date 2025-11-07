@@ -73,13 +73,13 @@ class IssueRepository @Inject constructor(
     }
 
     fun getIssueInfo(
-        owner: String, repoName: String, issueNumber: Int, forceRefresh: Boolean
+        owner: String, repoName: String, issueNumber: Int
     ): Flow<RepositoryResult<Issue>> = flow {
         var isDbEmpty: Boolean
-        val dbData = issueDao.getIssueById(issueNumber.toLong()).first()
+        val dbData = issueDao.getIssueById(owner, repoName, issueNumber.toLong()).first()
         isDbEmpty = (dbData == null)
 
-        if (dbData != null && !forceRefresh) {
+        if (dbData != null) {
             emit(RepositoryResult(Result.success(dbData.toIssue()), DataSource.CACHE, isDbEmpty))
         }
 
@@ -129,6 +129,61 @@ class IssueRepository @Inject constructor(
             emit(RepositoryResult(Result.success(networkComments), DataSource.NETWORK, isDbEmpty))
         } catch (e: Exception) {
             emit(RepositoryResult(Result.failure(e), DataSource.NETWORK, isDbEmpty))
+        }
+    }
+
+    fun addIssueComment(
+        owner: String, repoName: String, issueNumber: Int, body: String
+    ): Flow<RepositoryResult<Comment>> = flow {
+        try {
+            val comment = mapOf("body" to body)
+            val newComment = githubApiService.addIssueComment(owner, repoName, issueNumber, comment)
+            emit(RepositoryResult(Result.success(newComment), DataSource.NETWORK, true))
+        } catch (e: Exception) {
+            emit(RepositoryResult(Result.failure(e), DataSource.NETWORK, true))
+        }
+    }
+
+    fun editIssue(
+        owner: String,
+        repoName: String,
+        issueNumber: Int,
+        title: String,
+        body: String,
+        state: String? = null
+    ): Flow<RepositoryResult<Issue>> = flow {
+        try {
+            val issueMap: Map<String, String> = if (state == null) {
+                mapOf("title" to title, "body" to body)
+            } else {
+                mapOf("state" to state)
+            }
+            val updatedIssue = githubApiService.editIssue(owner, repoName, issueNumber, issueMap)
+            emit(RepositoryResult(Result.success(updatedIssue), DataSource.NETWORK, true))
+        } catch (e: Exception) {
+            emit(RepositoryResult(Result.failure(e), DataSource.NETWORK, true))
+        }
+    }
+
+    fun lockIssue(
+        owner: String, repoName: String, issueNumber: Int
+    ): Flow<RepositoryResult<Unit>> = flow {
+        try {
+            githubApiService.lockIssue(owner, repoName, issueNumber)
+            emit(RepositoryResult(Result.success(Unit), DataSource.NETWORK, true))
+        } catch (e: Exception) {
+            emit(RepositoryResult(Result.failure(e), DataSource.NETWORK, true))
+        }
+    }
+
+    fun unlockIssue(
+        owner: String, repoName: String, issueNumber: Int
+    ): Flow<RepositoryResult<Unit>> = flow {
+        try {
+            githubApiService.unlockIssue(owner, repoName, issueNumber)
+            emit(RepositoryResult(Result.success(Unit), DataSource.NETWORK, true))
+        } catch (e: Exception) {
+            emit(RepositoryResult(Result.failure(e), DataSource.NETWORK, true))
         }
     }
 }

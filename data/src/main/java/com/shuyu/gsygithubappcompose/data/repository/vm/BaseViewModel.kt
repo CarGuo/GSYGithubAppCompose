@@ -225,6 +225,11 @@ abstract class BaseViewModel<UiState : BaseUiState>(
         viewModelScope.launch { _toastMessage.emit(errorMessage) }
     }
 
+    protected fun showToast(message: String) {
+        viewModelScope.launch {
+            _toastMessage.emit(message)
+        }
+    }
 
     /**
      * Hilt 注入时机注意:
