@@ -15,23 +15,26 @@ class ReadmeRepository @Inject constructor(
 ) {
 
     fun getReadme(owner: String, repo: String, branch: String?, defaultBranch: String? = null): Flow<RepositoryResult<String>> = flow {
-        val cacheKey = "$owner/$repo/$branch"
-        val cachedReadme = readmeDao.getReadme(owner, repo)
+        val isDefaultBranch = branch == defaultBranch
 
-        if (cachedReadme != null && branch == defaultBranch) {
-            emit(RepositoryResult(Result.success(cachedReadme.data), DataSource.CACHE))
+        if (isDefaultBranch) {
+            val cachedReadme = readmeDao.getReadme(owner, repo)
+            if (cachedReadme != null) {
+                emit(RepositoryResult(Result.success(cachedReadme.data), DataSource.CACHE))
+            }
         }
 
         try {
             val responseBody = githubApiService.getReadme(owner, repo, branch)
             val htmlContent = responseBody.string()
 
-            if (branch == defaultBranch) {
+            if (isDefaultBranch) {
                 readmeDao.insert(ReadmeEntity(owner, repo, htmlContent))
             }
 
             emit(RepositoryResult(Result.success(htmlContent), DataSource.NETWORK))
         } catch (e: Exception) {
+            val cachedReadme = if (isDefaultBranch) readmeDao.getReadme(owner, repo) else null
             emit(
                 RepositoryResult(
                     Result.failure(e),

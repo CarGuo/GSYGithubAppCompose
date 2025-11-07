@@ -68,7 +68,6 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material.icons.outlined.VisibilityOff
-import com.shuyu.gsygithubappcompose.feature.detail.info.RepoDetailInfoUiState
 
 
 val LocalRepoOwner = staticCompositionLocalOf<String> { error("No Repo Owner provided") }
