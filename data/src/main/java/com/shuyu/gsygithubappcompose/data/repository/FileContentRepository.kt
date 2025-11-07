@@ -19,12 +19,15 @@ class FileContentRepository @Inject constructor(
     fun getRepositoryContents(
         owner: String,
         repo: String,
-        path: String = ""
+        path: String = "",
+        branch: String? = null, // Add branch parameter
+        defaultBranch: String? = null // Add defaultBranch parameter for caching logic
     ): Flow<RepositoryResult<List<FileContent>>> = flow {
         val isRootPath = path.isEmpty()
         var dbWasEmpty = true
 
-        if (isRootPath) {
+        // Only cache if it's the default branch and root path
+        if (isRootPath && branch == defaultBranch) {
             val cachedData = fileContentDao.getFileContents(owner, repo, path)
             if (cachedData.isNotEmpty()) {
                 dbWasEmpty = false
@@ -33,8 +36,9 @@ class FileContentRepository @Inject constructor(
         }
 
         try {
-            val networkData = gitHubApiService.getRepositoryContents(owner, repo, path)
-            if (isRootPath) {
+            val networkData = gitHubApiService.getRepositoryContents(owner, repo, path, branch)
+            // Only save to DB if it's the default branch and root path
+            if (isRootPath && branch == defaultBranch) {
                 fileContentDao.deleteAllFileContents(owner, repo)
                 fileContentDao.insertAll(networkData.map { it.toFileContentEntity(owner, repo) })
             }

@@ -13,6 +13,8 @@ import kotlinx.coroutines.flow.update
 data class RepoDetailFileUiState(
     val owner: String? = null,
     val repoName: String? = null,
+    val branch: String? = null,
+    val defaultBranch: String? = null, // Added defaultBranch parameter
     val currentPath: String = "",
     val pathSegments: List<String> = emptyList(),
     val fileContents: List<FileContent> = emptyList(),
@@ -61,10 +63,12 @@ class RepoDetailFileViewModel @Inject constructor(
     override fun loadData(initialLoad: Boolean, isRefresh: Boolean, isLoadMore: Boolean) {
         val currentOwner = uiState.value.owner ?: return
         val currentRepoName = uiState.value.repoName ?: return
+        val currentBranch = uiState.value.branch
+        val currentDefaultBranch = uiState.value.defaultBranch
         val currentPath = uiState.value.currentPath
 
         launchDataLoad(initialLoad, isRefresh, isLoadMore) { pageToLoad ->
-            fileContentRepository.getRepositoryContents(currentOwner, currentRepoName, currentPath)
+            fileContentRepository.getRepositoryContents(currentOwner, currentRepoName, currentPath, currentBranch, currentDefaultBranch)
                 .collect {
                     _uiState.update { uiState ->
                         uiState.copy(
@@ -121,7 +125,7 @@ class RepoDetailFileViewModel @Inject constructor(
         navigateToPath(newPath)
     }
 
-    fun setRepoInfo(owner: String, repoName: String) {
-        _uiState.update { it.copy(owner = owner, repoName = repoName) }
+    fun setRepoInfo(owner: String, repoName: String, branch: String?, defaultBranch: String?) {
+        _uiState.update { it.copy(owner = owner, repoName = repoName, branch = branch, defaultBranch = defaultBranch) }
     }
 }

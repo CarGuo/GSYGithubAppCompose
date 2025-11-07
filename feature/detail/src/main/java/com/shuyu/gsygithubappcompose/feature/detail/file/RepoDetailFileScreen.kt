@@ -25,6 +25,7 @@ import java.net.URLEncoder
 import com.shuyu.gsygithubappcompose.feature.detail.LocalRepoOwner
 import com.shuyu.gsygithubappcompose.feature.detail.LocalRepoName
 import com.shuyu.gsygithubappcompose.feature.detail.LocalRepoDetailFileViewModel
+import com.shuyu.gsygithubappcompose.feature.detail.LocalRepoDetailInfoViewModel
 
 @Composable
 fun RepoDetailFileScreen(
@@ -35,8 +36,11 @@ fun RepoDetailFileScreen(
     val owner = LocalRepoOwner.current
     val repoName = LocalRepoName.current
 
-    LaunchedEffect(owner, repoName) {
-        viewModel.setRepoInfo(owner, repoName)
+    val repoDetailInfoViewModel = LocalRepoDetailInfoViewModel.current
+    val repoDetailInfoUiState by repoDetailInfoViewModel.uiState.collectAsState()
+
+    LaunchedEffect(owner, repoName, repoDetailInfoUiState.selectedBranch, repoDetailInfoUiState.repoDetail?.defaultBranchRef) {
+        viewModel.setRepoInfo(owner, repoName, repoDetailInfoUiState.selectedBranch, repoDetailInfoUiState.repoDetail?.defaultBranchRef)
         viewModel.doInitialLoad()
     }
 

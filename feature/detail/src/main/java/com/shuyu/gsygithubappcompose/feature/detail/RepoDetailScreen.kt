@@ -59,6 +59,14 @@ import com.shuyu.gsygithubappcompose.feature.detail.issue.RepoDetailIssueViewMod
 import com.shuyu.gsygithubappcompose.feature.detail.readme.RepoDetailReadmeViewModel
 import com.shuyu.gsygithubappcompose.feature.detail.file.RepoDetailFileViewModel
 import kotlinx.coroutines.delay
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.widthIn
 
 val LocalRepoOwner = staticCompositionLocalOf<String> { error("No Repo Owner provided") }
 val LocalRepoName = staticCompositionLocalOf<String> { error("No Repo Name provided") }
@@ -96,20 +104,25 @@ fun RepoDetailScreen(
     val uiState by repoDetailInfoViewModel.uiState.collectAsState()
 
     // Unified refresh function for all tabs
-    val refreshAllTabs: () -> Unit = {
+    val refreshAllTabs: (String?, String?) -> Unit = { selectedBranch, defaultBranch ->
         repoDetailInfoViewModel.refreshRepoDetailInfo()
-        repoDetailReadmeViewModel.refresh()
-        repoDetailIssueViewModel.refresh()
-        repoDetailFileViewModel.refresh()
+        repoDetailReadmeViewModel.loadReadme(userName, repoName, selectedBranch, defaultBranch)
+        repoDetailIssueViewModel.setRepoInfo(userName, repoName)
+        repoDetailFileViewModel.setRepoInfo(userName, repoName, selectedBranch, defaultBranch)
     }
 
     LaunchedEffect(userName, repoName) {
         // Set repo info for all ViewModels that need it
         repoDetailInfoViewModel.loadRepoDetailInfo(userName, repoName)
-        repoDetailReadmeViewModel.loadReadme(userName, repoName, null)
-        repoDetailIssueViewModel.setRepoInfo(userName, repoName)
-        repoDetailFileViewModel.setRepoInfo(userName, repoName)
-        refreshAllTabs()
+    }
+
+    LaunchedEffect(uiState.selectedBranch, uiState.repoDetail?.defaultBranchRef) {
+        val selectedBranch = uiState.selectedBranch
+        val defaultBranch = uiState.repoDetail?.defaultBranchRef
+
+        if (selectedBranch != null) {
+            refreshAllTabs(selectedBranch, defaultBranch)
+        }
     }
 
     LaunchedEffect(Unit) {
@@ -240,6 +253,45 @@ fun RepoDetailScreen(
                                         Icons.AutoMirrored.Filled.CallSplit,
                                         contentDescription = stringResource(R.string.repo_detail_action_fork)
                                     )
+                                }
+                            }
+
+                            // Branch selection Popmenu
+                            uiState.selectedBranch?.let { currentBranch ->
+                                val expanded = remember { mutableStateOf(false) }
+                                Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterEnd) {
+                                    TextButton(
+                                        onClick = { if (uiState.branches.size > 1) expanded.value = true },
+                                        colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.primary)
+                                    ) {
+                                        Text(
+                                            currentBranch,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis,
+                                            modifier = Modifier.padding(end = 5.dp)
+                                        )
+                                        if (uiState.branches.size > 1) {
+                                            Icon(
+                                                Icons.Filled.ArrowDropDown,
+                                                contentDescription = "Select Branch"
+                                            )
+                                        }
+                                    }
+                                    DropdownMenu(
+                                        expanded = expanded.value,
+                                        onDismissRequest = { expanded.value = false },
+                                        modifier = Modifier.widthIn(max = 200.dp)
+                                    ) {
+                                        uiState.branches.forEach { branch ->
+                                            DropdownMenuItem(
+                                                text = { Text(branch) },
+                                                onClick = {
+                                                    repoDetailInfoViewModel.setBranch(branch)
+                                                    expanded.value = false
+                                                }
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }

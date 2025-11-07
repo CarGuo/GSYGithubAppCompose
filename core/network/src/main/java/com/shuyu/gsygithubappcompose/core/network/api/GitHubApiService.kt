@@ -191,7 +191,8 @@ interface GitHubApiService {
         @Path("owner") reposOwner: String,
         @Path("repo") reposName: String,
         @Query("page") page: Int = 1,
-        @Query("per_page") perPage: Int = NetworkConfig.PER_PAGE
+        @Query("per_page") perPage: Int = NetworkConfig.PER_PAGE,
+        @Query("sha") branch: String? = null
     ): List<RepoCommit>
 
     /**
