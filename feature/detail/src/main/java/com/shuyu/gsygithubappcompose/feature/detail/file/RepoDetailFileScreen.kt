@@ -21,6 +21,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYGeneralLoadState
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYPullRefresh
 import com.shuyu.gsygithubappcompose.core.ui.LocalNavigator
+import com.shuyu.gsygithubappcompose.data.repository.vm.BaseScreen
 import java.net.URLEncoder
 
 @Composable
@@ -35,38 +36,40 @@ fun RepoDetailFileScreen(
         viewModel.doInitialLoad()
     }
 
-    GSYGeneralLoadState(
-        isLoading = uiState.isPageLoading && uiState.fileContents.isEmpty(),
-        error = uiState.error,
-        retry = { viewModel.doInitialLoad() }) {
-        Column(Modifier.fillMaxSize()) {
-            PathNavigator(
-                pathSegments = uiState.pathSegments, onSegmentClick = { index ->
-                    val path = uiState.pathSegments.subList(0, index + 1).joinToString("/")
-                    viewModel.navigateToPath(path)
-                },
-                //onNavigateUp = { viewModel.navigateUp() },
-                isLoading = uiState.isPageLoading || uiState.isRefreshing || uiState.isLoadingMore
-            )
+    BaseScreen(viewModel = viewModel) {
+        GSYGeneralLoadState(
+            isLoading = uiState.isPageLoading && uiState.fileContents.isEmpty(),
+            error = uiState.error,
+            retry = { viewModel.doInitialLoad() }) {
+            Column(Modifier.fillMaxSize()) {
+                PathNavigator(
+                    pathSegments = uiState.pathSegments, onSegmentClick = { index ->
+                        val path = uiState.pathSegments.subList(0, index + 1).joinToString("/")
+                        viewModel.navigateToPath(path)
+                    },
+                    //onNavigateUp = { viewModel.navigateUp() },
+                    isLoading = uiState.isPageLoading || uiState.isRefreshing || uiState.isLoadingMore
+                )
 
-            GSYPullRefresh(
-                isRefreshing = uiState.isRefreshing,
-                onRefresh = { viewModel.refresh() },
-                isLoadMore = false,
-                onLoadMore = { },
-                hasMore = false,
-                itemCount = uiState.fileContents.size,
-                loadMoreError = false
-            ) {
-                items(uiState.fileContents.size) { index ->
-                    val file = uiState.fileContents[index]
-                    FileItem(file = file, onClick = {
-                        if (file.type == "dir") {
-                            viewModel.navigateToPath(file.path)
-                        } else if (!isImageOrArchive(file.name)) {
-                            navigator.navigate("file_code/$userName/$repoName/${URLEncoder.encode(file.path, "UTF-8")}")
-                        }
-                    })
+                GSYPullRefresh(
+                    isRefreshing = uiState.isRefreshing,
+                    onRefresh = { viewModel.refresh() },
+                    isLoadMore = false,
+                    onLoadMore = { },
+                    hasMore = false,
+                    itemCount = uiState.fileContents.size,
+                    loadMoreError = false
+                ) {
+                    items(uiState.fileContents.size) { index ->
+                        val file = uiState.fileContents[index]
+                        FileItem(file = file, onClick = {
+                            if (file.type == "dir") {
+                                viewModel.navigateToPath(file.path)
+                            } else if (!isImageOrArchive(file.name)) {
+                                navigator.navigate("file_code/$userName/$repoName/${URLEncoder.encode(file.path, "UTF-8")}")
+                            }
+                        })
+                    }
                 }
             }
         }

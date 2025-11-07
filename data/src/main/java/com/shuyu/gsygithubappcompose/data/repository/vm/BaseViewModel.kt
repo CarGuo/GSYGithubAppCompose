@@ -14,6 +14,9 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 
 interface BaseUiState {
     val isPageLoading: Boolean
@@ -44,6 +47,9 @@ abstract class BaseViewModel<UiState : BaseUiState>(
 
     protected val _uiState: MutableStateFlow<UiState> = MutableStateFlow(initialUiState)
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
+
+    private val _toastMessage = MutableSharedFlow<String>()
+    val toastMessage: SharedFlow<String> = _toastMessage.asSharedFlow()
 
     private var isInitialLoadStarted = false
 
@@ -83,31 +89,35 @@ abstract class BaseViewModel<UiState : BaseUiState>(
             updateLoadingState(initialLoad, isRefresh, isLoadMore)
 
             if (preferencesDataStore == null) {
+                val errorMessage = stringResourceProvider.getString(R.string.error_datastore_not_provided)
                 _uiState.update {
                     updateUiStateWithCommonProperties(
                         it,
                         isPageLoading = false,
                         isRefreshing = false,
                         isLoadingMore = false,
-                        error = stringResourceProvider.getString(R.string.error_datastore_not_provided),
+                        error = errorMessage,
                         loadMoreError = false
                     )
                 }
+                _toastMessage.emit(errorMessage)
                 return@launch
             }
 
             val username = preferencesDataStore.username.first()
             if (username.isNullOrEmpty()) {
+                val errorMessage = stringResourceProvider.getString(R.string.error_no_username_found)
                 _uiState.update {
                     updateUiStateWithCommonProperties(
                         it,
                         isPageLoading = false,
                         isRefreshing = false,
                         isLoadingMore = false,
-                        error = stringResourceProvider.getString(R.string.error_no_username_found),
+                        error = errorMessage,
                         loadMoreError = false
                     )
                 }
+                _toastMessage.emit(errorMessage)
                 return@launch
             }
 
@@ -170,9 +180,11 @@ abstract class BaseViewModel<UiState : BaseUiState>(
                     currentState, newItems, pageToLoad, isRefresh, initialLoad, isLoadMore
                 )
             } else {
+                val errorMessage = stringResourceProvider.getString(R.string.error_no_data_found)
+                viewModelScope.launch { _toastMessage.emit(errorMessage) }
                 updateFailure(
                     currentState,
-                    stringResourceProvider.getString(R.string.error_no_data_found),
+                    errorMessage,
                     isLoadMore
                 )
             }
@@ -195,20 +207,22 @@ abstract class BaseViewModel<UiState : BaseUiState>(
     }
 
     protected fun updateErrorState(
-        exception: Throwable?,
+        exception: Throwable? = null,
         isLoadMore: Boolean,
         defaultMessage: String = stringResourceProvider.getString(R.string.error_unknown)
     ) {
+        val errorMessage = exception?.message ?: defaultMessage
         _uiState.update {
             updateUiStateWithCommonProperties(
                 it,
                 isPageLoading = false,
                 isRefreshing = false,
                 isLoadingMore = false,
-                error = exception?.message ?: defaultMessage,
+                error = errorMessage,
                 loadMoreError = isLoadMore
             )
         }
+        viewModelScope.launch { _toastMessage.emit(errorMessage) }
     }
 
 
@@ -219,7 +233,7 @@ abstract class BaseViewModel<UiState : BaseUiState>(
      *  ◦子类的构造函数参数被求值。
      *  ◦父类（BaseProfileViewModel）的 init 代码块和构造函数被执行。
      *  ◦子类（ProfileViewModel）的 init 代码块和属性初始化器被执行。
-     * 3.问题根源:
+     * 3.问题根源: 
      *  ◦ ProfileViewModel 将 userRepository 和 preferencesDataStore 传递给了父类 BaseProfileViewModel 的构造函数。
      *  ◦如果 BaseProfileViewModel 的构造函数或其 init 块直接或间接地调用了 getUserLogin 方法，此时就会出现问题。
      *  ◦因为 getUserLogin 是一个被 ProfileViewModel 覆写的方法，所以在父类构造期间，调用的将是子类的实现。

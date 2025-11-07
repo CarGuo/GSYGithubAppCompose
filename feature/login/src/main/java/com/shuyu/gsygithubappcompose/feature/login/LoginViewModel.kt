@@ -10,6 +10,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 
 data class LoginUiState(
     val token: String = "",
@@ -26,6 +29,9 @@ class LoginViewModel @Inject constructor(
     
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
+
+    private val _toastMessage = MutableSharedFlow<String>()
+    val toastMessage: SharedFlow<String> = _toastMessage.asSharedFlow()
     
     fun onTokenChange(token: String) {
         _uiState.update { it.copy(token = token, error = null) }
@@ -48,12 +54,14 @@ class LoginViewModel @Inject constructor(
                     }
                 },
                 onFailure = { exception ->
+                    val errorMessage = exception.message ?: "Login failed"
                     _uiState.update { 
                         it.copy(
                             isLoading = false,
-                            error = exception.message ?: "Login failed"
+                            error = errorMessage
                         )
                     }
+                    _toastMessage.emit(errorMessage)
                 }
             )
         }
@@ -84,12 +92,14 @@ class LoginViewModel @Inject constructor(
                     }
                 },
                 onFailure = { exception ->
+                    val errorMessage = exception.message ?: "OAuth login failed"
                     _uiState.update { 
                         it.copy(
                             isLoading = false,
-                            error = exception.message ?: "OAuth login failed"
+                            error = errorMessage
                         )
                     }
+                    _toastMessage.emit(errorMessage)
                 }
             )
         }

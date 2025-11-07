@@ -15,8 +15,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
@@ -66,6 +70,9 @@ class SearchViewModel @Inject constructor(
 
     private val _searchHistory = MutableStateFlow<List<SearchHistoryEntity>>(emptyList<SearchHistoryEntity>()) // Corrected type inference
     val searchHistory: StateFlow<List<SearchHistoryEntity>> = _searchHistory.asStateFlow()
+
+    private val _toastMessage = MutableSharedFlow<String>()
+    val toastMessage: SharedFlow<String> = _toastMessage.asSharedFlow()
 
     init {
         searchHistoryRepository.getSearchHistory()
@@ -136,7 +143,9 @@ class SearchViewModel @Inject constructor(
                     saveSearchQuery(_searchQuery.value)
                 }
             } catch (e: Exception) {
-                _error.value = e.message
+                val errorMessage = e.message ?: "Unknown search error"
+                _error.value = errorMessage
+                _toastMessage.emit(errorMessage)
                 if (page > 1) {
                     when (_searchType.value) {
                         SearchType.REPOSITORY -> _loadMoreErrorRepo.value = true

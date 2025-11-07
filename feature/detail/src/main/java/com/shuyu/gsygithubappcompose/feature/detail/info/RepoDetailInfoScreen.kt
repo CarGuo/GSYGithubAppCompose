@@ -18,6 +18,7 @@ import com.shuyu.gsygithubappcompose.core.ui.components.EventItem
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYLoadingDialog
 import com.shuyu.gsygithubappcompose.core.ui.components.SegmentedButton
 import com.shuyu.gsygithubappcompose.core.common.R
+import com.shuyu.gsygithubappcompose.data.repository.vm.BaseScreen
 
 @Composable
 fun RepoDetailInfoScreen(
@@ -35,58 +36,60 @@ fun RepoDetailInfoScreen(
         GSYLoadingDialog()
     }
 
-    GSYGeneralLoadState(
-        isLoading = uiState.isPageLoading && uiState.repoDetail == null,
-        error = uiState.error,
-        retry = { viewModel.refreshRepoDetailInfo() }
-    ) {
-        GSYPullRefresh(
-            modifier = Modifier.fillMaxSize(),
-            isRefreshing = uiState.isRefreshing,
-            onRefresh = { viewModel.refreshRepoDetailInfo() },
-            isLoadMore = uiState.isLoadingMore,
-            onLoadMore = { viewModel.loadMoreRepoDetailList() },
-            hasMore = uiState.hasMore,
-            itemCount = uiState.repoDetailList.size,
-            loadMoreError = uiState.loadMoreError
+    BaseScreen(viewModel = viewModel) {
+        GSYGeneralLoadState(
+            isLoading = uiState.isPageLoading && uiState.repoDetail == null,
+            error = uiState.error,
+            retry = { viewModel.refreshRepoDetailInfo() }
         ) {
-            uiState.repoDetail?.let { headerData ->
+            GSYPullRefresh(
+                modifier = Modifier.fillMaxSize(),
+                isRefreshing = uiState.isRefreshing,
+                onRefresh = { viewModel.refreshRepoDetailInfo() },
+                isLoadMore = uiState.isLoadingMore,
+                onLoadMore = { viewModel.loadMoreRepoDetailList() },
+                hasMore = uiState.hasMore,
+                itemCount = uiState.repoDetailList.size,
+                loadMoreError = uiState.loadMoreError
+            ) {
+                uiState.repoDetail?.let { headerData ->
+                    item {
+                        RepositoryDetailInfoHeader(
+                            repositoryDetailModel = headerData
+                        )
+                    }
+                }
+
                 item {
-                    RepositoryDetailInfoHeader(
-                        repositoryDetailModel = headerData
+                    SegmentedButton(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        items = listOf(
+                            stringResource(R.string.events),
+                            stringResource(R.string.commits)
+                        ),
+                        selectedIndex = when (uiState.selectedItemType) {
+                            RepoDetailItemType.EVENT -> 0
+                            RepoDetailItemType.COMMIT -> 1
+                        },
+                        onItemSelected = { index ->
+                            when (index) {
+                                0 -> viewModel.setSelectedItemType(RepoDetailItemType.EVENT)
+                                1 -> viewModel.setSelectedItemType(RepoDetailItemType.COMMIT)
+                            }
+                        }
                     )
                 }
-            }
 
-            item {
-                SegmentedButton(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                    items = listOf(
-                        stringResource(R.string.events),
-                        stringResource(R.string.commits)
-                    ),
-                    selectedIndex = when (uiState.selectedItemType) {
-                        RepoDetailItemType.EVENT -> 0
-                        RepoDetailItemType.COMMIT -> 1
-                    },
-                    onItemSelected = { index ->
-                        when (index) {
-                            0 -> viewModel.setSelectedItemType(RepoDetailItemType.EVENT)
-                            1 -> viewModel.setSelectedItemType(RepoDetailItemType.COMMIT)
+                items(uiState.repoDetailList) { item ->
+                    when (item) {
+                        is RepoDetailListItem.EventItem -> {
+                            EventItem(event = item.event)
                         }
-                    }
-                )
-            }
-
-            items(uiState.repoDetailList) { item ->
-                when (item) {
-                    is RepoDetailListItem.EventItem -> {
-                        EventItem(event = item.event)
-                    }
-                    is RepoDetailListItem.CommitItem -> {
-                        CommitItem(commit = item.commit)
+                        is RepoDetailListItem.CommitItem -> {
+                            CommitItem(commit = item.commit)
+                        }
                     }
                 }
             }

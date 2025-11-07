@@ -75,6 +75,8 @@
     <string name="issue_content_tip">Content</string>
     <string name="cancel">Cancel</string>
     <string name="confirm">Confirm</string>
+    <string name="issue_created_successfully">Issue created successfully!</string>
+    <string name="error_failed_to_create_issue">Failed to create issue</string>
 
     <!-- Common -->
     <string name="loading">Loading...</string>

@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.shuyu.gsygithubappcompose.core.ui.LocalNavigator
+import com.shuyu.gsygithubappcompose.data.repository.vm.BaseScreen
 
 @Composable
 fun ProfileScreen(
@@ -25,17 +26,19 @@ fun ProfileScreen(
         viewModel.doInitialLoad()
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        ProfileContent(
-            uiState = uiState,
-            onRefresh = { viewModel.refresh() },
-            onLoadMore = { viewModel.loadMore() }
-        )
-        Button(
-            onClick = { viewModel.logout(navigator) },
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Text("Logout")
+    BaseScreen(viewModel = viewModel) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            ProfileContent(
+                uiState = uiState,
+                onRefresh = { viewModel.refresh() },
+                onLoadMore = { viewModel.loadMore() }
+            )
+            Button(
+                onClick = { viewModel.logout(navigator) },
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Text("Logout")
+            }
         }
     }
 }
