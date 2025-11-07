@@ -81,7 +81,7 @@
     <!-- Issue Screen -->
     <string name="user_avatar">用户头像</string>
     <string name="comments_count">%d 条评论</string>
-    <string name="closed_by_at">由 %s 于 %s 关闭</string>
+    <string name="closed_by_at">由 %s 关闭于 %s </string>
 
     <!-- 通用 -->
     <string name="loading">加载中...</string>
