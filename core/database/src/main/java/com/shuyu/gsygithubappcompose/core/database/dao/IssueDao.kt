@@ -19,7 +19,7 @@ interface IssueDao {
     @Query("SELECT * FROM issues WHERE id = :issueId")
     fun getIssueById(issueId: Long): Flow<IssueEntity?>
 
-    @Query("SELECT * FROM issues WHERE owner = :owner AND repo_name = :repoName")
+    @Query("SELECT * FROM issues WHERE owner = :owner AND repo_name = :repoName  ORDER BY number DESC")
     fun getIssues(owner: String, repoName: String): Flow<List<IssueEntity>>
 
     @Query("DELETE FROM issues WHERE owner = :owner AND repo_name = :repoName")
