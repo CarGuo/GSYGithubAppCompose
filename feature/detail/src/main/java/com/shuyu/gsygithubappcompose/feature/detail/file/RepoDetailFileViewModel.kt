@@ -63,7 +63,7 @@ class RepoDetailFileViewModel @Inject constructor(
         val currentRepoName = uiState.value.repoName ?: return
         val currentPath = uiState.value.currentPath
 
-        launchDataLoad(initialLoad, isRefresh, isLoadMore) {
+        launchDataLoad(initialLoad, isRefresh, isLoadMore) { pageToLoad ->
             fileContentRepository.getRepositoryContents(currentOwner, currentRepoName, currentPath)
                 .collect {
                     _uiState.update { uiState ->
@@ -76,7 +76,7 @@ class RepoDetailFileViewModel @Inject constructor(
                     it.data.onSuccess { data ->
                         handleResult(
                             newItems = data,
-                            pageToLoad = uiState.value.currentPage, // Pass current page
+                            pageToLoad = pageToLoad, // Pass current page
                             isRefresh = isRefresh,
                             initialLoad = initialLoad,
                             isLoadMore = isLoadMore,

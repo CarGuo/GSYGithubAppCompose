@@ -65,13 +65,13 @@ class RepoDetailIssueViewModel @Inject constructor(
         val currentIssueState = uiState.value.issueState
         val currentSearchQuery = uiState.value.searchQuery
 
-        launchDataLoad(initialLoad, isRefresh, isLoadMore) {
+        launchDataLoad(initialLoad, isRefresh, isLoadMore) { pageToLoad ->
             issueRepository.getRepositoryIssues(
                 owner = currentOwner,
                 repoName = currentRepoName,
                 state = currentIssueState,
                 query = currentSearchQuery,
-                page = uiState.value.currentPage
+                page = pageToLoad
             ).collect {
                 _uiState.update { uiState ->
                     uiState.copy(
@@ -83,17 +83,22 @@ class RepoDetailIssueViewModel @Inject constructor(
                 it.data.onSuccess { data ->
                     handleResult(
                         newItems = data,
-                        pageToLoad = uiState.value.currentPage,
+                        pageToLoad = pageToLoad,
                         isRefresh = isRefresh,
                         initialLoad = initialLoad,
                         isLoadMore = isLoadMore,
                         source = it.dataSource,
                         isDbEmpty = data.isEmpty(),
                         updateSuccess = { currentState, newItems, _, _, _, _ ->
-                            currentState.copy(issues = newItems)
+                            val updatedIssues = if (isLoadMore) {
+                                currentState.issues + newItems
+                            } else {
+                                newItems
+                            }
+                            currentState.copy(issues = updatedIssues)
                         },
                         updateFailure = { currentState, errorMsg, _ ->
-                            currentState.copy(error = errorMsg)
+                            currentState.copy(error = errorMsg, issues = if (isLoadMore) currentState.issues else emptyList())
                         }
                     )
                 }.onFailure { throwable ->

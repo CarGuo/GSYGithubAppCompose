@@ -11,11 +11,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYGeneralLoadState
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYPullRefresh
 import com.shuyu.gsygithubappcompose.core.ui.components.CommitItem
 import com.shuyu.gsygithubappcompose.core.ui.components.EventItem
+import com.shuyu.gsygithubappcompose.core.ui.components.GSYLoadingDialog
 import com.shuyu.gsygithubappcompose.core.ui.components.SegmentedButton
 import com.shuyu.gsygithubappcompose.core.common.R
 
@@ -23,12 +23,16 @@ import com.shuyu.gsygithubappcompose.core.common.R
 fun RepoDetailInfoScreen(
     owner: String,
     name: String,
-    viewModel: RepoDetailInfoViewModel = hiltViewModel()
+    viewModel: RepoDetailInfoViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(owner, name) {
         viewModel.loadRepoDetailInfo(owner, name)
+    }
+
+    if (uiState.isLoadingDialog) {
+        GSYLoadingDialog()
     }
 
     GSYGeneralLoadState(
@@ -48,7 +52,9 @@ fun RepoDetailInfoScreen(
         ) {
             uiState.repoDetail?.let { headerData ->
                 item {
-                    RepositoryDetailInfoHeader(repositoryDetailModel = headerData)
+                    RepositoryDetailInfoHeader(
+                        repositoryDetailModel = headerData
+                    )
                 }
             }
 
