@@ -1,5 +1,6 @@
 package com.shuyu.gsygithubappcompose.feature.detail.issue
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
@@ -20,6 +21,7 @@ import kotlinx.coroutines.flow.collectLatest
 import com.shuyu.gsygithubappcompose.feature.detail.LocalRepoOwner
 import com.shuyu.gsygithubappcompose.feature.detail.LocalRepoName
 import com.shuyu.gsygithubappcompose.feature.detail.LocalRepoDetailIssueViewModel
+import com.shuyu.gsygithubappcompose.core.ui.LocalNavigator
 
 @Composable
 fun RepoDetailIssueScreen(
@@ -28,6 +30,7 @@ fun RepoDetailIssueScreen(
     val uiState by viewModel.uiState.collectAsState()
     val owner = LocalRepoOwner.current
     val repoName = LocalRepoName.current
+    val navigator = LocalNavigator.current
 
     LaunchedEffect(owner, repoName) {
         viewModel.setRepoInfo(owner, repoName)
@@ -79,8 +82,7 @@ fun RepoDetailIssueScreen(
                             else -> "all"
                         }
                         viewModel.onIssueStateChanged(newState)
-                    }
-                )
+                    })
 
                 GSYPullRefresh(
                     isRefreshing = uiState.isRefreshing,
@@ -92,7 +94,9 @@ fun RepoDetailIssueScreen(
                     loadMoreError = uiState.loadMoreError
                 ) {
                     items(uiState.issues) { issue ->
-                        IssueItem(issue = issue)
+                        IssueItem(issue = issue, onClick = {
+                            navigator.navigate("issue_detail/${owner}/${repoName}/${issue.number}")
+                        })
                     }
                 }
             }

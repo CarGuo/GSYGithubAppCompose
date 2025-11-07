@@ -14,6 +14,7 @@ import com.shuyu.gsygithubappcompose.feature.code.FileCodeViewScreen
 import com.shuyu.gsygithubappcompose.feature.detail.RepoDetailScreen
 import com.shuyu.gsygithubappcompose.feature.dynamic.DynamicScreen
 import com.shuyu.gsygithubappcompose.feature.home.HomeScreen
+import com.shuyu.gsygithubappcompose.feature.issue.IssueScreen
 import com.shuyu.gsygithubappcompose.feature.login.LoginScreen
 import com.shuyu.gsygithubappcompose.feature.profile.PersonScreen
 import com.shuyu.gsygithubappcompose.feature.profile.ProfileScreen
@@ -82,6 +83,17 @@ class MainActivity : ComponentActivity() {
                             repo = repo,
                             path = path,
                             branch = branch
+                        )
+                    }
+
+                    composable("issue_detail/{owner}/{repoName}/{issueNumber}") { backStackEntry ->
+                        val owner = backStackEntry.arguments?.getString("owner") ?: ""
+                        val repoName = backStackEntry.arguments?.getString("repoName") ?: ""
+                        val issueNumber = backStackEntry.arguments?.getString("issueNumber")?.toIntOrNull() ?: 0
+                        IssueScreen(
+                            owner = owner,
+                            repoName = repoName,
+                            issueNumber = issueNumber
                         )
                     }
                 }

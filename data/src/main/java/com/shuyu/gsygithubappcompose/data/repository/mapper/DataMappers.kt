@@ -1,15 +1,19 @@
 package com.shuyu.gsygithubappcompose.data.repository.mapper
 
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.shuyu.gsygithubappcompose.core.database.entity.CommitEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.CommitUserEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.EventEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.FileContentEntity
+import com.shuyu.gsygithubappcompose.core.database.entity.IssueCommentEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.IssueEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.RepositoryDetailEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.RepositoryEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.TrendingEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.UserEntity
 import com.shuyu.gsygithubappcompose.core.network.graphql.GetRepositoryDetailQuery
+import com.shuyu.gsygithubappcompose.core.network.model.Comment
 import com.shuyu.gsygithubappcompose.core.network.model.CommitDetail
 import com.shuyu.gsygithubappcompose.core.network.model.CommitUser
 import com.shuyu.gsygithubappcompose.core.network.model.Event
@@ -410,8 +414,7 @@ fun CommitUser.toCommitUserEntity(): CommitUserEntity {
 
 fun CommitEntity.toRepoCommit(): RepoCommit {
     return RepoCommit(
-        sha = sha,
-        nodeId = null, // Not stored in entity
+        sha = sha, nodeId = null, // Not stored in entity
         commit = CommitDetail(
             author = author?.toNetworkCommitAuthor(),
             committer = committer?.toNetworkCommitAuthor(),
@@ -420,8 +423,7 @@ fun CommitEntity.toRepoCommit(): RepoCommit {
             url = null, // Not stored in entity
             commentCount = null, // Not stored in entity
             verification = null // Not stored in entity
-        ),
-        url = null, // Not stored in entity
+        ), url = null, // Not stored in entity
         htmlUrl = null, // Not stored in entity
         commentsUrl = null, // Not stored in entity
         author = null, // Not enough info in CommitUserEntity to create a full User object
@@ -501,14 +503,14 @@ fun FileContentEntity.toFileContent(): FileContent {
     )
 }
 
-fun Issue.toIssueEntity(owner: String, repoName: String, page: Int): IssueEntity {
+fun Issue.toIssueEntity(owner: String, repoName: String): IssueEntity {
     return IssueEntity(
         id = id,
         nodeId = nodeId,
         number = number,
         title = title,
         user = user?.toEntity(),
-        labels = labels?.joinToString(",") { it.name },
+        labels = Gson().toJson(labels), // Convert list of labels to JSON string
         state = state,
         locked = locked,
         assignee = assignee?.toEntity(),
@@ -517,44 +519,75 @@ fun Issue.toIssueEntity(owner: String, repoName: String, page: Int): IssueEntity
         updatedAt = updatedAt,
         closedAt = closedAt,
         body = body,
+        bodyHtml = bodyHtml,
         htmlUrl = htmlUrl,
         repositoryUrl = repositoryUrl,
         owner = owner,
         repoName = repoName,
-        page = page
     )
 }
 
-fun List<IssueEntity>.toIssue(): List<Issue> {
-    return this.map { entity ->
-        Issue(
-            id = entity.id,
-            nodeId = entity.nodeId,
-            number = entity.number,
-            title = entity.title,
-            user = entity.user?.toUser(), // Handle null user
-            labels = entity.labels?.split(",")?.map { labelName ->
-                IssueLabel(
-                    id = 0, // Not stored in entity
-                    nodeId = null, // Not stored in entity
-                    url = null, // Not stored in entity
-                    name = labelName,
-                    color = "", // Not stored in entity
-                    default = null // Not stored in entity
-                )
-            } ?: emptyList(),
-            state = entity.state,
-            locked = entity.locked,
-            assignee = entity.assignee?.toUser(),
-            assignees = null, // Not stored in entity
-            comments = entity.comments,
-            createdAt = entity.createdAt,
-            updatedAt = entity.updatedAt,
-            closedAt = entity.closedAt,
-            body = entity.body,
-            bodyHtml = null, // Not stored in entity
-            htmlUrl = entity.htmlUrl,
-            repositoryUrl = entity.repositoryUrl
-        )
-    }
+fun IssueEntity.toIssue(): Issue {
+    val gson = Gson()
+    return Issue(
+        id = id,
+        nodeId = nodeId,
+        number = number,
+        title = title,
+        user = user?.toUser(),
+        labels = labels?.let {
+            gson.fromJson(
+                it, object : TypeToken<List<IssueLabel>>() {}.type
+            )
+        } ?: emptyList(), // Convert JSON string to list of labels
+        state = state,
+        locked = locked,
+        assignee = assignee?.toUser(),
+        assignees = null, // Not stored in entity
+        comments = comments,
+        createdAt = createdAt,
+        updatedAt = updatedAt,
+        closedAt = closedAt,
+        body = body,
+        bodyHtml = bodyHtml,
+        htmlUrl = htmlUrl,
+        repositoryUrl = repositoryUrl)
+}
+
+fun Comment.toIssueCommentEntity(issueId: Long): IssueCommentEntity {
+    return IssueCommentEntity(
+        id = id,
+        issueId = issueId,
+        nodeId = nodeId,
+        url = url,
+        htmlUrl = htmlUrl,
+        issueUrl = null, // Not available in Comment model
+        body = body,
+        bodyHtml = bodyHtml,
+        bodyText = bodyText,
+        userLogin = user.login,
+        userAvatarUrl = user.avatarUrl,
+        userId = user.id,
+        createdAt = createdAt,
+        updatedAt = updatedAt,
+        authorAssociation = authorAssociation
+    )
+}
+
+fun IssueCommentEntity.toIssueComment(): Comment {
+    return Comment(
+        id = id,
+        nodeId = nodeId,
+        url = url,
+        htmlUrl = htmlUrl,
+        body = body,
+        bodyHtml = bodyHtml,
+        bodyText = bodyText,
+        user = User.toMiniUserModel(
+            login = userLogin, avatarUrl = userAvatarUrl ?: "", id = userId ?: 0
+        ), // Simplified User creation
+        createdAt = createdAt,
+        updatedAt = updatedAt,
+        authorAssociation = authorAssociation
+    )
 }

@@ -13,12 +13,18 @@ interface IssueDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(issues: List<IssueEntity>)
 
-    @Query("SELECT * FROM issue WHERE owner = :owner AND repo_name = :repoName AND page = :page ORDER BY created_at DESC")
-    fun getIssues(owner: String, repoName: String, page: Int): Flow<List<IssueEntity>>
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertIssue(issue: IssueEntity)
 
-    @Query("DELETE FROM issue WHERE owner = :owner AND repo_name = :repoName")
+    @Query("SELECT * FROM issues WHERE id = :issueId")
+    fun getIssueById(issueId: Long): Flow<IssueEntity?>
+
+    @Query("SELECT * FROM issues WHERE owner = :owner AND repo_name = :repoName")
+    fun getIssues(owner: String, repoName: String): Flow<List<IssueEntity>>
+
+    @Query("DELETE FROM issues WHERE owner = :owner AND repo_name = :repoName")
     suspend fun clearIssues(owner: String, repoName: String)
 
-    @Query("SELECT COUNT(*) FROM issue WHERE owner = :owner AND repo_name = :repoName")
+    @Query("SELECT COUNT(*) FROM issues WHERE owner = :owner AND repo_name = :repoName")
     suspend fun getIssueCount(owner: String, repoName: String): Int
 }

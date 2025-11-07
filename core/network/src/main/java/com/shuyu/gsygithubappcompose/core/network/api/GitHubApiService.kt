@@ -270,6 +270,7 @@ interface GitHubApiService {
      */
     @GET("repos/{owner}/{repo}/issues/{issue_number}")
     suspend fun getIssueInfo(
+        @Header("Accept") acceptHeader: String = "application/vnd.github.VERSION.raw",
         @Path("owner") reposOwner: String,
         @Path("repo") reposName: String,
         @Path("issue_number") issueNumber: Int

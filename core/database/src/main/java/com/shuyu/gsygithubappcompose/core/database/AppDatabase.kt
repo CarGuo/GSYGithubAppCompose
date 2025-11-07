@@ -7,6 +7,7 @@ import com.shuyu.gsygithubappcompose.core.database.dao.CommitDao
 import com.shuyu.gsygithubappcompose.core.database.dao.EventDao
 import com.shuyu.gsygithubappcompose.core.database.dao.FileContentDao
 import com.shuyu.gsygithubappcompose.core.database.dao.IssueDao
+import com.shuyu.gsygithubappcompose.core.database.dao.IssueCommentDao
 import com.shuyu.gsygithubappcompose.core.database.dao.ReadmeDao
 import com.shuyu.gsygithubappcompose.core.database.dao.RepositoryDao
 import com.shuyu.gsygithubappcompose.core.database.dao.RepositoryDetailDao
@@ -17,6 +18,7 @@ import com.shuyu.gsygithubappcompose.core.database.entity.CommitEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.EventEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.FileContentEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.IssueEntity
+import com.shuyu.gsygithubappcompose.core.database.entity.IssueCommentEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.ReadmeEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.RepositoryDetailEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.RepositoryEntity
@@ -35,9 +37,10 @@ import com.shuyu.gsygithubappcompose.core.database.entity.UserEntity
         RepositoryDetailEntity::class,
         FileContentEntity::class,
         IssueEntity::class,
+        IssueCommentEntity::class,
         ReadmeEntity::class
     ],
-    version = 48,
+    version = 50,
     exportSchema = false
 )
 @TypeConverters(DateConverter::class)
@@ -51,6 +54,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun repositoryDetailDao(): RepositoryDetailDao
     abstract fun fileContentDao(): FileContentDao
     abstract fun issueDao(): IssueDao
+    abstract fun issueCommentDao(): IssueCommentDao
     abstract fun readmeDao(): ReadmeDao
 
     fun clearAllData() {
