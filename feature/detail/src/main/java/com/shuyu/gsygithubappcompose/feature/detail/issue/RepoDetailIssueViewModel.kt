@@ -66,11 +66,6 @@ class RepoDetailIssueViewModel @Inject constructor(
         refresh()
     }
 
-    fun triggerRefresh() {
-        viewModelScope.launch {
-            _refreshTrigger.emit(Unit)
-        }
-    }
 
     override fun loadData(initialLoad: Boolean, isRefresh: Boolean, isLoadMore: Boolean) {
         val currentOwner = uiState.value.owner ?: return
