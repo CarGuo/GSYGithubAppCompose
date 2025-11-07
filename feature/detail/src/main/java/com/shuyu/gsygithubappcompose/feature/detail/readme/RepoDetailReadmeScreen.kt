@@ -9,20 +9,22 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYGeneralLoadState
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYPullRefresh
 import com.shuyu.gsygithubappcompose.data.repository.vm.BaseScreen
+import com.shuyu.gsygithubappcompose.feature.detail.LocalRepoOwner
+import com.shuyu.gsygithubappcompose.feature.detail.LocalRepoName
+import com.shuyu.gsygithubappcompose.feature.detail.LocalRepoDetailReadmeViewModel
 
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
 fun RepoDetailReadmeScreen(
-    owner: String,
-    repo: String,
-    branch: String? = "main",
-    viewModel: RepoDetailReadmeViewModel = hiltViewModel()
+    branch: String? = "main"
 ) {
+    val viewModel = LocalRepoDetailReadmeViewModel.current
     val uiState by viewModel.uiState.collectAsState()
+    val owner = LocalRepoOwner.current
+    val repo = LocalRepoName.current
 
     LaunchedEffect(owner, repo) {
         viewModel.loadReadme(owner, repo, branch)
