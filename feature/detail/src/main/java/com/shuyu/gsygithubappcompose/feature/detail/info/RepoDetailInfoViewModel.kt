@@ -266,6 +266,30 @@ class RepoDetailInfoViewModel @Inject constructor(
         }
     }
 
+    fun createIssue(owner: String, repo: String, title: String, body: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoadingDialog = true) }
+            repositoryRepository.createIssue(owner, repo, title, body)
+                .flowOn(Dispatchers.IO)
+                .collectLatest { result ->
+                    result.data.fold(
+                        onSuccess = {
+                            _uiState.update { it.copy(isLoadingDialog = false) }
+                            refresh()
+                        },
+                        onFailure = {
+                            _uiState.update { it.copy(isLoadingDialog = false) }
+                            updateErrorState(
+                                Exception("Failed to create issue"),
+                                false,
+                                stringResourceProvider.getString(R.string.error_unknown)
+                            )
+                        }
+                    )
+                }
+        }
+    }
+
 
     // Public functions to trigger refresh and load more, leveraging BaseViewModel's functionality.
     fun refreshRepoDetailInfo() {

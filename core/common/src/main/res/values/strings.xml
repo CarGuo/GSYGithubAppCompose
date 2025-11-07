@@ -59,6 +59,7 @@
     <string name="repo_detail_last_commit">Last Commit: %s</string>
     <string name="events">Events</string>
     <string name="commits">Commits</string>
+    <string name="create_issue">Create Issue</string>
     <string name="search_issue">Search Issue</string>
     <string name="all">All</string>
     <string name="open">Open</string>
@@ -68,6 +69,12 @@
     <string name="repo_detail_action_watch">Watch</string>
     <string name="repo_detail_action_unwatch">Unwatch</string>
     <string name="repo_detail_action_fork">Fork</string>
+
+    <!-- Issue Dialog -->
+    <string name="issue_title_tip">Title</string>
+    <string name="issue_content_tip">Content</string>
+    <string name="cancel">Cancel</string>
+    <string name="confirm">Confirm</string>
 
     <!-- Common -->
     <string name="loading">Loading...</string>
