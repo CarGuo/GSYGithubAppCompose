@@ -3,11 +3,16 @@ package com.shuyu.gsygithubappcompose.data.repository.mapper
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.shuyu.gsygithubappcompose.core.database.entity.CommitEntity
+import com.shuyu.gsygithubappcompose.core.database.entity.CommitDetailEntity
+import com.shuyu.gsygithubappcompose.core.database.entity.CommitFileEntity
+import com.shuyu.gsygithubappcompose.core.database.entity.CommitStatsEntity
+import com.shuyu.gsygithubappcompose.core.database.entity.CommitTreeEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.CommitUserEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.EventEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.FileContentEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.IssueCommentEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.IssueEntity
+import com.shuyu.gsygithubappcompose.core.database.entity.PushCommitEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.RepositoryDetailEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.RepositoryEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.TrendingEntity
@@ -15,12 +20,16 @@ import com.shuyu.gsygithubappcompose.core.database.entity.UserEntity
 import com.shuyu.gsygithubappcompose.core.network.graphql.GetRepositoryDetailQuery
 import com.shuyu.gsygithubappcompose.core.network.model.Comment
 import com.shuyu.gsygithubappcompose.core.network.model.CommitDetail
+import com.shuyu.gsygithubappcompose.core.network.model.CommitFile
+import com.shuyu.gsygithubappcompose.core.network.model.CommitStats
+import com.shuyu.gsygithubappcompose.core.network.model.CommitTree
 import com.shuyu.gsygithubappcompose.core.network.model.CommitUser
 import com.shuyu.gsygithubappcompose.core.network.model.Event
 import com.shuyu.gsygithubappcompose.core.network.model.EventRepo
 import com.shuyu.gsygithubappcompose.core.network.model.FileContent
 import com.shuyu.gsygithubappcompose.core.network.model.Issue
 import com.shuyu.gsygithubappcompose.core.network.model.IssueLabel
+import com.shuyu.gsygithubappcompose.core.network.model.PushCommit
 import com.shuyu.gsygithubappcompose.core.network.model.RepoCommit
 import com.shuyu.gsygithubappcompose.core.network.model.Repository
 import com.shuyu.gsygithubappcompose.core.network.model.RepositoryDetailModel
@@ -412,12 +421,18 @@ fun CommitUser.toCommitUserEntity(): CommitUserEntity {
     )
 }
 
+fun CommitUserEntity.toCommitUser(): CommitUser {
+    return CommitUser(
+        name = name, email = email, date = date
+    )
+}
+
 fun CommitEntity.toRepoCommit(): RepoCommit {
     return RepoCommit(
         sha = sha, nodeId = null, // Not stored in entity
         commit = CommitDetail(
-            author = author?.toNetworkCommitAuthor(),
-            committer = committer?.toNetworkCommitAuthor(),
+            author = author?.toCommitUser(),
+            committer = committer?.toCommitUser(),
             message = message ?: "",
             tree = null, // Not stored in entity
             url = null, // Not stored in entity
@@ -431,13 +446,6 @@ fun CommitEntity.toRepoCommit(): RepoCommit {
         parents = null // Not stored in entity
     )
 }
-
-fun CommitUserEntity.toNetworkCommitAuthor(): CommitUser {
-    return CommitUser(
-        name = name, email = email, date = date
-    )
-}
-
 
 fun TrendingRepoModel.toTrendingEntity(): TrendingEntity {
     return TrendingEntity(
@@ -589,5 +597,117 @@ fun IssueCommentEntity.toIssueComment(): Comment {
         createdAt = createdAt,
         updatedAt = updatedAt,
         authorAssociation = authorAssociation
+    )
+}
+
+fun CommitStats.toEntity(): CommitStatsEntity {
+    return CommitStatsEntity(
+        total = total,
+        additions = additions,
+        deletions = deletions
+    )
+}
+
+fun CommitStatsEntity.toModel(): CommitStats {
+    return CommitStats(
+        total = total,
+        additions = additions,
+        deletions = deletions
+    )
+}
+
+fun CommitFile.toEntity(): CommitFileEntity {
+    return CommitFileEntity(
+        sha = sha,
+        filename = filename,
+        status = status,
+        additions = additions,
+        deletions = deletions,
+        changes = changes,
+        blobUrl = blobUrl,
+        rawUrl = rawUrl,
+        contentsUrl = contentsUrl,
+        patch = patch
+    )
+}
+
+fun CommitFileEntity.toModel(): CommitFile {
+    return CommitFile(
+        sha = sha,
+        filename = filename,
+        status = status,
+        additions = additions,
+        deletions = deletions,
+        changes = changes,
+        blobUrl = blobUrl,
+        rawUrl = rawUrl,
+        contentsUrl = contentsUrl,
+        patch = patch
+    )
+}
+
+fun CommitTree.toEntity(): CommitTreeEntity {
+    return CommitTreeEntity(
+        sha = sha,
+        url = url
+    )
+}
+
+fun CommitTreeEntity.toModel(): CommitTree {
+    return CommitTree(
+        sha = sha,
+        url = url
+    )
+}
+
+fun CommitDetail.toEntity(): CommitDetailEntity {
+    return CommitDetailEntity(
+        author = author?.toCommitUserEntity(),
+        committer = committer?.toCommitUserEntity(),
+        message = message,
+        tree = tree?.toEntity(),
+        url = url,
+        commentCount = commentCount
+    )
+}
+
+fun CommitDetailEntity.toModel(): CommitDetail {
+    return CommitDetail(
+        author = author?.toCommitUser(),
+        committer = committer?.toCommitUser(),
+        message = message,
+        tree = tree?.toModel(),
+        url = url,
+        commentCount = commentCount,
+        verification = null // Not stored in entity
+    )
+}
+
+fun PushCommit.toEntity(): PushCommitEntity {
+    return PushCommitEntity(
+        sha = sha ?: "",
+        url = url,
+        htmlUrl = htmlUrl,
+        commentsUrl = commentsUrl,
+        stats = stats?.toEntity(),
+        commit = commit?.toEntity(),
+        author = author?.toEntity(),
+        committer = committer?.toEntity(),
+        files = files?.map { it.toEntity() }
+    )
+}
+
+fun PushCommitEntity.toModel(): PushCommit {
+    return PushCommit(
+        sha = sha,
+        url = url,
+        htmlUrl = htmlUrl,
+        commentsUrl = commentsUrl,
+        stats = stats?.toModel(),
+        commit = commit?.toModel(),
+        author = author?.toUser(),
+        committer = committer?.toUser(),
+        files = files?.map { it.toModel() },
+        parents = null // This is not stored in the database
     )
 }

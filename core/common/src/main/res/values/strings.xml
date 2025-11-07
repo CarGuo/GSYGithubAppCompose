@@ -123,4 +123,11 @@
     <string name="time_days_ago">%d days ago</string>
     <string name="time_months_ago">%d months ago</string>
     <string name="time_years_ago">%d years ago</string>
+
+    <!-- Push Detail -->
+    <string name="files_changed">Files Changed</string>
+    <string name="lines_added">Lines Added</string>
+    <string name="lines_deleted">Lines Deleted</string>
+    <string name="unknown_file">Unknown File</string>
+    <string name="file_icon">File Icon</string>
 </resources>

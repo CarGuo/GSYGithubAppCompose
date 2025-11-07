@@ -11,21 +11,23 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 @Composable
 fun GSYCardItem(
     modifier: Modifier = Modifier,
+    backgroundColor: Color? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
     Card(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp)
-            .border(BorderStroke(1.dp, MaterialTheme.colorScheme.outline), RoundedCornerShape(8.dp)),
-        shape = RoundedCornerShape(8.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        content = content
+            .border(
+                BorderStroke(1.dp, MaterialTheme.colorScheme.outline), RoundedCornerShape(8.dp)
+            ), shape = RoundedCornerShape(8.dp), colors = CardDefaults.cardColors(
+            containerColor = backgroundColor ?: MaterialTheme.colorScheme.surface
+        ), elevation = CardDefaults.cardElevation(defaultElevation = 2.dp), content = content
     )
 }
