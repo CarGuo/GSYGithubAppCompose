@@ -44,7 +44,7 @@ import com.shuyu.gsygithubappcompose.core.database.entity.UserEntity
         ReadmeEntity::class,
         PushCommitEntity::class
     ],
-    version = 52,
+    version = 54,
     exportSchema = false
 )
 @TypeConverters(DateConverter::class, Converters::class)

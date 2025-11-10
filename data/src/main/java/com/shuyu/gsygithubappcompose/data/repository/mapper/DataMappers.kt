@@ -405,13 +405,15 @@ fun EventEntity.toEvent(): Event {
 }
 
 fun RepoCommit.toEntity(repoOwnerLogin: String, repoName: String): CommitEntity {
+    val gson = Gson()
     return CommitEntity(
         sha = sha,
         message = commit.message,
-        author = commit.author?.toCommitUserEntity(),
-        committer = commit.committer?.toCommitUserEntity(),
+        author = gson.toJson(author),
+        committer = gson.toJson(committer),
         repoOwnerLogin = repoOwnerLogin,
-        repoName = repoName
+        repoName = repoName,
+        commitDetail = gson.toJson(commit)
     )
 }
 
@@ -427,22 +429,20 @@ fun CommitUserEntity.toCommitUser(): CommitUser {
     )
 }
 
+
 fun CommitEntity.toRepoCommit(): RepoCommit {
+    val gson = Gson()
+    val authorUser = author?.let { gson.fromJson(it, User::class.java) }
+    val committerUser = committer?.let { gson.fromJson(it, User::class.java) }
     return RepoCommit(
-        sha = sha, nodeId = null, // Not stored in entity
-        commit = CommitDetail(
-            author = author?.toCommitUser(),
-            committer = committer?.toCommitUser(),
-            message = message ?: "",
-            tree = null, // Not stored in entity
-            url = null, // Not stored in entity
-            commentCount = null, // Not stored in entity
-            verification = null // Not stored in entity
-        ), url = null, // Not stored in entity
+        sha = sha,
+        nodeId = null, // Not stored in entity
+        commit = gson.fromJson(commitDetail, CommitDetail::class.java),
+        url = null, // Not stored in entity
         htmlUrl = null, // Not stored in entity
         commentsUrl = null, // Not stored in entity
-        author = null, // Not enough info in CommitUserEntity to create a full User object
-        committer = null, // Not enough info in CommitUserEntity to create a full User object
+        author = authorUser,
+        committer = committerUser,
         parents = null // Not stored in entity
     )
 }
@@ -602,17 +602,13 @@ fun IssueCommentEntity.toIssueComment(): Comment {
 
 fun CommitStats.toEntity(): CommitStatsEntity {
     return CommitStatsEntity(
-        total = total,
-        additions = additions,
-        deletions = deletions
+        total = total, additions = additions, deletions = deletions
     )
 }
 
 fun CommitStatsEntity.toModel(): CommitStats {
     return CommitStats(
-        total = total,
-        additions = additions,
-        deletions = deletions
+        total = total, additions = additions, deletions = deletions
     )
 }
 
@@ -648,15 +644,13 @@ fun CommitFileEntity.toModel(): CommitFile {
 
 fun CommitTree.toEntity(): CommitTreeEntity {
     return CommitTreeEntity(
-        sha = sha,
-        url = url
+        sha = sha, url = url
     )
 }
 
 fun CommitTreeEntity.toModel(): CommitTree {
     return CommitTree(
-        sha = sha,
-        url = url
+        sha = sha, url = url
     )
 }
 
@@ -693,8 +687,7 @@ fun PushCommit.toEntity(): PushCommitEntity {
         commit = commit?.toEntity(),
         author = author?.toEntity(),
         committer = committer?.toEntity(),
-        files = files?.map { it.toEntity() }
-    )
+        files = files?.map { it.toEntity() })
 }
 
 fun PushCommitEntity.toModel(): PushCommit {

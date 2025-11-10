@@ -38,10 +38,10 @@ interface EventDao {
     }
 
     // New methods for repository events
-    @Query("SELECT * FROM events WHERE repo_owner_login = :owner AND repo_name = :repoName")
+    @Query("SELECT * FROM events WHERE repo_owner_login = :owner AND repo_full_name = :repoName")
     suspend fun getRepoEvents(owner: String, repoName: String): List<EventEntity>
 
-    @Query("DELETE FROM events WHERE repo_owner_login = :owner AND repo_name = :repoName")
+    @Query("DELETE FROM events WHERE repo_owner_login = :owner AND repo_full_name = :repoName")
     suspend fun clearRepoEvents(owner: String, repoName: String)
 
     @Transaction

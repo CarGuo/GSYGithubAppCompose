@@ -53,7 +53,23 @@ class FileCodeViewViewModel @Inject constructor(
         doInitialLoad()
     }
 
+    fun setPatchContent(patchText: String) {
+        _uiState.update {
+            it.copy(
+                content = patchText,
+                isPageLoading = false,
+                isRefreshing = false,
+                error = null
+            )
+        }
+    }
+
     override fun loadData(initialLoad: Boolean, isRefresh: Boolean, isLoadMore: Boolean) {
+        // If content is already set by patchText, no need to load from repository
+        if (_uiState.value.content != null && _uiState.value.path.isEmpty()) {
+            return
+        }
+
         // Update loading state first
         _uiState.update {
             when {

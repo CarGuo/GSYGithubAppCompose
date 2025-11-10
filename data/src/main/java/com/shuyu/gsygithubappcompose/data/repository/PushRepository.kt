@@ -28,7 +28,9 @@ class PushRepository @Inject constructor(
             }
 
             try {
-                val networkCommit = githubApiService.getRepositoryCommitInfo(owner, repo, sha)
+                val networkCommit = githubApiService.getRepositoryCommitInfo(
+                    reposOwner = owner, reposName = repo, sha = sha
+                )
                 val entity = networkCommit.toEntity()
                 pushCommitDao.insertPushCommit(entity)
                 emit(

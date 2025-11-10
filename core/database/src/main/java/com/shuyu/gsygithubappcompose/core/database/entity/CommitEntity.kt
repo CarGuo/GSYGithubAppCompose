@@ -1,7 +1,6 @@
 package com.shuyu.gsygithubappcompose.core.database.entity
 
 import androidx.room.ColumnInfo
-import androidx.room.Embedded
 import androidx.room.Entity
 
 data class CommitUserEntity(
@@ -14,12 +13,12 @@ data class CommitUserEntity(
 data class CommitEntity(
     val sha: String,
     val message: String?,
-    @Embedded(prefix = "author_")
-    val author: CommitUserEntity?,
-    @Embedded(prefix = "committer_")
-    val committer: CommitUserEntity?,
+    val author: String?,
+    val committer: String?,
     @ColumnInfo(name = "repo_owner_login")
     val repoOwnerLogin: String,
     @ColumnInfo(name = "repo_name")
-    val repoName: String
+    val repoName: String,
+    @ColumnInfo(name = "commit_detail")
+    val commitDetail: String
 )
