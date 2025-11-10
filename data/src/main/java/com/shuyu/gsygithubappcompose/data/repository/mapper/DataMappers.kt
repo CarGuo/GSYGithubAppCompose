@@ -29,6 +29,7 @@ import com.shuyu.gsygithubappcompose.core.network.model.EventRepo
 import com.shuyu.gsygithubappcompose.core.network.model.FileContent
 import com.shuyu.gsygithubappcompose.core.network.model.Issue
 import com.shuyu.gsygithubappcompose.core.network.model.IssueLabel
+import com.shuyu.gsygithubappcompose.core.network.model.Organization
 import com.shuyu.gsygithubappcompose.core.network.model.PushCommit
 import com.shuyu.gsygithubappcompose.core.network.model.RepoCommit
 import com.shuyu.gsygithubappcompose.core.network.model.Repository
@@ -702,5 +703,47 @@ fun PushCommitEntity.toModel(): PushCommit {
         committer = committer?.toUser(),
         files = files?.map { it.toModel() },
         parents = null // This is not stored in the database
+    )
+}
+
+fun Organization.toUser(): User {
+    return User(
+        login = login,
+        id = id,
+        nodeId = nodeId,
+        avatarUrl = avatarUrl ?:"",
+        gravatarId = null,
+        url = url,
+        htmlUrl = null,
+        followersUrl = null,
+        followingUrl = null,
+        gistsUrl = null,
+        starredUrl = null,
+        subscriptionsUrl = null,
+        organizationsUrl = null,
+        reposUrl = reposUrl,
+        eventsUrl = null,
+        receivedEventsUrl = null,
+        type = "Organization",
+        siteAdmin = false,
+        name = null,
+        company = null,
+        blog = null,
+        location = null,
+        email = null,
+        starred = null,
+        bio = description,
+        publicRepos = null,
+        publicGists = null,
+        followers = null,
+        following = null,
+        createdAt = null,
+        updatedAt = null,
+        privateGists = null,
+        totalPrivateRepos = null,
+        ownedPrivateRepos = null,
+        diskUsage = null,
+        collaborators = null,
+        twoFactorAuthentication = false
     )
 }

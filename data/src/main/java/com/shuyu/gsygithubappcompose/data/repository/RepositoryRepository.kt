@@ -12,6 +12,7 @@ import com.shuyu.gsygithubappcompose.core.network.model.RepoCommit
 import com.shuyu.gsygithubappcompose.core.network.model.Repository
 import com.shuyu.gsygithubappcompose.core.network.model.RepositoryDetailModel
 import com.shuyu.gsygithubappcompose.core.network.model.RepositorySearchResponse
+import com.shuyu.gsygithubappcompose.core.network.model.User
 import com.shuyu.gsygithubappcompose.data.repository.mapper.toEntity
 import com.shuyu.gsygithubappcompose.data.repository.mapper.toRepoCommit
 import com.shuyu.gsygithubappcompose.data.repository.mapper.toRepository
@@ -64,7 +65,7 @@ class RepositoryRepository @Inject constructor(
 
             val response = apiService.searchRepositories(query, page = page)
 
-            // 3. If it\'s the first page, update the database
+            // 3. If it's the first page, update the database
             if (page == 1) {
                 repositoryDao.clearAndInsert(response.items.map { it.toEntity() })
             }
@@ -248,5 +249,55 @@ class RepositoryRepository @Inject constructor(
 
     suspend fun searchRepositories(query: String, page: Int = 1): RepositorySearchResponse {
         return apiService.searchRepositories(query, page = page)
+    }
+
+    fun getRepoStargazers(userName: String, repoName: String, page: Int): Flow<Result<List<User>>> = flow {
+        try {
+            emit(Result.success(apiService.getRepositoryStargazers(userName, repoName, page)))
+        } catch (e: Exception) {
+            emit(Result.failure(e))
+        }
+    }
+
+    fun getUserStaredRepos(userName: String, page: Int, sort: String): Flow<Result<List<Repository>>> = flow {
+        try {
+            emit(Result.success(apiService.getUserStarredRepositories(userName, sort, page)))
+        } catch (e: Exception) {
+            emit(Result.failure(e))
+        }
+    }
+
+    fun getRepoWatchers(userName: String, repoName: String, page: Int): Flow<Result<List<User>>> = flow {
+        try {
+            emit(Result.success(apiService.getRepositoryWatchers(userName, repoName, page)))
+        } catch (e: Exception) {
+            emit(Result.failure(e))
+        }
+    }
+
+    fun getRepoForks(userName: String, repoName: String, page: Int): Flow<Result<List<Repository>>> = flow {
+        try {
+            emit(Result.success(apiService.getRepositoryForks(userName, repoName, page)))
+        } catch (e: Exception) {
+            emit(Result.failure(e))
+        }
+    }
+
+    fun searchRepos(query: String, page: Int, sort: String, order: String): Flow<Result<List<Repository>>> = flow {
+        try {
+            val response = apiService.searchRepositories(query, sort, order, page)
+            emit(Result.success(response.items))
+        } catch (e: Exception) {
+            emit(Result.failure(e))
+        }
+    }
+
+    fun getUserRepos(userName: String, page: Int, sort: String): Flow<Result<List<Repository>>> = flow {
+        try {
+            val repos = apiService.getUserRepositories(userName, sort, page)
+            emit(Result.success(repos))
+        } catch (e: Exception) {
+            emit(Result.failure(e))
+        }
     }
 }
