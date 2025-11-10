@@ -98,13 +98,13 @@ fun HomeScreen(
         }, title = {
             Text(text = stringResource(id = R.string.app_name))
         }, text = {
-            Text(text = "Version: $versionName")
+            Text(text = stringResource(id = R.string.app_version, versionName))
         }, confirmButton = {
             Button(
                 onClick = {
                     openAboutDialog = false
                 }) {
-                Text("OK")
+                Text(stringResource(id = R.string.app_ok))
             }
         })
     }

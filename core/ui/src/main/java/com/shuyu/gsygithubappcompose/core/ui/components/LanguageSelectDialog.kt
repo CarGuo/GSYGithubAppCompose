@@ -1,6 +1,5 @@
 package com.shuyu.gsygithubappcompose.core.ui.components
 
-import android.app.Activity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,7 +12,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.shuyu.gsygithubappcompose.core.common.datastore.AppLanguage
@@ -24,8 +22,6 @@ fun LanguageSelectDialog(
     onLanguageSelected: (AppLanguage) -> Unit,
     onDismissRequest: () -> Unit
 ) {
-    val activity = LocalContext.current as Activity
-
     AlertDialog(
         onDismissRequest = onDismissRequest,
         title = {
@@ -40,7 +36,8 @@ fun LanguageSelectDialog(
                         onSelect = {
                             onLanguageSelected(language)
                             onDismissRequest()
-                            activity.recreate() // Recreate the activity to apply language changes
+                            // No need to recreate activity - Compose will recompose automatically
+                            // when the language state changes in MainActivity
                         }
                     )
                 }
