@@ -16,7 +16,6 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYGeneralLoadState
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYPullRefresh
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYTopAppBar
-import com.shuyu.gsygithubappcompose.core.ui.LocalNavigator
 import com.shuyu.gsygithubappcompose.data.repository.vm.BaseScreen
 
 @SuppressLint("SetJavaScriptEnabled")
@@ -27,16 +26,16 @@ fun FileCodeViewScreen(
     path: String,
     branch: String? = "main",
     dataText: String? = null,
+    sha: String? = null,
     viewModel: FileCodeViewViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val navigator = LocalNavigator.current
 
-    LaunchedEffect(owner, repo, path, branch, dataText) {
-        if (dataText != null) {
-            viewModel.setPatchContent(dataText)
-        } else {
-            viewModel.loadFile(owner, repo, path, branch)
+    LaunchedEffect(owner, repo, path, branch, dataText, sha) {
+        when {
+            dataText != null -> viewModel.setPatchContent(dataText)
+            sha != null -> viewModel.loadFileWithSha(owner, repo, path, sha)
+            else -> viewModel.loadFile(owner, repo, path, branch)
         }
     }
 
@@ -80,7 +79,7 @@ fun FileCodeViewScreen(
                                         "<style>" + "body{padding:15px;}" + "img{max-width:100% !important; height:auto !important;}" + "pre{background-color:#f6f8fa; padding:16px; overflow:auto; border-radius:6px;}" + "</style>"
                                     "<html><head>$viewport$style</head><body>${it}</body></html>"
                                 } else {
-                                    val fileType = if (dataText != null) "" else path.substringAfterLast('.', "")
+                                    val fileType = if (dataText != null) "diff" else path.substringAfterLast('.', "")
                                     val langClass =
                                         if (fileType.isNotEmpty()) "class=\"language-$fileType\"" else ""
                                     val highlightJsTheme =

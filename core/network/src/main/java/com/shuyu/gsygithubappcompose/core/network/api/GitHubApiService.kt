@@ -619,4 +619,10 @@ interface GitHubApiService {
         @Path("repo") repo: String
     ): Unit
 
+    @GET("repos/{owner}/{repo}/commits/{sha}")
+    suspend fun getCommitInfo(
+        @Path("owner") owner: String,
+        @Path("repo") repo: String,
+        @Path("sha") sha: String
+    ): PushCommit
 }

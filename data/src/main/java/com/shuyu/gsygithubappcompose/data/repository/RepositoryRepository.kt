@@ -181,6 +181,22 @@ class RepositoryRepository @Inject constructor(
         }
     }
 
+    fun getCommitFile(
+        owner: String, repoName: String, path: String, sha: String
+    ): Flow<RepositoryResult<String>> = flow {
+        try {
+            val response = apiService.getCommitInfo(owner, repoName, sha)
+            val file = response.files?.firstOrNull { it.filename == path }
+            if (file != null) {
+                emit(RepositoryResult(Result.success(file.patch ?: ""), DataSource.NETWORK, true))
+            } else {
+                emit(RepositoryResult(Result.failure(Exception("File not found in commit")), DataSource.NETWORK, true))
+            }
+        } catch (e: Exception) {
+            emit(RepositoryResult(Result.failure(e), DataSource.NETWORK, true))
+        }
+    }
+
     fun starRepo(owner: String, repo: String, star: Boolean): Flow<Boolean> = flow {
         try {
             if (star) {
