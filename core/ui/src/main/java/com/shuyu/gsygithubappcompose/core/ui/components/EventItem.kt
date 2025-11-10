@@ -1,5 +1,8 @@
 package com.shuyu.gsygithubappcompose.core.ui.components
 
+import android.content.Intent
+import android.net.Uri
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,11 +14,17 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.shuyu.gsygithubappcompose.core.network.model.Event
+import com.shuyu.gsygithubappcompose.core.ui.LocalNavigator
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -26,7 +35,91 @@ import java.util.TimeZone
 fun EventItem(
     event: Event
 ) {
-    GSYCardItem {
+    var showDialog by remember { mutableStateOf(false) }
+
+    val navigator = LocalNavigator.current
+    val context = LocalContext.current
+
+    GSYCardItem(
+        modifier = Modifier.clickable {
+            val repoNameArray = event.repo.name.split("/")
+            val owner = repoNameArray.getOrNull(0)
+            val repoName = repoNameArray.getOrNull(1)
+
+            when (event.type) {
+                "IssueCommentEvent", "IssuesEvent" -> {
+                    val issue = event.payload?.issue
+                    if (issue != null && owner != null && repoName != null) {
+                        navigator.navigate("issue_detail/${owner}/${repoName}/${issue.number}")
+                    }
+                }
+
+                "PushEvent" -> {
+                    val commits = event.payload?.commits
+                    if (commits != null && commits.size > 1) {
+                        showDialog = true
+                    } else if (commits != null && commits.size == 1) {
+                        val commit = commits[0]
+                        if (owner != null && repoName != null) {
+                            navigator.navigate(
+                                "push_detail/${owner}/${repoName}/${commit.sha}"
+                            )
+                        }
+                    } else if(event.payload != null && event.payload!!.head != null) {
+                        navigator.navigate(
+                            "push_detail/${owner}/${repoName}/${event.payload!!.head}"
+                        )
+                    }
+                }
+
+                "MemberEvent" -> {
+                    navigator.navigate("person/${event.actor.login}")
+                }
+
+                "ReleaseEvent" -> {
+                    val url = event.payload?.release?.tarballUrl
+                    if (url != null) {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                        context.startActivity(intent)
+                    }
+                }
+
+                else -> {
+                    if (owner != null && repoName != null) {
+                        navigator.navigate(
+                            "repo_detail/${owner}/${repoName}"
+                        )
+                    }
+                }
+            }
+        }
+    ) {
+        if (showDialog) {
+            val commits = event.payload?.commits
+            if (commits != null) {
+                val commitMessages = commits.map {
+                    it.message!!
+                }
+                GSYOptionDialog(
+                    options = commitMessages,
+                    onDismiss = {
+                        showDialog = false
+                    },
+                    onOptionSelected = {
+                        val commit = commits[it]
+                        val repoNameArray = event.repo.name.split("/")
+                        val owner = repoNameArray.getOrNull(0)
+                        val repoName = repoNameArray.getOrNull(1)
+                        if (owner != null && repoName != null) {
+                            navigator.navigate(
+                                "push_detail/${owner}/${repoName}/${commit.sha}"
+                            )
+                        }
+                        showDialog = false
+                    }
+                )
+            }
+        }
         Row(
             modifier = Modifier
                 .fillMaxWidth()

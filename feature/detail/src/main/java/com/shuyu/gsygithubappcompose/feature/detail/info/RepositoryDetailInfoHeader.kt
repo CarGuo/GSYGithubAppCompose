@@ -41,6 +41,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -52,12 +53,16 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.Date
 import com.shuyu.gsygithubappcompose.core.common.R
+import com.shuyu.gsygithubappcompose.core.ui.LocalNavigator
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun RepositoryDetailInfoHeader(
     modifier: Modifier = Modifier, repositoryDetailModel: RepositoryDetailModel
 ) {
+
+    val navigator = LocalNavigator.current
+
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -95,7 +100,9 @@ fun RepositoryDetailInfoHeader(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = repositoryDetailModel.owner, style = TextStyle(
+                        modifier = Modifier.clickable {
+                            navigator.navigate("person/${repositoryDetailModel.owner}")
+                        }, text = repositoryDetailModel.owner, style = TextStyle(
                             color = Color(0xFF2196F3), // Blue color
                             fontSize = 24.sp, fontWeight = FontWeight.Bold, shadow = Shadow(
                                 color = Color.Black, blurRadius = 8f
@@ -211,8 +218,10 @@ fun RepositoryDetailInfoHeader(
 
                     if (createdAtDate != null) {
                         Text(
-                            text = stringResource(id = R.string.repo_detail_created, outputDateFormat.format(createdAtDate)),
-                            style = TextStyle(
+                            text = stringResource(
+                                id = R.string.repo_detail_created,
+                                outputDateFormat.format(createdAtDate)
+                            ), style = TextStyle(
                                 color = Color.White.copy(alpha = 0.6f),
                                 fontSize = 12.sp,
                                 shadow = Shadow(
@@ -222,8 +231,9 @@ fun RepositoryDetailInfoHeader(
                         )
                     } else {
                         Text(
-                            text = stringResource(id = R.string.repo_detail_created, "Invalid Date"),
-                            style = TextStyle(
+                            text = stringResource(
+                                id = R.string.repo_detail_created, "Invalid Date"
+                            ), style = TextStyle(
                                 color = Color.White.copy(alpha = 0.6f),
                                 fontSize = 12.sp,
                                 shadow = Shadow(
@@ -246,20 +256,22 @@ fun RepositoryDetailInfoHeader(
 
                         if (pushedAtDate != null) {
                             Text(
-                                text = stringResource(id = R.string.repo_detail_last_commit, outputDateFormat.format(pushedAtDate)),
-                                style = TextStyle(
+                                text = stringResource(
+                                    id = R.string.repo_detail_last_commit,
+                                    outputDateFormat.format(pushedAtDate)
+                                ), style = TextStyle(
                                     color = Color.White.copy(alpha = 0.6f),
                                     fontSize = 12.sp,
                                     shadow = Shadow(
                                         color = Color.Black, blurRadius = 8f
                                     )
-                                ),
-                                modifier = Modifier.padding(top = 4.dp)
+                                ), modifier = Modifier.padding(top = 4.dp)
                             )
                         } else {
                             Text(
-                                text = stringResource(id = R.string.repo_detail_last_commit, "Invalid Date"),
-                                style = TextStyle(
+                                text = stringResource(
+                                    id = R.string.repo_detail_last_commit, "Invalid Date"
+                                ), style = TextStyle(
                                     color = Color.White.copy(alpha = 0.6f),
                                     fontSize = 12.sp,
                                     shadow = Shadow(
@@ -326,7 +338,9 @@ fun RepositoryDetailInfoHeader(
                                     text = topic ?: "",
                                     onClick = { /* Do nothing or navigate to topic search */ },
                                     backgroundColor = Color.Gray.copy(alpha = 0.5f),
-                                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 1.dp)
+                                    contentPadding = PaddingValues(
+                                        horizontal = 8.dp, vertical = 1.dp
+                                    )
                                 )
                             }
                         }
@@ -339,9 +353,7 @@ fun RepositoryDetailInfoHeader(
 
 @Composable
 fun RepositoryStatItem(
-    imageVector: ImageVector,
-    contentDescription: String,
-    count: Int
+    imageVector: ImageVector, contentDescription: String, count: Int
 ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Icon(
@@ -382,12 +394,8 @@ fun CustomChip(
             horizontalArrangement = Arrangement.Center
         ) {
             Text(
-                text = text,
-                style = TextStyle(
-                    color = Color.White,
-                    fontSize = 14.sp,
-                    lineHeight = 14.sp,
-                    shadow = Shadow(
+                text = text, style = TextStyle(
+                    color = Color.White, fontSize = 14.sp, lineHeight = 14.sp, shadow = Shadow(
                         color = Color.Black, blurRadius = 4f
                     )
                 )

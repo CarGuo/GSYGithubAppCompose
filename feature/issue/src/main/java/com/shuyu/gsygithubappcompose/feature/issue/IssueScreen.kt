@@ -204,7 +204,9 @@ fun IssueScreen(
                 GSYOptionDialog(
                     options = uiState.optionDialogOptions,
                     onDismiss = { },
-                    onOptionSelected = { viewModel.onOptionSelected(it) })
+                    onOptionSelected = {
+                        viewModel.onOptionSelected(uiState.optionDialogOptions[it])
+                    })
             }
 
             if (uiState.isActionLoading) {
