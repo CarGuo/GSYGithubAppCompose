@@ -4,6 +4,7 @@ import androidx.lifecycle.viewModelScope
 import com.shuyu.gsygithubappcompose.core.common.R
 import com.shuyu.gsygithubappcompose.core.common.datastore.UserPreferencesDataStore
 import com.shuyu.gsygithubappcompose.core.common.util.StringResourceProvider
+import com.shuyu.gsygithubappcompose.core.network.model.Release
 import com.shuyu.gsygithubappcompose.core.network.model.User
 import com.shuyu.gsygithubappcompose.data.repository.IssueRepository
 import com.shuyu.gsygithubappcompose.data.repository.RepositoryRepository
@@ -89,11 +90,71 @@ class HomeViewModel @Inject constructor(
         }
         return success
     }
+
+    fun checkUpdate(currentVersionName: String, showTip: Boolean = false) {
+        viewModelScope.launch {
+            repositoryRepository.getRepositoryReleases("CarGuo", "GSYGithubAppCompose")
+                .collectLatest { result ->
+                    result.data.fold(onSuccess = { releases ->
+                        val latestRelease = releases.firstOrNull()
+                        if (latestRelease != null) {
+                            val latestVersion = parseVersion(latestRelease.tagName)
+                            val currentVersion = parseVersion(currentVersionName)
+
+                            if (latestVersion > currentVersion) {
+                                _uiState.update {
+                                    it.copy(
+                                        latestRelease = latestRelease, showUpdateDialog = true
+                                    )
+                                }
+                            } else if (showTip) {
+                                showToast(stringResourceProvider.getString(R.string.app_not_new_version))
+                            }
+                        } else if (showTip) {
+                            showToast(stringResourceProvider.getString(R.string.error_no_data_found))
+                        }
+                    }, onFailure = { e ->
+                        if (showTip) {
+                            showToast(
+                                e.message
+                                    ?: stringResourceProvider.getString(R.string.error_unknown)
+                            )
+                        }
+                    })
+                }
+        }
+    }
+
+    fun dismissUpdateDialog() {
+        _uiState.update { it.copy(showUpdateDialog = false) }
+    }
+
+    private fun parseVersion(versionString: String): Version {
+        // Remove any non-numeric or leading 'v' characters
+        val cleanedVersion = versionString.replace(Regex("[^\\d.]"), "")
+        val parts = cleanedVersion.split(".").map { it.toIntOrNull() ?: 0 }
+        return Version(
+            major = parts.getOrElse(0) { 0 },
+            minor = parts.getOrElse(1) { 0 },
+            patch = parts.getOrElse(2) { 0 })
+    }
+}
+
+data class Version(
+    val major: Int, val minor: Int, val patch: Int
+) : Comparable<Version> {
+    override fun compareTo(other: Version): Int {
+        if (major != other.major) return major.compareTo(other.major)
+        if (minor != other.minor) return minor.compareTo(other.minor)
+        return patch.compareTo(other.patch)
+    }
 }
 
 data class HomeUiState(
     val user: User? = null,
     val isLoadingDialog: Boolean = false,
+    val latestRelease: Release? = null,
+    val showUpdateDialog: Boolean = false,
     override val isPageLoading: Boolean = false,
     override val isRefreshing: Boolean = false,
     override val isLoadingMore: Boolean = false,

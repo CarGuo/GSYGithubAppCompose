@@ -97,7 +97,7 @@ class IssueViewModel @Inject constructor(
         val currentIssueNumber = _uiState.value.issueNumber
 
         if (currentOwner == null || currentRepoName == null || currentIssueNumber == null) {
-            _uiState.update { it.copy(error = "Missing owner, repoName or issueNumber") }
+            _uiState.update { it.copy(error = stringResourceProvider.getString(R.string.error_missing_issue_info)) }
             return
         }
 
@@ -227,7 +227,7 @@ class IssueViewModel @Inject constructor(
         val commentBody = _uiState.value.replyComment
 
         if (commentBody.isBlank()) {
-            showToast("Comment cannot be empty")
+            showToast(stringResourceProvider.getString(R.string.issue_comment_cannot_be_empty))
             return
         }
 
@@ -237,13 +237,13 @@ class IssueViewModel @Inject constructor(
                 currentOwner, currentRepoName, currentIssueNumber, commentBody
             ).collect { result ->
                 result.data.fold(onSuccess = {
-                    showToast("Comment added successfully")
+                    showToast(stringResourceProvider.getString(R.string.issue_comment_added_successfully))
                     showReplyDialog(false)
                     updateReplyComment("")
                     _uiState.update { it.copy(isActionLoading = false) }
                     refresh() // Refresh comments
                 }, onFailure = { throwable ->
-                    showToast(throwable.message ?: "Failed to add comment")
+                    showToast(throwable.message ?: stringResourceProvider.getString(R.string.error_failed_to_add_comment))
                     _uiState.update { it.copy(isActionLoading = false) }
                 })
             }
@@ -258,7 +258,7 @@ class IssueViewModel @Inject constructor(
         val newBody = _uiState.value.editIssueBody
 
         if (newTitle.isBlank()) {
-            showToast("Title cannot be empty")
+            showToast(stringResourceProvider.getString(R.string.issue_title_cannot_be_empty))
             return
         }
 
@@ -268,12 +268,12 @@ class IssueViewModel @Inject constructor(
                 currentOwner, currentRepoName, currentIssueNumber, newTitle, newBody
             ).collect { result ->
                 result.data.fold(onSuccess = {
-                    showToast("Issue updated successfully")
+                    showToast(stringResourceProvider.getString(R.string.issue_updated_successfully))
                     showEditDialog(false)
                     _uiState.update { it.copy(isActionLoading = false) }
                     refresh() // Refresh issue info
                 }, onFailure = { throwable ->
-                    showToast(throwable.message ?: "Failed to update issue")
+                    showToast(throwable.message ?: stringResourceProvider.getString(R.string.error_failed_to_update_issue))
                     _uiState.update { it.copy(isActionLoading = false) }
                 })
             }
@@ -299,11 +299,11 @@ class IssueViewModel @Inject constructor(
                 newState
             ).collect { result ->
                 result.data.fold(onSuccess = {
-                    showToast("Issue state changed to $newState")
+                    showToast(stringResourceProvider.getString(R.string.issue_state_changed_to, newState))
                     _uiState.update { it.copy(isActionLoading = false) }
                     refresh() // Refresh issue info
                 }, onFailure = { throwable ->
-                    showToast(throwable.message ?: "Failed to change issue state")
+                    showToast(throwable.message ?: stringResourceProvider.getString(R.string.error_failed_to_change_issue_state))
                     _uiState.update { it.copy(isActionLoading = false) }
                 })
             }
@@ -322,11 +322,11 @@ class IssueViewModel @Inject constructor(
                 issueRepository.unlockIssue(currentOwner, currentRepoName, currentIssueNumber)
                     .collect { result ->
                         result.data.fold(onSuccess = {
-                            showToast("Issue unlocked successfully")
+                            showToast(stringResourceProvider.getString(R.string.issue_unlocked_successfully))
                             _uiState.update { it.copy(isActionLoading = false) }
                             refresh()
                         }, onFailure = { throwable ->
-                            showToast(throwable.message ?: "Failed to unlock issue")
+                            showToast(throwable.message ?: stringResourceProvider.getString(R.string.error_failed_to_unlock_issue))
                             _uiState.update { it.copy(isActionLoading = false) }
                         })
                     }
@@ -334,11 +334,11 @@ class IssueViewModel @Inject constructor(
                 issueRepository.lockIssue(currentOwner, currentRepoName, currentIssueNumber)
                     .collect { result ->
                         result.data.fold(onSuccess = {
-                            showToast("Issue locked successfully")
+                            showToast(stringResourceProvider.getString(R.string.issue_locked_successfully))
                             _uiState.update { it.copy(isActionLoading = false) }
                             refresh()
                         }, onFailure = { throwable ->
-                            showToast(throwable.message ?: "Failed to lock issue")
+                            showToast(throwable.message ?: stringResourceProvider.getString(R.string.error_failed_to_lock_issue))
                             _uiState.update { it.copy(isActionLoading = false) }
                         })
                     }
@@ -407,7 +407,7 @@ class IssueViewModel @Inject constructor(
         val commentBody = _uiState.value.editComment
 
         if (commentBody.isBlank()) {
-            showToast("Comment cannot be empty")
+            showToast(stringResourceProvider.getString(R.string.issue_comment_cannot_be_empty))
             return
         }
 
@@ -416,12 +416,12 @@ class IssueViewModel @Inject constructor(
             issueRepository.editComment(currentOwner, currentRepoName, commentId, commentBody)
                 .collect { result ->
                     result.data.fold(onSuccess = {
-                        showToast("Comment updated successfully")
+                        showToast(stringResourceProvider.getString(R.string.issue_comment_updated_successfully))
                         showEditCommentDialog(false)
                         _uiState.update { it.copy(isActionLoading = false, selectedComment = null) }
                         refresh() // Refresh comments
                     }, onFailure = { throwable ->
-                        showToast(throwable.message ?: "Failed to update comment")
+                        showToast(throwable.message ?: stringResourceProvider.getString(R.string.error_failed_to_update_comment))
                         _uiState.update { it.copy(isActionLoading = false) }
                     })
                 }
@@ -438,11 +438,11 @@ class IssueViewModel @Inject constructor(
             issueRepository.deleteComment(currentOwner, currentRepoName, commentId)
                 .collect { result ->
                     result.data.fold(onSuccess = {
-                        showToast("Comment deleted successfully")
+                        showToast(stringResourceProvider.getString(R.string.issue_comment_deleted_successfully))
                         _uiState.update { it.copy(isActionLoading = false) }
                         refresh() // Refresh comments
                     }, onFailure = { throwable ->
-                        showToast(throwable.message ?: "Failed to delete comment")
+                        showToast(throwable.message ?: stringResourceProvider.getString(R.string.error_failed_to_delete_comment))
                         _uiState.update { it.copy(isActionLoading = false) }
                     })
                 }

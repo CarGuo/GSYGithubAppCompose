@@ -1,5 +1,7 @@
 package com.shuyu.gsygithubappcompose.feature.home
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -23,6 +25,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -63,6 +66,7 @@ fun HomeScreen(
     val uiState by homeViewModel.uiState.collectAsState()
     var openAboutDialog by remember { mutableStateOf(false) }
     var openFeedbackDialog by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
 
     val items = listOf(
@@ -88,25 +92,20 @@ fun HomeScreen(
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
     if (openAboutDialog) {
-        AlertDialog(
-            onDismissRequest = {
-                openAboutDialog = false
-            },
-            title = {
-                Text(text = stringResource(id = R.string.app_name))
-            },
-            text = {
-                Text(text = "Version: $versionName")
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        openAboutDialog = false
-                    }) {
-                    Text("OK")
-                }
+        AlertDialog(onDismissRequest = {
+            openAboutDialog = false
+        }, title = {
+            Text(text = stringResource(id = R.string.app_name))
+        }, text = {
+            Text(text = "Version: $versionName")
+        }, confirmButton = {
+            Button(
+                onClick = {
+                    openAboutDialog = false
+                }) {
+                Text("OK")
             }
-        )
+        })
     }
 
     if (openFeedbackDialog) {
@@ -123,8 +122,38 @@ fun HomeScreen(
                         openFeedbackDialog = false
                     }
                 }
+            })
+    }
+
+    if (uiState.showUpdateDialog && uiState.latestRelease != null) {
+        AlertDialog(onDismissRequest = {
+            homeViewModel.dismissUpdateDialog()
+        }, title = {
+            Text(text = stringResource(id = R.string.update_dialog_title))
+        }, text = {
+            Text(
+                text = stringResource(
+                    id = R.string.update_dialog_message,
+                    uiState.latestRelease?.tagName ?: "",
+                    uiState.latestRelease?.body ?: ""
+                )
+            )
+        }, confirmButton = {
+            Button(
+                onClick = {
+                    uiState.latestRelease?.htmlUrl?.let { url ->
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                        context.startActivity(intent)
+                    }
+                    homeViewModel.dismissUpdateDialog()
+                }) {
+                Text(stringResource(id = R.string.app_ok))
             }
-        )
+        }, dismissButton = {
+            Button(onClick = { homeViewModel.dismissUpdateDialog() }) {
+                Text(stringResource(id = R.string.app_cancel))
+            }
+        })
     }
 
     if (uiState.isLoadingDialog) {
@@ -133,38 +162,36 @@ fun HomeScreen(
 
     BaseScreen(viewModel = homeViewModel) {
         ModalNavigationDrawer(
-            drawerState = drawerState,
-            drawerContent = {
-                DrawerContent(
-                    user = uiState.user,
-                    onLogout = {
-                        homeViewModel.logout()
-                    },
-                    onItemSelected = {
-                        when (it) {
-                            "about" -> {
-                                openAboutDialog = true
-                            }
-                            "feedback" -> {
-                                openFeedbackDialog = true
-                            }
-                            "personal_info" -> {
-                                // Handle personal info
-                            }
-                            "language" -> {
-                                // Handle language
-                            }
-                            "check_update" -> {
-                                // Handle check update
-                            }
+            drawerState = drawerState, drawerContent = {
+                DrawerContent(user = uiState.user, onLogout = {
+                    homeViewModel.logout()
+                }, onItemSelected = {
+                    when (it) {
+                        "about" -> {
+                            openAboutDialog = true
                         }
-                        coroutineScope.launch {
-                            drawerState.close()
+
+                        "feedback" -> {
+                            openFeedbackDialog = true
+                        }
+
+                        "personal_info" -> {
+                            // Handle personal info
+                        }
+
+                        "language" -> {
+                            // Handle language
+                        }
+
+                        "check_update" -> {
+                            homeViewModel.checkUpdate(versionName, true)
                         }
                     }
-                )
-            }
-        ) {
+                    coroutineScope.launch {
+                        drawerState.close()
+                    }
+                })
+            }) {
             Scaffold(topBar = {
                 GSYTopAppBar(
                     title = { Text(text = stringResource(id = R.string.app_name)) },
@@ -183,17 +210,17 @@ fun HomeScreen(
                     },
                     actions = {
                         SearchActionIcon(navigator = navigator)
-                    }
-                )
+                    })
             }, bottomBar = {
                 NavigationBar(containerColor = MaterialTheme.colorScheme.primary) {
                     items.forEachIndexed { index, item ->
                         NavigationBarItem(
                             icon = {
-                                Icon(
-                                    item.icon, contentDescription = stringResource(id = item.titleRes)
-                                )
-                            },
+                            Icon(
+                                item.icon,
+                                contentDescription = stringResource(id = item.titleRes)
+                            )
+                        },
                             label = { Text(stringResource(id = item.titleRes)) },
                             selected = pagerState.currentPage == index,
                             onClick = {
@@ -228,9 +255,7 @@ fun HomeScreen(
 
 @Composable
 fun DrawerContent(
-    user: User?,
-    onLogout: () -> Unit,
-    onItemSelected: (String) -> Unit
+    user: User?, onLogout: () -> Unit, onItemSelected: (String) -> Unit
 ) {
     ModalDrawerSheet {
         Column(modifier = Modifier.fillMaxSize()) {
@@ -272,36 +297,31 @@ fun DrawerContent(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable { onItemSelected("feedback") }
-                        .padding(16.dp)
-                )
+                        .padding(16.dp))
                 Text(
                     text = stringResource(id = R.string.menu_personal_info),
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable { onItemSelected("personal_info") }
-                        .padding(16.dp)
-                )
+                        .padding(16.dp))
                 Text(
                     text = stringResource(id = R.string.menu_language),
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable { onItemSelected("language") }
-                        .padding(16.dp)
-                )
+                        .padding(16.dp))
                 Text(
                     text = stringResource(id = R.string.menu_check_update),
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable { onItemSelected("check_update") }
-                        .padding(16.dp)
-                )
+                        .padding(16.dp))
                 Text(
                     text = stringResource(id = R.string.menu_about),
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable { onItemSelected("about") }
-                        .padding(16.dp)
-                )
+                        .padding(16.dp))
             }
 
             // Logout Button

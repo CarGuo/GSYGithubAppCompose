@@ -30,7 +30,12 @@
     <string name="menu_personal_info">Personal Info</string>
     <string name="menu_language">Switch Language</string>
     <string name="menu_check_update">Check for Updates</string>
-    <string name="feedback_hint">Your feedback will be submitted as an issue to the GitHub repository.</string>
+    <string name="feedback_hint">Your feedback will be submitted as an issue to the GitHub repository. Please describe the problem or suggestion in as much detail as possible. Thank you!</string>
+    <string name="app_not_new_version">Current version is the latest.</string>
+    <string name="update_dialog_title">New Version Available</string>
+    <string name="update_dialog_message">Version: %1$s\n\n%2$s</string>
+    <string name="app_cancel">Cancel</string>
+    <string name="app_ok">Update</string>
 
     <!-- Search Screen -->
     <string name="nav_search">Search</string>
@@ -109,6 +114,25 @@
     <string name="issue_locked">Locked</string>
     <string name="edit">Edit</string>
     <string name="delete">Delete</string>
+
+    <!-- Issue View Model Toasts -->
+    <string name="issue_comment_cannot_be_empty">Comment cannot be empty</string>
+    <string name="issue_comment_added_successfully">Comment added successfully</string>
+    <string name="issue_title_cannot_be_empty">Title cannot be empty</string>
+    <string name="issue_updated_successfully">Issue updated successfully</string>
+    <string name="issue_state_changed_to">Issue state changed to %s</string>
+    <string name="issue_unlocked_successfully">Issue unlocked successfully</string>
+    <string name="issue_locked_successfully">Issue locked successfully</string>
+    <string name="issue_comment_updated_successfully">Comment updated successfully</string>
+    <string name="issue_comment_deleted_successfully">Comment deleted successfully</string>
+    <string name="error_failed_to_update_comment">Failed to update comment</string>
+    <string name="error_failed_to_delete_comment">Failed to delete comment</string>
+    <string name="error_failed_to_add_comment">Failed to add comment</string>
+    <string name="error_failed_to_change_issue_state">Failed to change issue state</string>
+    <string name="error_failed_to_update_issue">Failed to update issue</string>
+    <string name="error_failed_to_unlock_issue">Failed to unlock issue</string>
+    <string name="error_failed_to_lock_issue">Failed to lock issue</string>
+    <string name="error_missing_issue_info">Missing owner, repoName or issueNumber</string>
 
     <!-- Common -->
     <string name="loading">Loading...</string>
