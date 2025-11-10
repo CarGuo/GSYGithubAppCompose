@@ -56,6 +56,14 @@ interface GitHubApiService {
     ): User
 
     /**
+     * Update authenticated user
+     */
+    @PATCH("user")
+    suspend fun updateUserInfo(
+        @Body userInfo: Map<String, String>
+    ): User
+
+    /**
      * Get user by username
      */
     @GET("users/{username}")

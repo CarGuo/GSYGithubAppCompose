@@ -193,4 +193,20 @@
     <string name="notify_status">状态</string>
     <string name="notification_status_unread">未读</string>
     <string name="notification_status_read">已读</string>
+
+    <!-- Info Page -->
+    <string name="home_user_info">个人信息</string>
+    <string name="user_profile_name">姓名</string>
+    <string name="user_profile_email">邮箱</string>
+    <string name="user_profile_link">链接</string>
+    <string name="user_profile_org">公司</string>
+    <string name="user_profile_location">地点</string>
+    <string name="user_profile_info">简介</string>
+    <string name="edit_field">编辑 %s</string>
+    <string name="user_info_update_success">用户信息更新成功！</string>
+    <string name="user_info_update_failed">更新用户信息失败。</string>
+
+    <string name="language_system">跟随系统</string>
+    <string name="language_chinese">中文</string>
+    <string name="language_english">English</string>
 </resources>

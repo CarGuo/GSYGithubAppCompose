@@ -2,6 +2,7 @@ package com.shuyu.gsygithubappcompose.feature.login
 
 import android.widget.Toast
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -20,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.shuyu.gsygithubappcompose.core.common.R
 import com.shuyu.gsygithubappcompose.core.ui.LocalNavigator
+import com.shuyu.gsygithubappcompose.core.ui.components.LanguageSelectDialog
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
@@ -40,6 +42,18 @@ fun LoginScreen(viewModel: LoginViewModel = hiltViewModel()) {
         }
     }
 
+    if (uiState.showLanguageDialog) {
+        LanguageSelectDialog(
+            currentLanguage = uiState.currentAppLanguage,
+            onLanguageSelected = { language ->
+                viewModel.setAppLanguage(language)
+            },
+            onDismissRequest = {
+                viewModel.dismissLanguageSelectionDialog()
+            }
+        )
+    }
+
     if (uiState.showOAuthWebView) {
         OAuthScreen(onCodeReceived = { code ->
             viewModel.handleOAuthCode(
@@ -51,7 +65,9 @@ fun LoginScreen(viewModel: LoginViewModel = hiltViewModel()) {
             uiState = uiState,
             onTokenChange = { viewModel.onTokenChange(it) },
             onLoginClick = { viewModel.login() },
-            onOAuthClick = { viewModel.startOAuthFlow() })
+            onOAuthClick = { viewModel.startOAuthFlow() },
+            onLanguageClick = { viewModel.showLanguageSelectionDialog() }
+        )
     }
 }
 
@@ -60,7 +76,8 @@ fun LoginContent(
     uiState: LoginUiState,
     onTokenChange: (String) -> Unit,
     onLoginClick: () -> Unit,
-    onOAuthClick: () -> Unit
+    onOAuthClick: () -> Unit,
+    onLanguageClick: () -> Unit
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.primaryContainer
@@ -201,6 +218,18 @@ fun LoginContent(
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
+
+                    // Language Switcher
+                    Text(
+                        text = stringResource(id = R.string.menu_language),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onLanguageClick() }
+                            .padding(vertical = 8.dp),
+                        textAlign = TextAlign.Center,
+                        color = MaterialTheme.colorScheme.primary,
+                        style = MaterialTheme.typography.bodyLarge
+                    )
                 }
             }
         }

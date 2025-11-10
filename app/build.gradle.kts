@@ -57,6 +57,7 @@ dependencies {
     implementation(projects.feature.push)
     implementation(projects.feature.list)
     implementation(projects.feature.notification)
+    implementation(projects.feature.info)
 
     // Core modules
     implementation(projects.core.ui)

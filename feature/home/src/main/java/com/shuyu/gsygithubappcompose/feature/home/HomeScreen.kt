@@ -38,6 +38,7 @@ import com.shuyu.gsygithubappcompose.core.ui.GSYNavigator
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYLoadingDialog
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYMarkdownInputDialog
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYTopAppBar
+import com.shuyu.gsygithubappcompose.core.ui.components.LanguageSelectDialog
 import com.shuyu.gsygithubappcompose.core.network.model.User
 import com.shuyu.gsygithubappcompose.data.repository.vm.BaseScreen
 import kotlinx.coroutines.flow.collectLatest
@@ -160,6 +161,18 @@ fun HomeScreen(
         GSYLoadingDialog()
     }
 
+    if (uiState.showLanguageDialog) {
+        LanguageSelectDialog(
+            currentLanguage = uiState.currentAppLanguage,
+            onLanguageSelected = { language ->
+                homeViewModel.setAppLanguage(language)
+            },
+            onDismissRequest = {
+                homeViewModel.dismissLanguageSelectionDialog()
+            }
+        )
+    }
+
     BaseScreen(viewModel = homeViewModel) {
         ModalNavigationDrawer(
             drawerState = drawerState, drawerContent = {
@@ -176,11 +189,11 @@ fun HomeScreen(
                         }
 
                         "personal_info" -> {
-                            // Handle personal info
+                            navigator.navigate("info")
                         }
 
                         "language" -> {
-                            // Handle language
+                            homeViewModel.showLanguageSelectionDialog()
                         }
 
                         "check_update" -> {

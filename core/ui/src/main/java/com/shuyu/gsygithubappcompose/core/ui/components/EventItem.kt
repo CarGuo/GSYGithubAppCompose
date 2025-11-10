@@ -167,7 +167,7 @@ fun EventItem(
                 Spacer(modifier = Modifier.height(4.dp))
 
                 // Time
-                val timeText = formatEventTime(event.createdAt)
+                val timeText = getRelativeTimeSpanString(event.createdAt)
                 Text(
                     text = timeText,
                     style = MaterialTheme.typography.bodySmall,
@@ -175,36 +175,5 @@ fun EventItem(
                 )
             }
         }
-    }
-}
-
-fun formatEventTime(createdAt: String): String {
-    return try {
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US)
-        dateFormat.timeZone = TimeZone.getTimeZone("UTC")
-        val date = dateFormat.parse(createdAt)
-
-        if (date != null) {
-            val now = Date()
-            val diffInMillis = now.time - date.time
-            val diffInMinutes = diffInMillis / (1000 * 60)
-            val diffInHours = diffInMinutes / 60
-            val diffInDays = diffInHours / 24
-
-            when {
-                diffInMinutes < 1 -> "just now"
-                diffInMinutes < 60 -> "${diffInMinutes}m ago"
-                diffInHours < 24 -> "${diffInHours}h ago"
-                diffInDays < 7 -> "${diffInDays}d ago"
-                else -> {
-                    val outputFormat = SimpleDateFormat("MMM dd", Locale.getDefault())
-                    outputFormat.format(date)
-                }
-            }
-        } else {
-            createdAt.split("T")[0]
-        }
-    } catch (e: Exception) {
-        createdAt.split("T")[0]
     }
 }

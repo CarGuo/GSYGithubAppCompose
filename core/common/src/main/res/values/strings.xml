@@ -193,4 +193,20 @@
     <string name="notify_status">Status</string>
     <string name="notification_status_unread">Unread</string>
     <string name="notification_status_read">Read</string>
+
+    <!-- Info Page -->
+    <string name="home_user_info">Personal Info</string>
+    <string name="user_profile_name">Name</string>
+    <string name="user_profile_email">Email</string>
+    <string name="user_profile_link">Link</string>
+    <string name="user_profile_org">Organization</string>
+    <string name="user_profile_location">Location</string>
+    <string name="user_profile_info">Bio</string>
+    <string name="edit_field">Edit %s</string>
+    <string name="user_info_update_success">User information updated successfully!</string>
+    <string name="user_info_update_failed">Failed to update user information.</string>
+
+    <string name="language_system">Follow System</string>
+    <string name="language_chinese">中文</string>
+    <string name="language_english">English</string>
 </resources>
