@@ -199,6 +199,18 @@ fun ProfileHeader(user: User, notificationAction: @Composable () -> Unit = {}) {
             ) {
                 navigator.navigate("list_screen/following/${user.login}/_")
             }
+            HorizontalDivider(
+                modifier = Modifier
+                    .width(1.dp)
+                    .height(40.dp),
+                color = MaterialTheme.colorScheme.outline
+            )
+            ProfileStat(
+                label = stringResource(id = R.string.profile_stars),
+                count = user.starred?.toIntOrNull() ?: 0
+            ) {
+                navigator.navigate("list_screen/user_star/${user.login}/_")
+            }
         }
 
         Box(

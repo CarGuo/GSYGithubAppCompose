@@ -379,7 +379,7 @@ interface GitHubApiService {
         @Query("sort") sort: String = "updated",
         @Query("page") page: Int = 1,
         @Query("per_page") perPage: Int = NetworkConfig.PER_PAGE
-    ): List<Repository>
+    ): Response<List<Repository>>
 
     /**
      * Check if starring a repository

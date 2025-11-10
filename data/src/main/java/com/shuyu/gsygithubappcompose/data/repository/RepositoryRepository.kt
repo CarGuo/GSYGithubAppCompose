@@ -261,11 +261,19 @@ class RepositoryRepository @Inject constructor(
 
     fun getUserStaredRepos(userName: String, page: Int, sort: String): Flow<Result<List<Repository>>> = flow {
         try {
-            emit(Result.success(apiService.getUserStarredRepositories(userName, sort, page)))
+            val response = apiService.getUserStarredRepositories(userName, sort, page)
+            if (response.isSuccessful) {
+                response.body()?.let {
+                    emit(Result.success(it))
+                } ?: emit(Result.failure(Exception("Response body is null")))
+            } else {
+                emit(Result.failure(Exception("Request failed with code ${response.code()}")))
+            }
         } catch (e: Exception) {
             emit(Result.failure(e))
         }
     }
+
 
     fun getRepoWatchers(userName: String, repoName: String, page: Int): Flow<Result<List<User>>> = flow {
         try {

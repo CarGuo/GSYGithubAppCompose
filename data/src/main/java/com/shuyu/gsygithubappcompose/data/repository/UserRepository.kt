@@ -79,13 +79,58 @@ class UserRepository @Inject constructor(
         return preferencesDataStore.authToken.map { it?.isNotEmpty() == true }
     }
 
-    fun getUser(username: String): Flow<RepositoryResult<User>> =
-        getFromCacheAndNetwork(
-            cacheFlow = userDao.getUserByLogin(username),
-            networkCall = { apiService.getUser(username) },
-            cacheUpdate = { user -> userDao.insertUser(user.toEntity()) },
-            toDomain = { userEntity -> userEntity.toUser() }
-        )
+    fun getUser(username: String): Flow<RepositoryResult<User>> = flow {
+        // 1. Attempt to load from cache first
+        val cachedUser = userDao.getUserByLogin(username).first()
+        val isDbEmpty = cachedUser == null
+        if (cachedUser != null) {
+            emit(RepositoryResult(Result.success(cachedUser.toUser()), DataSource.CACHE, isDbEmpty))
+        }
+
+        try {
+            // 2. Fetch user from network
+            val networkUser = apiService.getUser(username)
+
+            // 3. Fetch starred count
+            var starredCount = "0"
+            try {
+                val starredResponse = apiService.getUserStarredRepositories(username, page = 1, perPage = 1)
+                if (starredResponse.isSuccessful) {
+                    val linkHeader = starredResponse.headers()["Link"]
+                    linkHeader?.let {
+                        val lastPageLink = it.split(",").find { s -> s.contains("rel=\"last\"") }
+                        if (lastPageLink != null) {
+                            val pageRegex = "page=([0-9]+)".toRegex()
+                            val matchResult = pageRegex.find(lastPageLink)
+                            starredCount = matchResult?.groups?.get(1)?.value ?: "0"
+                        } else {
+                            //If there is no last page, it means there is only one page.
+                            if(starredResponse.body().isNullOrEmpty()) {
+                                starredCount = "0"
+                            } else {
+                                starredCount = "1"
+                            }
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                // Ignore if starred count fails, we can still proceed with the user data
+                e.printStackTrace()
+            }
+
+            // 4. Create a new User object with the starred count
+            val userWithStarred = networkUser.copy(starred = starredCount)
+
+            // 5. Cache the updated user object
+            userDao.insertUser(userWithStarred.toEntity())
+
+            // 6. Emit the final result
+            emit(RepositoryResult(Result.success(userWithStarred), DataSource.NETWORK, isDbEmpty))
+        } catch (e: Exception) {
+            emit(RepositoryResult(Result.failure(e), DataSource.NETWORK, isDbEmpty))
+        }
+    }
+
 
     fun getCachedUser(login: String): Flow<UserEntity?> {
         return userDao.getUserByLogin(login)
