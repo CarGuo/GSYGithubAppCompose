@@ -216,6 +216,10 @@ class IssueViewModel @Inject constructor(
         _uiState.update { it.copy(editComment = comment) }
     }
 
+    fun showCopySuccessToast() {
+        showToast(stringResourceProvider.getString(R.string.copy_success))
+    }
+
     fun addComment() {
         val currentOwner = _uiState.value.owner ?: return
         val currentRepoName = _uiState.value.repoName ?: return

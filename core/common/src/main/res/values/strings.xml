@@ -117,6 +117,7 @@
     <string name="error_failed_to_load_commits">Failed to load commits</string>
     <string name="error_failed_to_load_branches">Failed to load branches</string>
     <string name="back">Back</string>
+    <string name="copy_success">Copied to clipboard</string>
 
     <!-- Relative Time -->
     <string name="time_just_now">just now</string>

@@ -4,14 +4,12 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -21,16 +19,13 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.MailOutline
 import androidx.compose.material.icons.filled.OpenWith
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -45,7 +40,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -71,6 +68,7 @@ fun IssueScreen(
     owner: String, repoName: String, issueNumber: Int, viewModel: IssueViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val clipboardManager = LocalClipboardManager.current
 
     LaunchedEffect(owner, repoName, issueNumber) {
         viewModel.doInitialLoad()
@@ -146,16 +144,21 @@ fun IssueScreen(
                     ) {
                         uiState.issue?.let { issue ->
                             item {
-                                IssueHeader(issue = issue)
+                                IssueHeader(issue = issue, onLongPress = {
+                                    issue.body?.let {
+                                        clipboardManager.setText(AnnotatedString(it))
+                                        viewModel.showCopySuccessToast()
+                                    }
+                                })
                             }
                         }
                         items(uiState.comments) { comment ->
-                            IssueCommentItem(
-                                comment = comment,
-                                onLongPress = {
-                                    viewModel.showOptionDialog(true, comment)
-                                }
-                            )
+                            IssueCommentItem(comment = comment, onClick = {
+                                viewModel.showOptionDialog(true, comment)
+                            }, onLongPress = {
+                                clipboardManager.setText(AnnotatedString(comment.body))
+                                viewModel.showCopySuccessToast()
+                            })
                         }
                     }
                 }
@@ -201,8 +204,7 @@ fun IssueScreen(
                 GSYOptionDialog(
                     options = uiState.optionDialogOptions,
                     onDismiss = { },
-                    onOptionSelected = { viewModel.onOptionSelected(it) }
-                )
+                    onOptionSelected = { viewModel.onOptionSelected(it) })
             }
 
             if (uiState.isActionLoading) {
@@ -226,9 +228,12 @@ fun ActionButton(icon: ImageVector, text: String, onClick: () -> Unit) {
 
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun IssueHeader(issue: Issue) {
-    GSYCardItem {
+fun IssueHeader(issue: Issue, onLongPress: () -> Unit) {
+    GSYCardItem(
+        modifier = Modifier.combinedClickable(onLongClick = onLongPress, onClick = {})
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -322,11 +327,10 @@ fun IssueBody(issue: Issue) {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun IssueCommentItem(comment: Comment, onLongPress: () -> Unit) {
+fun IssueCommentItem(comment: Comment, onLongPress: () -> Unit, onClick: () -> Unit) {
     GSYCardItem(
         modifier = Modifier.combinedClickable(
-            onClick = {},
-            onLongClick = onLongPress
+            onClick = onClick, onLongClick = onLongPress
         )
     ) {
         Row(
