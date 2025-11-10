@@ -21,6 +21,12 @@
     <string name="nav_trending">趋势</string>
     <string name="nav_profile">我的</string>
 
+    <!-- 抽屉菜单 -->
+    <string name="menu_notification">通知</string>
+    <string name="menu_events">我的动态</string>
+    <string name="menu_about">关于</string>
+    <string name="logout">退出登录</string>
+
     <!-- 搜索页 -->
     <string name="nav_search">搜索</string>
     <string name="search_hint">搜索 GitHub</string>

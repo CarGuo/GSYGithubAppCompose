@@ -30,7 +30,8 @@ android {
 dependencies {
     implementation(projects.core.ui)
     implementation(projects.core.common)
-    
+    implementation(projects.data)
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.compose)

@@ -21,6 +21,12 @@
     <string name="nav_trending">Trending</string>
     <string name="nav_profile">My</string>
 
+    <!-- Drawer Menu -->
+    <string name="menu_notification">Notification</string>
+    <string name="menu_events">My Events</string>
+    <string name="menu_about">About</string>
+    <string name="logout">Logout</string>
+
     <!-- Search Screen -->
     <string name="nav_search">Search</string>
     <string name="search_hint">Search GitHub</string>
