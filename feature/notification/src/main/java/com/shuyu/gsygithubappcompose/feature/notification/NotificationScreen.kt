@@ -11,8 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DoneAll
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -115,16 +113,15 @@ fun NotificationScreen(
                             val notification = uiState.notifications[index]
                             NotificationItem(notification = notification) {
                                 viewModel.markNotificationAsRead(notification)
-                                if (notification.subject?.type == "Issue") {
+                                if (notification.subject.type == "Issue") {
                                     val url = notification.subject.url
                                     if (url != null) {
                                         val issueId = url.substring(url.lastIndexOf("/") + 1)
-                                        val repoUrl = notification.repository?.fullName
-                                        if (repoUrl != null) {
-                                            val owner = repoUrl.split("/")[0]
-                                            val repo = repoUrl.split("/")[1]
-                                            navigator.navigate("issue_detail/$owner/$repo/$issueId")
-                                        }
+                                        val repoUrl = notification.repository.fullName
+
+                                        val owner = repoUrl.split("/")[0]
+                                        val repo = repoUrl.split("/")[1]
+                                        navigator.navigate("issue_detail/$owner/$repo/$issueId")
                                     }
                                 }
                             }
@@ -150,18 +147,18 @@ fun NotificationItem(
                 modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = notification.repository?.fullName ?: "",
+                    text = notification.repository.fullName,
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.primary
                 )
                 RelativeTimeText(dateString = notification.updatedAt)
             }
             Text(
-                text = notification.subject?.title ?: "",
+                text = notification.subject.title,
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(top = 5.dp)
             )
-            val type = notification.subject?.type ?: ""
+            val type = notification.subject.type
             val status =
                 if (notification.unread) stringResource(R.string.notification_status_unread) else stringResource(
                     R.string.notification_status_read
