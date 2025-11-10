@@ -20,9 +20,28 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        getByName("debug") {
+            storeFile = file("gsygithubapp-debug.jks")
+            storePassword = "123456"
+            keyAlias = "debug"
+            keyPassword = "123456"
+        }
+        create("release") {
+            storeFile = file("gsygithubapp-debug.jks")
+            storePassword = "123456"
+            keyAlias = "debug"
+            keyPassword = "123456"
+        }
+    }
+
     buildTypes {
-        release {
+        getByName("debug") {
+            signingConfig = signingConfigs.getByName("debug")
+        }
+        getByName("release") {
             isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
