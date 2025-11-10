@@ -15,6 +15,7 @@ import com.shuyu.gsygithubappcompose.feature.detail.RepoDetailScreen
 import com.shuyu.gsygithubappcompose.feature.dynamic.DynamicScreen
 import com.shuyu.gsygithubappcompose.feature.home.HomeScreen
 import com.shuyu.gsygithubappcompose.feature.issue.IssueScreen
+import com.shuyu.gsygithubappcompose.feature.list.ListScreen
 import com.shuyu.gsygithubappcompose.feature.login.LoginScreen
 import com.shuyu.gsygithubappcompose.feature.profile.PersonScreen
 import com.shuyu.gsygithubappcompose.feature.profile.ProfileScreen
@@ -105,6 +106,17 @@ class MainActivity : ComponentActivity() {
                         val repoName = backStackEntry.arguments?.getString("repoName") ?: ""
                         val sha = backStackEntry.arguments?.getString("sha") ?: ""
                         PushDetailScreen()
+                    }
+
+                    composable("list_screen/{listType}/{username}/{repoName}") { backStackEntry ->
+                        val listType = backStackEntry.arguments?.getString("listType") ?: ""
+                        val username = backStackEntry.arguments?.getString("username") ?: ""
+                        val repoName = backStackEntry.arguments?.getString("repoName") ?: ""
+                        ListScreen(
+                            listType = listType,
+                            userName = username,
+                            repoName = repoName
+                        )
                     }
                 }
             }

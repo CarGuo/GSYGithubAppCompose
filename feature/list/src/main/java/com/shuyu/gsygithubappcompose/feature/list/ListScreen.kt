@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.shuyu.gsygithubappcompose.core.common.R
 import com.shuyu.gsygithubappcompose.core.network.model.User
+import com.shuyu.gsygithubappcompose.core.ui.LocalNavigator
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYPullRefresh
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYTopAppBar
 import com.shuyu.gsygithubappcompose.core.ui.components.RepoItemDisplayData
@@ -33,6 +34,7 @@ fun ListScreen(
     listViewModel: ListViewModel = hiltViewModel()
 ) {
     val uiState by listViewModel.uiState.collectAsState()
+    val navigator = LocalNavigator.current
 
     listViewModel.loadData(userName, repoName, listType)
 
@@ -40,10 +42,9 @@ fun ListScreen(
         topBar = {
             GSYTopAppBar(
                 title = { Text(text = uiState.title) },
-                showBackButton = false,
+                showBackButton = true,
             )
-        }
-    ) { innerPadding ->
+        }) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
             if (uiState.isPageLoading) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -76,11 +77,12 @@ fun ListScreen(
                                     repoItem = item
                                 )
                             }
+
                             is User -> {
                                 UserItem(
                                     user = item
                                 ) {
-                                    //TODO
+                                    navigator.navigate("person/${item.login}")
                                 }
                             }
                         }

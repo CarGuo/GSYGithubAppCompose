@@ -133,4 +133,16 @@
     <string name="lines_deleted">Lines Deleted</string>
     <string name="unknown_file">Unknown File</string>
     <string name="file_icon">File Icon</string>
+
+    <!-- List Page -->
+    <string name="list_repositories">%s repositories</string>
+    <string name="list_followers">%s followers</string>
+    <string name="list_following">%s following</string>
+    <string name="list_repos">%s repos</string>
+    <string name="list_stargazers">%s stargazers</string>
+    <string name="list_star">%s star</string>
+    <string name="list_watchers">%s watchers</string>
+    <string name="list_forks">%s forks</string>
+    <string name="list_topics">%s topics</string>
+    <string name="list_orgs">%s orgs</string>
 </resources>

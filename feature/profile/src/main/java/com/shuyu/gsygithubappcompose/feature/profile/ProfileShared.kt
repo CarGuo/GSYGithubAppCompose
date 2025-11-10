@@ -1,6 +1,7 @@
 package com.shuyu.gsygithubappcompose.feature.profile
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,6 +33,7 @@ import com.shuyu.gsygithubappcompose.core.ui.components.EventItem
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYGeneralLoadState
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYPullRefresh
 import com.shuyu.gsygithubappcompose.core.ui.components.UserItem
+import com.shuyu.gsygithubappcompose.core.ui.components.getRelativeTimeSpanString
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -85,6 +87,7 @@ fun ProfileContent(
 
 @Composable
 fun ProfileHeader(user: User) {
+    val navigator = LocalNavigator.current
     Column {
         Column(
             modifier = Modifier
@@ -149,21 +152,15 @@ fun ProfileHeader(user: User) {
 
             // Join date
             Spacer(modifier = Modifier.height(4.dp))
-            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-            val joinDate = try {
-                val parsedDate = SimpleDateFormat(
-                    "yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US
-                ).parse(user.createdAt ?: "")
-                parsedDate?.let { dateFormat.format(it) } ?: user.createdAt?.split("T")[0]
-            } catch (e: Exception) {
-                e.printStackTrace()
-                user.createdAt?.split("T")[0]
+            user.createdAt?.let {
+                Text(
+                    text = stringResource(
+                        id = R.string.profile_joined, getRelativeTimeSpanString(it)
+                    ),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.White.copy(alpha = 0.7f)
+                )
             }
-            Text(
-                text = stringResource(id = R.string.profile_joined, joinDate ?: ""),
-                style = MaterialTheme.typography.bodySmall,
-                color = Color.White.copy(alpha = 0.7f)
-            )
         }
 
         Row(
@@ -175,7 +172,9 @@ fun ProfileHeader(user: User) {
             ProfileStat(
                 label = stringResource(id = R.string.profile_repositories),
                 count = user.publicRepos ?: 0
-            )
+            ) {
+                navigator.navigate("list_screen/repositories/${user.login}/_")
+            }
             HorizontalDivider(
                 modifier = Modifier
                     .width(1.dp)
@@ -184,7 +183,9 @@ fun ProfileHeader(user: User) {
             )
             ProfileStat(
                 label = stringResource(id = R.string.profile_followers), count = user.followers ?: 0
-            )
+            ) {
+                navigator.navigate("list_screen/follower/${user.login}/_")
+            }
             HorizontalDivider(
                 modifier = Modifier
                     .width(1.dp)
@@ -193,7 +194,9 @@ fun ProfileHeader(user: User) {
             )
             ProfileStat(
                 label = stringResource(id = R.string.profile_following), count = user.following ?: 0
-            )
+            ) {
+                navigator.navigate("list_screen/following/${user.login}/_")
+            }
         }
 
         Box(
@@ -213,8 +216,9 @@ fun ProfileHeader(user: User) {
 }
 
 @Composable
-fun ProfileStat(label: String, count: Int) {
+fun ProfileStat(label: String, count: Int, onClick: () -> Unit) {
     Column(
+        modifier = Modifier.clickable(onClick = onClick),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {

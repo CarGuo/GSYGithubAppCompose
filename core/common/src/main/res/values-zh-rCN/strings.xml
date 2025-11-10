@@ -126,4 +126,16 @@
     <string name="time_days_ago">%d 天前</string>
     <string name="time_months_ago">%d 月前</string>
     <string name="time_years_ago">%d 年前</string>
+
+    <!-- List Page -->
+    <string name="list_repositories">%s 的仓库</string>
+    <string name="list_followers">%s 的粉丝</string>
+    <string name="list_following">%s 的关注</string>
+    <string name="list_repos">%s 的仓库</string>
+    <string name="list_stargazers">%s 的关注者</string>
+    <string name="list_star">%s 的星标</string>
+    <string name="list_watchers">%s 的订阅者</string>
+    <string name="list_forks">%s 的复刻</string>
+    <string name="list_topics">%s 的主题</string>
+    <string name="list_orgs">%s 的组织</string>
 </resources>

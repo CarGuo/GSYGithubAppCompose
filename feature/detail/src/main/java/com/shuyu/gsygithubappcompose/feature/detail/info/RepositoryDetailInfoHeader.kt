@@ -300,22 +300,30 @@ fun RepositoryDetailInfoHeader(
                         imageVector = Icons.Filled.Star,
                         contentDescription = "Stars",
                         count = repositoryDetailModel.stargazersCount
-                    )
+                    ) {
+                        navigator.navigate("list_screen/stargazers/${repositoryDetailModel.owner}/${repositoryDetailModel.name}")
+                    }
                     RepositoryStatItem(
                         imageVector = Icons.Filled.ForkRight,
                         contentDescription = "Forks",
                         count = repositoryDetailModel.forkCount
-                    )
+                    ) {
+                        navigator.navigate("list_screen/forks/${repositoryDetailModel.owner}/${repositoryDetailModel.name}")
+                    }
                     RepositoryStatItem(
                         imageVector = Icons.Filled.Visibility,
                         contentDescription = "Watchers",
                         count = repositoryDetailModel.watchersCount
-                    )
+                    ) {
+                        navigator.navigate("list_screen/watchers/${repositoryDetailModel.owner}/${repositoryDetailModel.name}")
+                    }
                     RepositoryStatItem(
                         imageVector = Icons.Filled.Info,
                         contentDescription = "Open Issues",
                         count = repositoryDetailModel.issuesTotal
-                    )
+                    ) {
+                        //navigator.navigate("list_screen/issues/${repositoryDetailModel.owner}/${repositoryDetailModel.name}")
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -334,14 +342,18 @@ fun RepositoryDetailInfoHeader(
                             verticalArrangement = Arrangement.spacedBy(5.dp)
                         ) {
                             topics.forEach { topic ->
-                                CustomChip(
-                                    text = topic ?: "",
-                                    onClick = { /* Do nothing or navigate to topic search */ },
-                                    backgroundColor = Color.Gray.copy(alpha = 0.5f),
-                                    contentPadding = PaddingValues(
-                                        horizontal = 8.dp, vertical = 1.dp
+                                if (topic != null) {
+                                    CustomChip(
+                                        text = topic,
+                                        onClick = {
+                                            navigator.navigate("list_screen/topics/$topic/_")
+                                        },
+                                        backgroundColor = Color.Gray.copy(alpha = 0.5f),
+                                        contentPadding = PaddingValues(
+                                            horizontal = 8.dp, vertical = 1.dp
+                                        )
                                     )
-                                )
+                                }
                             }
                         }
                     }
@@ -353,9 +365,15 @@ fun RepositoryDetailInfoHeader(
 
 @Composable
 fun RepositoryStatItem(
-    imageVector: ImageVector, contentDescription: String, count: Int
+    imageVector: ImageVector,
+    contentDescription: String,
+    count: Int,
+    onClick: () -> Unit
 ) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.clickable(onClick = onClick)
+    ) {
         Icon(
             imageVector = imageVector,
             contentDescription = contentDescription,
