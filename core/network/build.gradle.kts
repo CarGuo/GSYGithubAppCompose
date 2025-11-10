@@ -41,7 +41,7 @@ dependencies {
     ksp(libs.hilt.compiler)
 
     // Retrofit & OkHttp
-    implementation(libs.retrofit)
+    api(libs.retrofit)
     implementation(libs.retrofit.converter.gson)
     implementation(libs.retrofit.converter.serialization)
     implementation(libs.okhttp)

@@ -50,7 +50,7 @@ fun EventItem(
                 "IssueCommentEvent", "IssuesEvent" -> {
                     val issue = event.payload?.issue
                     if (issue != null && owner != null && repoName != null) {
-                        navigator.navigate("issue_detail/${owner}/${repoName}/${issue.number}")
+                        navigator.navigate("`issue_detail`/${owner}/${repoName}/${issue.number}")
                     }
                 }
 

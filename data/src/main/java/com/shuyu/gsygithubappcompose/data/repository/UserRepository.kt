@@ -17,6 +17,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import retrofit2.HttpException
+import java.net.HttpURLConnection
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -132,6 +134,38 @@ class UserRepository @Inject constructor(
             emit(Result.failure(e))
         }
     }
+
+    fun checkFollowing(userName: String): Flow<RepositoryResult<Boolean>> = flow {
+        try {
+            apiService.checkFollowingUser(userName)
+            emit(RepositoryResult(Result.success(true), DataSource.NETWORK, true))
+        } catch (e: Exception) {
+            if (e is HttpException && e.code() == HttpURLConnection.HTTP_NOT_FOUND) {
+                emit(RepositoryResult(Result.success(false), DataSource.NETWORK, true))
+            } else {
+                emit(RepositoryResult(Result.failure(e), DataSource.NETWORK, true))
+            }
+        }
+    }
+
+    fun followUser(userName: String): Flow<RepositoryResult<Boolean>> = flow {
+        try {
+            apiService.followUser(userName)
+            emit(RepositoryResult(Result.success(true), DataSource.NETWORK, true))
+        } catch (e: Exception) {
+            emit(RepositoryResult(Result.failure(e), DataSource.NETWORK, true))
+        }
+    }
+
+    fun unFollowUser(userName: String): Flow<RepositoryResult<Boolean>> = flow {
+        try {
+            apiService.unfollowUser(userName)
+            emit(RepositoryResult(Result.success(true), DataSource.NETWORK, true))
+        } catch (e: Exception) {
+            emit(RepositoryResult(Result.failure(e), DataSource.NETWORK, true))
+        }
+    }
+
 
     fun getOrgs(userName: String, page: Int): Flow<Result<List<Organization>>> = flow {
         try {
