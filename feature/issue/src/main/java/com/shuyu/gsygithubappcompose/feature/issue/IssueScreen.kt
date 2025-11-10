@@ -1,7 +1,10 @@
 package com.shuyu.gsygithubappcompose.feature.issue
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -49,12 +53,13 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.shuyu.gsygithubappcompose.core.network.model.Comment
 import com.shuyu.gsygithubappcompose.core.network.model.Issue
-import com.shuyu.gsygithubappcompose.core.common.R // Corrected R import
+import com.shuyu.gsygithubappcompose.core.common.R
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYCardItem
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYGeneralLoadState
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYLoadingDialog
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYMarkdownInputDialog
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYMarkdownText
+import com.shuyu.gsygithubappcompose.core.ui.components.GSYOptionDialog
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYPullRefresh
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYTopAppBar
 import com.shuyu.gsygithubappcompose.core.ui.components.RelativeTimeText
@@ -145,7 +150,12 @@ fun IssueScreen(
                             }
                         }
                         items(uiState.comments) { comment ->
-                            IssueCommentItem(comment = comment)
+                            IssueCommentItem(
+                                comment = comment,
+                                onLongPress = {
+                                    viewModel.showOptionDialog(true, comment)
+                                }
+                            )
                         }
                     }
                 }
@@ -174,6 +184,25 @@ fun IssueScreen(
                     onDismiss = { viewModel.showEditDialog(false) },
                     onTitleChange = { viewModel.updateEditIssueTitle(it) },
                     onTextChange = { viewModel.updateEditIssueBody(it) })
+            }
+
+            if (uiState.showEditCommentDialog) {
+                GSYMarkdownInputDialog(
+                    title = stringResource(R.string.issue_edit_dialog_title),
+                    initialText = uiState.editComment,
+                    textHint = stringResource(R.string.issue_reply_hint),
+                    showTitleField = false,
+                    onConfirm = { _, text -> viewModel.editComment() },
+                    onDismiss = { viewModel.showEditCommentDialog(false) },
+                    onTextChange = { viewModel.updateEditComment(it) })
+            }
+
+            if (uiState.showOptionDialog) {
+                GSYOptionDialog(
+                    options = uiState.optionDialogOptions,
+                    onDismiss = { },
+                    onOptionSelected = { viewModel.onOptionSelected(it) }
+                )
             }
 
             if (uiState.isActionLoading) {
@@ -291,9 +320,15 @@ fun IssueBody(issue: Issue) {
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun IssueCommentItem(comment: Comment) {
-    GSYCardItem {
+fun IssueCommentItem(comment: Comment, onLongPress: () -> Unit) {
+    GSYCardItem(
+        modifier = Modifier.combinedClickable(
+            onClick = {},
+            onLongClick = onLongPress
+        )
+    ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()

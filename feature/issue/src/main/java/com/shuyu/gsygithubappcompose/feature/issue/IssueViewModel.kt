@@ -2,6 +2,7 @@ package com.shuyu.gsygithubappcompose.feature.issue
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.shuyu.gsygithubappcompose.core.common.R
 import com.shuyu.gsygithubappcompose.core.common.util.StringResourceProvider
 import com.shuyu.gsygithubappcompose.data.repository.IssueRepository
 import com.shuyu.gsygithubappcompose.data.repository.vm.BaseUiState
@@ -27,15 +28,20 @@ data class IssueUiState(
     val isIssueCreator: Boolean = false,
     val showReplyDialog: Boolean = false,
     val showEditDialog: Boolean = false,
+    val showEditCommentDialog: Boolean = false,
     val canReply: Boolean = false,
     val canEdit: Boolean = false,
     val canOpenClose: Boolean = false,
     val canLockUnlock: Boolean = false,
     val editIssueTitle: String = "",
     val editIssueBody: String = "",
+    val editComment: String = "",
     val replyComment: String = "",
     val isIssueLocked: Boolean = false,
     val isActionLoading: Boolean = false,
+    val showOptionDialog: Boolean = false,
+    val selectedComment: Comment? = null,
+    val optionDialogOptions: List<String> = emptyList(),
     override val isPageLoading: Boolean = false,
     override val isRefreshing: Boolean = false,
     override val isLoadingMore: Boolean = false,
@@ -49,7 +55,7 @@ data class IssueUiState(
 class IssueViewModel @Inject constructor(
     private val issueRepository: IssueRepository,
     private val preferencesDataStore: UserPreferencesDataStore,
-    stringResourceProvider: StringResourceProvider,
+    private val stringResourceProvider: StringResourceProvider,
     savedStateHandle: SavedStateHandle
 ) : BaseViewModel<IssueUiState>(
     initialUiState = IssueUiState(),
@@ -65,8 +71,7 @@ class IssueViewModel @Inject constructor(
             hasMore = hasMore,
             loadMoreError = loadMoreError
         )
-    }
-) {
+    }) {
     init {
         savedStateHandle.get<String>("owner")?.let { owner ->
             _uiState.update { it.copy(owner = owner) }
@@ -102,58 +107,64 @@ class IssueViewModel @Inject constructor(
         fetchIssueComments(currentOwner, currentRepoName, currentIssueNumber, isLoadMore)
     }
 
-    private fun fetchIssueInfo(owner: String, repoName: String, issueNumber: Int, isRefresh: Boolean) {
+    private fun fetchIssueInfo(
+        owner: String, repoName: String, issueNumber: Int, isRefresh: Boolean
+    ) {
         launchDataLoad(initialLoad = false, isRefresh = isRefresh, isLoadMore = false) { _ ->
             issueRepository.getIssueInfo(owner, repoName, issueNumber).collect { result ->
-                result.data.fold(
-                    onSuccess = { issue ->
-                        _uiState.update { currentState ->
-                            val currentUserLogin = currentState.currentUserLogin
-                            val isIssueCreator = currentUserLogin == issue.user?.login
-                            // Directly compare current user login with the repo owner from the issue context
-                            val isRepoOwner = currentUserLogin == owner
+                result.data.fold(onSuccess = { issue ->
+                    _uiState.update { currentState ->
+                        val currentUserLogin = currentState.currentUserLogin
+                        val isIssueCreator = currentUserLogin == issue.user?.login
+                        // Directly compare current user login with the repo owner from the issue context
+                        val isRepoOwner = currentUserLogin == owner
 
-                            val isIssueLocked = issue.locked ?: false
+                        val isIssueLocked = issue.locked ?: false
 
-                            val canReply = isRepoOwner || isIssueCreator || !isIssueLocked
-                            val canEdit = isRepoOwner || (isIssueCreator && !isIssueLocked)
-                            val canOpenClose = isRepoOwner || isIssueCreator
-                            val canLockUnlock = isRepoOwner
+                        val canReply = isRepoOwner || isIssueCreator || !isIssueLocked
+                        val canEdit = isRepoOwner || (isIssueCreator && !isIssueLocked)
+                        val canOpenClose = isRepoOwner || isIssueCreator
+                        val canLockUnlock = isRepoOwner
 
-                            currentState.copy(
-                                issue = issue,
-                                isPageLoading = false,
-                                isRefreshing = false,
-                                error = null,
-                                isIssueCreator = isIssueCreator,
-                                isRepoOwner = isRepoOwner,
-                                isIssueLocked = isIssueLocked,
-                                canReply = canReply,
-                                canEdit = canEdit,
-                                canOpenClose = canOpenClose,
-                                canLockUnlock = canLockUnlock,
-                                editIssueTitle = issue.title,
-                                editIssueBody = issue.body ?: ""
-                            )
-                        }
-                    },
-                    onFailure = { throwable ->
-                        _uiState.update {
-                            it.copy(error = throwable.message, isPageLoading = false, isRefreshing = false)
-                        }
+                        currentState.copy(
+                            issue = issue,
+                            isPageLoading = false,
+                            isRefreshing = false,
+                            error = null,
+                            isIssueCreator = isIssueCreator,
+                            isRepoOwner = isRepoOwner,
+                            isIssueLocked = isIssueLocked,
+                            canReply = canReply,
+                            canEdit = canEdit,
+                            canOpenClose = canOpenClose,
+                            canLockUnlock = canLockUnlock,
+                            editIssueTitle = issue.title,
+                            editIssueBody = issue.body ?: ""
+                        )
                     }
-                )
+                }, onFailure = { throwable ->
+                    _uiState.update {
+                        it.copy(
+                            error = throwable.message, isPageLoading = false, isRefreshing = false
+                        )
+                    }
+                })
             }
         }
     }
 
-    private fun fetchIssueComments(owner: String, repoName: String, issueNumber: Int, isLoadMore: Boolean) {
-        launchDataLoad(initialLoad = false, isRefresh = false, isLoadMore = isLoadMore) { pageToLoad ->
-            issueRepository.getIssueComments(owner, repoName, issueNumber, pageToLoad).collect { result ->
-                result.data.fold(
-                    onSuccess = { newComments ->
+    private fun fetchIssueComments(
+        owner: String, repoName: String, issueNumber: Int, isLoadMore: Boolean
+    ) {
+        launchDataLoad(
+            initialLoad = false, isRefresh = false, isLoadMore = isLoadMore
+        ) { pageToLoad ->
+            issueRepository.getIssueComments(owner, repoName, issueNumber, pageToLoad)
+                .collect { result ->
+                    result.data.fold(onSuccess = { newComments ->
                         _uiState.update { currentState ->
-                            val updatedComments = if (pageToLoad == 1) newComments else currentState.comments + newComments
+                            val updatedComments =
+                                if (pageToLoad == 1) newComments else currentState.comments + newComments
                             currentState.copy(
                                 comments = updatedComments,
                                 isPageLoading = false,
@@ -163,8 +174,7 @@ class IssueViewModel @Inject constructor(
                                 hasMore = newComments.size == NetworkConfig.PER_PAGE
                             )
                         }
-                    },
-                    onFailure = { throwable ->
+                    }, onFailure = { throwable ->
                         _uiState.update { currentState ->
                             currentState.copy(
                                 error = throwable.message,
@@ -173,9 +183,8 @@ class IssueViewModel @Inject constructor(
                                 loadMoreError = true
                             )
                         }
-                    }
-                )
-            }
+                    })
+                }
         }
     }
 
@@ -185,6 +194,10 @@ class IssueViewModel @Inject constructor(
 
     fun showEditDialog(show: Boolean) {
         _uiState.update { it.copy(showEditDialog = show) }
+    }
+
+    fun showEditCommentDialog(show: Boolean) {
+        _uiState.update { it.copy(showEditCommentDialog = show) }
     }
 
     fun updateEditIssueTitle(title: String) {
@@ -197,6 +210,10 @@ class IssueViewModel @Inject constructor(
 
     fun updateReplyComment(comment: String) {
         _uiState.update { it.copy(replyComment = comment) }
+    }
+
+    fun updateEditComment(comment: String) {
+        _uiState.update { it.copy(editComment = comment) }
     }
 
     fun addComment() {
@@ -212,20 +229,19 @@ class IssueViewModel @Inject constructor(
 
         _uiState.update { it.copy(isActionLoading = true) }
         launchDataLoad(initialLoad = false, isRefresh = false, isLoadMore = false) {
-            issueRepository.addIssueComment(currentOwner, currentRepoName, currentIssueNumber, commentBody).collect { result ->
-                result.data.fold(
-                    onSuccess = {
-                        showToast("Comment added successfully")
-                        showReplyDialog(false)
-                        updateReplyComment("")
-                        _uiState.update { it.copy(isActionLoading = false) }
-                        refresh() // Refresh comments
-                    },
-                    onFailure = { throwable ->
-                        showToast(throwable.message ?: "Failed to add comment")
-                        _uiState.update { it.copy(isActionLoading = false) }
-                    }
-                )
+            issueRepository.addIssueComment(
+                currentOwner, currentRepoName, currentIssueNumber, commentBody
+            ).collect { result ->
+                result.data.fold(onSuccess = {
+                    showToast("Comment added successfully")
+                    showReplyDialog(false)
+                    updateReplyComment("")
+                    _uiState.update { it.copy(isActionLoading = false) }
+                    refresh() // Refresh comments
+                }, onFailure = { throwable ->
+                    showToast(throwable.message ?: "Failed to add comment")
+                    _uiState.update { it.copy(isActionLoading = false) }
+                })
             }
         }
     }
@@ -244,19 +260,18 @@ class IssueViewModel @Inject constructor(
 
         _uiState.update { it.copy(isActionLoading = true) }
         launchDataLoad(initialLoad = false, isRefresh = false, isLoadMore = false) {
-            issueRepository.editIssue(currentOwner, currentRepoName, currentIssueNumber, newTitle, newBody).collect { result ->
-                result.data.fold(
-                    onSuccess = {
-                        showToast("Issue updated successfully")
-                        showEditDialog(false)
-                        _uiState.update { it.copy(isActionLoading = false) }
-                        refresh() // Refresh issue info
-                    },
-                    onFailure = { throwable ->
-                        showToast(throwable.message ?: "Failed to update issue")
-                        _uiState.update { it.copy(isActionLoading = false) }
-                    }
-                )
+            issueRepository.editIssue(
+                currentOwner, currentRepoName, currentIssueNumber, newTitle, newBody
+            ).collect { result ->
+                result.data.fold(onSuccess = {
+                    showToast("Issue updated successfully")
+                    showEditDialog(false)
+                    _uiState.update { it.copy(isActionLoading = false) }
+                    refresh() // Refresh issue info
+                }, onFailure = { throwable ->
+                    showToast(throwable.message ?: "Failed to update issue")
+                    _uiState.update { it.copy(isActionLoading = false) }
+                })
             }
         }
     }
@@ -271,18 +286,22 @@ class IssueViewModel @Inject constructor(
 
         _uiState.update { it.copy(isActionLoading = true) }
         launchDataLoad(initialLoad = false, isRefresh = false, isLoadMore = false) {
-            issueRepository.editIssue(currentOwner, currentRepoName, currentIssueNumber, _uiState.value.editIssueTitle, _uiState.value.editIssueBody, newState).collect { result ->
-                result.data.fold(
-                    onSuccess = {
-                        showToast("Issue state changed to $newState")
-                        _uiState.update { it.copy(isActionLoading = false) }
-                        refresh() // Refresh issue info
-                    },
-                    onFailure = { throwable ->
-                        showToast(throwable.message ?: "Failed to change issue state")
-                        _uiState.update { it.copy(isActionLoading = false) }
-                    }
-                )
+            issueRepository.editIssue(
+                currentOwner,
+                currentRepoName,
+                currentIssueNumber,
+                _uiState.value.editIssueTitle,
+                _uiState.value.editIssueBody,
+                newState
+            ).collect { result ->
+                result.data.fold(onSuccess = {
+                    showToast("Issue state changed to $newState")
+                    _uiState.update { it.copy(isActionLoading = false) }
+                    refresh() // Refresh issue info
+                }, onFailure = { throwable ->
+                    showToast(throwable.message ?: "Failed to change issue state")
+                    _uiState.update { it.copy(isActionLoading = false) }
+                })
             }
         }
     }
@@ -296,34 +315,133 @@ class IssueViewModel @Inject constructor(
         _uiState.update { it.copy(isActionLoading = true) }
         launchDataLoad(initialLoad = false, isRefresh = false, isLoadMore = false) {
             if (isLocked) {
-                issueRepository.unlockIssue(currentOwner, currentRepoName, currentIssueNumber).collect { result ->
-                    result.data.fold(
-                        onSuccess = {
+                issueRepository.unlockIssue(currentOwner, currentRepoName, currentIssueNumber)
+                    .collect { result ->
+                        result.data.fold(onSuccess = {
                             showToast("Issue unlocked successfully")
                             _uiState.update { it.copy(isActionLoading = false) }
                             refresh()
-                        },
-                        onFailure = { throwable ->
+                        }, onFailure = { throwable ->
                             showToast(throwable.message ?: "Failed to unlock issue")
                             _uiState.update { it.copy(isActionLoading = false) }
-                        }
-                    )
-                }
+                        })
+                    }
             } else {
-                issueRepository.lockIssue(currentOwner, currentRepoName, currentIssueNumber).collect { result ->
-                    result.data.fold(
-                        onSuccess = {
+                issueRepository.lockIssue(currentOwner, currentRepoName, currentIssueNumber)
+                    .collect { result ->
+                        result.data.fold(onSuccess = {
                             showToast("Issue locked successfully")
                             _uiState.update { it.copy(isActionLoading = false) }
                             refresh()
-                        },
-                        onFailure = { throwable ->
+                        }, onFailure = { throwable ->
                             showToast(throwable.message ?: "Failed to lock issue")
                             _uiState.update { it.copy(isActionLoading = false) }
-                        }
-                    )
-                }
+                        })
+                    }
             }
+        }
+    }
+
+    fun showOptionDialog(show: Boolean, comment: Comment?) {
+        val options = mutableListOf<String>()
+        val isCommentAuthor = _uiState.value.currentUserLogin == comment?.user?.login
+        if (_uiState.value.isRepoOwner || isCommentAuthor) {
+            options.add(stringResourceProvider.getString(R.string.edit))
+            options.add(stringResourceProvider.getString(R.string.delete))
+        }
+
+        if (options.isNotEmpty()) {
+            _uiState.update {
+                it.copy(
+                    showOptionDialog = show,
+                    selectedComment = comment,
+                    optionDialogOptions = options,
+                    editComment = comment?.body ?: ""
+                )
+            }
+        }
+    }
+
+    fun hideOptionDialog(cleanSelect: Boolean) {
+        if (cleanSelect) {
+            _uiState.update {
+                it.copy(
+                    showOptionDialog = false,
+                    selectedComment = null,
+                    optionDialogOptions = emptyList()
+                )
+            }
+        } else {
+
+            _uiState.update {
+                it.copy(
+                    showOptionDialog = false, optionDialogOptions = emptyList()
+                )
+            }
+        }
+
+    }
+
+    fun onOptionSelected(option: String) {
+        when (option) {
+            stringResourceProvider.getString(R.string.edit) -> {
+                showEditCommentDialog(true)
+                hideOptionDialog(false)
+            }
+
+            stringResourceProvider.getString(R.string.delete) -> {
+                deleteComment()
+                hideOptionDialog(true)
+            }
+        }
+    }
+
+    fun editComment() {
+        val currentOwner = _uiState.value.owner ?: return
+        val currentRepoName = _uiState.value.repoName ?: return
+        val commentId = _uiState.value.selectedComment?.id ?: return
+        val commentBody = _uiState.value.editComment
+
+        if (commentBody.isBlank()) {
+            showToast("Comment cannot be empty")
+            return
+        }
+
+        _uiState.update { it.copy(isActionLoading = true) }
+        launchDataLoad(initialLoad = false, isRefresh = false, isLoadMore = false) {
+            issueRepository.editComment(currentOwner, currentRepoName, commentId, commentBody)
+                .collect { result ->
+                    result.data.fold(onSuccess = {
+                        showToast("Comment updated successfully")
+                        showEditCommentDialog(false)
+                        _uiState.update { it.copy(isActionLoading = false, selectedComment = null) }
+                        refresh() // Refresh comments
+                    }, onFailure = { throwable ->
+                        showToast(throwable.message ?: "Failed to update comment")
+                        _uiState.update { it.copy(isActionLoading = false) }
+                    })
+                }
+        }
+    }
+
+    fun deleteComment() {
+        val currentOwner = _uiState.value.owner ?: return
+        val currentRepoName = _uiState.value.repoName ?: return
+        val commentId = _uiState.value.selectedComment?.id ?: return
+
+        _uiState.update { it.copy(isActionLoading = true) }
+        launchDataLoad(initialLoad = false, isRefresh = false, isLoadMore = false) {
+            issueRepository.deleteComment(currentOwner, currentRepoName, commentId)
+                .collect { result ->
+                    result.data.fold(onSuccess = {
+                        showToast("Comment deleted successfully")
+                        _uiState.update { it.copy(isActionLoading = false) }
+                        refresh() // Refresh comments
+                    }, onFailure = { throwable ->
+                        showToast(throwable.message ?: "Failed to delete comment")
+                        _uiState.update { it.copy(isActionLoading = false) }
+                    })
+                }
         }
     }
 }
