@@ -50,6 +50,7 @@ class MainActivity : ComponentActivity() {
 
                     composable("home") {
                         HomeScreen(
+                            versionName = BuildConfig.VERSION_NAME,
                             dynamicContent = { DynamicScreen() },
                             trendingContent = { TrendingScreen() },
                             profileContent = { ProfileScreen() }

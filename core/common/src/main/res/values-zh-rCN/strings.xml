@@ -26,6 +26,11 @@
     <string name="menu_events">我的动态</string>
     <string name="menu_about">关于</string>
     <string name="logout">退出登录</string>
+    <string name="menu_feedback">问题反馈</string>
+    <string name="menu_personal_info">个人信息</string>
+    <string name="menu_language">语言切换</string>
+    <string name="menu_check_update">检查更新</string>
+    <string name="feedback_hint">您输入的反馈会变成 issue 提交到 GitHub 仓库！</string>
 
     <!-- 搜索页 -->
     <string name="nav_search">搜索</string>
@@ -83,6 +88,8 @@
     <string name="confirm">确定</string>
     <string name="issue_created_successfully">Issue 创建成功！</string>
     <string name="error_failed_to_create_issue">创建 Issue 失败</string>
+    <string name="issue_submit_success">反馈提交成功！</string>
+    <string name="issue_submit_fail">反馈提交失败</string>
 
     <!-- Issue Screen -->
     <string name="user_avatar">用户头像</string>

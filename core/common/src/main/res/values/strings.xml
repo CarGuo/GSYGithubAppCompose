@@ -26,6 +26,11 @@
     <string name="menu_events">My Events</string>
     <string name="menu_about">About</string>
     <string name="logout">Logout</string>
+    <string name="menu_feedback">Feedback</string>
+    <string name="menu_personal_info">Personal Info</string>
+    <string name="menu_language">Switch Language</string>
+    <string name="menu_check_update">Check for Updates</string>
+    <string name="feedback_hint">Your feedback will be submitted as an issue to the GitHub repository.</string>
 
     <!-- Search Screen -->
     <string name="nav_search">Search</string>
@@ -83,6 +88,8 @@
     <string name="confirm">Confirm</string>
     <string name="issue_created_successfully">Issue created successfully!</string>
     <string name="error_failed_to_create_issue">Failed to create issue</string>
+    <string name="issue_submit_success">Feedback submitted successfully!</string>
+    <string name="issue_submit_fail">Failed to submit feedback</string>
 
     <!-- Issue Screen -->
     <string name="user_avatar">User Avatar</string>

@@ -3,8 +3,6 @@ package com.shuyu.gsygithubappcompose.feature.home
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
@@ -15,7 +13,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -31,8 +32,11 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.shuyu.gsygithubappcompose.core.common.R
 import com.shuyu.gsygithubappcompose.core.ui.LocalNavigator
 import com.shuyu.gsygithubappcompose.core.ui.GSYNavigator
+import com.shuyu.gsygithubappcompose.core.ui.components.GSYLoadingDialog
+import com.shuyu.gsygithubappcompose.core.ui.components.GSYMarkdownInputDialog
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYTopAppBar
 import com.shuyu.gsygithubappcompose.core.network.model.User
+import com.shuyu.gsygithubappcompose.data.repository.vm.BaseScreen
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -48,6 +52,7 @@ sealed class BottomNavItem(
 @Composable
 fun HomeScreen(
     homeViewModel: HomeViewModel = hiltViewModel(),
+    versionName: String,
     dynamicContent: @Composable () -> Unit,
     trendingContent: @Composable () -> Unit,
     profileContent: @Composable () -> Unit
@@ -56,6 +61,9 @@ fun HomeScreen(
     val coroutineScope = rememberCoroutineScope()
     val navigator = LocalNavigator.current
     val uiState by homeViewModel.uiState.collectAsState()
+    var openAboutDialog by remember { mutableStateOf(false) }
+    var openFeedbackDialog by remember { mutableStateOf(false) }
+
 
     val items = listOf(
         BottomNavItem.Dynamic, BottomNavItem.Trending, BottomNavItem.Profile
@@ -79,77 +87,139 @@ fun HomeScreen(
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
-    ModalNavigationDrawer(
-        drawerState = drawerState,
-        drawerContent = {
-            DrawerContent(
-                user = uiState.user,
-                onLogout = {
-                    homeViewModel.logout()
-                },
-                onNavigationTo = {
-                    coroutineScope.launch {
-                        drawerState.close()
-                    }
-                    navigator.navigate(it)
-                }
-            )
-        }
-    ) {
-        Scaffold(topBar = {
-            GSYTopAppBar(
-                title = { Text(text = stringResource(id = R.string.app_name)) },
-                navigationIcon = {
-                    IconButton(onClick = {
-                        coroutineScope.launch {
-                            drawerState.open()
-                        }
+    if (openAboutDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                openAboutDialog = false
+            },
+            title = {
+                Text(text = stringResource(id = R.string.app_name))
+            },
+            text = {
+                Text(text = "Version: $versionName")
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        openAboutDialog = false
                     }) {
-                        Icon(
-                            Icons.Default.Menu,
-                            contentDescription = "Drawer",
-                            tint = Color.White
-                        )
-                    }
-                },
-                actions = {
-                    SearchActionIcon(navigator = navigator)
-                }
-            )
-        }, bottomBar = {
-            NavigationBar(containerColor = MaterialTheme.colorScheme.primary) {
-                items.forEachIndexed { index, item ->
-                    NavigationBarItem(
-                        icon = {
-                            Icon(
-                                item.icon, contentDescription = stringResource(id = item.titleRes)
-                            )
-                        },
-                        label = { Text(stringResource(id = item.titleRes)) },
-                        selected = pagerState.currentPage == index,
-                        onClick = {
-                            coroutineScope.launch {
-                                pagerState.animateScrollToPage(index)
-                            }
-                        },
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = Color.White,
-                            unselectedIconColor = Color.White.copy(alpha = 0.6f),
-                            selectedTextColor = Color.White,
-                            unselectedTextColor = Color.White.copy(alpha = 0.6f),
-                            indicatorColor = MaterialTheme.colorScheme.primary
-                        )
-                    )
+                    Text("OK")
                 }
             }
-        }) { innerPadding ->
-            HorizontalPager(
-                state = pagerState, modifier = Modifier.padding(innerPadding)
-            ) { page ->
-                when (page) {
-                    0 -> dynamicContent()
-                    1 -> trendingContent()
-                    2 -> profileContent()
+        )
+    }
+
+    if (openFeedbackDialog) {
+        GSYMarkdownInputDialog(
+            title = stringResource(id = R.string.menu_feedback),
+            textHint = stringResource(id = R.string.feedback_hint),
+            onDismiss = {
+                openFeedbackDialog = false
+            },
+            onConfirm = { title, content ->
+                coroutineScope.launch {
+                    val success = homeViewModel.submitFeedback(title, content)
+                    if (success) {
+                        openFeedbackDialog = false
+                    }
+                }
+            }
+        )
+    }
+
+    if (uiState.isLoadingDialog) {
+        GSYLoadingDialog()
+    }
+
+    BaseScreen(viewModel = homeViewModel) {
+        ModalNavigationDrawer(
+            drawerState = drawerState,
+            drawerContent = {
+                DrawerContent(
+                    user = uiState.user,
+                    onLogout = {
+                        homeViewModel.logout()
+                    },
+                    onItemSelected = {
+                        when (it) {
+                            "about" -> {
+                                openAboutDialog = true
+                            }
+                            "feedback" -> {
+                                openFeedbackDialog = true
+                            }
+                            "personal_info" -> {
+                                // Handle personal info
+                            }
+                            "language" -> {
+                                // Handle language
+                            }
+                            "check_update" -> {
+                                // Handle check update
+                            }
+                        }
+                        coroutineScope.launch {
+                            drawerState.close()
+                        }
+                    }
+                )
+            }
+        ) {
+            Scaffold(topBar = {
+                GSYTopAppBar(
+                    title = { Text(text = stringResource(id = R.string.app_name)) },
+                    navigationIcon = {
+                        IconButton(onClick = {
+                            coroutineScope.launch {
+                                drawerState.open()
+                            }
+                        }) {
+                            Icon(
+                                Icons.Default.Menu,
+                                contentDescription = "Drawer",
+                                tint = Color.White
+                            )
+                        }
+                    },
+                    actions = {
+                        SearchActionIcon(navigator = navigator)
+                    }
+                )
+            }, bottomBar = {
+                NavigationBar(containerColor = MaterialTheme.colorScheme.primary) {
+                    items.forEachIndexed { index, item ->
+                        NavigationBarItem(
+                            icon = {
+                                Icon(
+                                    item.icon, contentDescription = stringResource(id = item.titleRes)
+                                )
+                            },
+                            label = { Text(stringResource(id = item.titleRes)) },
+                            selected = pagerState.currentPage == index,
+                            onClick = {
+                                coroutineScope.launch {
+                                    pagerState.animateScrollToPage(index)
+                                }
+                            },
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = Color.White,
+                                unselectedIconColor = Color.White.copy(alpha = 0.6f),
+                                selectedTextColor = Color.White,
+                                unselectedTextColor = Color.White.copy(alpha = 0.6f),
+                                indicatorColor = MaterialTheme.colorScheme.primary
+                            )
+                        )
+                    }
+                }
+            }) { innerPadding ->
+                HorizontalPager(
+                    state = pagerState, modifier = Modifier.padding(innerPadding)
+                ) { page ->
+                    when (page) {
+                        0 -> dynamicContent()
+                        1 -> trendingContent()
+                        2 -> profileContent()
+                    }
                 }
             }
         }
@@ -160,18 +230,8 @@ fun HomeScreen(
 fun DrawerContent(
     user: User?,
     onLogout: () -> Unit,
-    onNavigationTo: (String) -> Unit
+    onItemSelected: (String) -> Unit
 ) {
-    val drawerItems = listOf(
-        DrawerItem(
-            "notification_route",
-            R.string.menu_notification,
-            Icons.Default.Notifications
-        ),
-        DrawerItem("my_events_route", R.string.menu_events, Icons.Default.Event),
-        DrawerItem("about_route", R.string.menu_about, Icons.Default.Info)
-    )
-
     ModalDrawerSheet {
         Column(modifier = Modifier.fillMaxSize()) {
             // User Info Header
@@ -206,15 +266,42 @@ fun DrawerContent(
             HorizontalDivider()
 
             // Menu Items
-            LazyColumn(modifier = Modifier.weight(1f)) {
-                items(drawerItems) { item ->
-                    NavigationDrawerItem(
-                        icon = { Icon(item.icon, contentDescription = null) },
-                        label = { Text(stringResource(item.titleRes)) },
-                        selected = false,
-                        onClick = { onNavigationTo(item.route) }
-                    )
-                }
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(id = R.string.menu_feedback),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onItemSelected("feedback") }
+                        .padding(16.dp)
+                )
+                Text(
+                    text = stringResource(id = R.string.menu_personal_info),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onItemSelected("personal_info") }
+                        .padding(16.dp)
+                )
+                Text(
+                    text = stringResource(id = R.string.menu_language),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onItemSelected("language") }
+                        .padding(16.dp)
+                )
+                Text(
+                    text = stringResource(id = R.string.menu_check_update),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onItemSelected("check_update") }
+                        .padding(16.dp)
+                )
+                Text(
+                    text = stringResource(id = R.string.menu_about),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onItemSelected("about") }
+                        .padding(16.dp)
+                )
             }
 
             // Logout Button
@@ -230,9 +317,6 @@ fun DrawerContent(
         }
     }
 }
-
-data class DrawerItem(val route: String, val titleRes: Int, val icon: ImageVector)
-
 
 @Composable
 fun SearchActionIcon(navigator: GSYNavigator) {
