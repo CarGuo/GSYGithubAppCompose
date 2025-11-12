@@ -54,6 +54,34 @@
 
 ## 项目结构图
 
+### KeyFeatures
+
+![](./doc/KeyFeatures.png)
+
+### Core Technologies
+
+![](./doc/CoreTechnologies.png)
+
+### Layer Structure
+
+![](./doc/LayerStructure.png)
+
+
+### Technology Stack
+
+![](./doc/TechnologyStack.png)
+
+### Navigation Flow
+
+![](./doc/NavigationFlow.png)
+
+
+### Data Flow Architecture
+
+![](./doc/DataFlowArchitecture.png)
+
+
+
 ### 整体架构图
 
 ```
@@ -370,6 +398,7 @@ GSYGithubAppCompose/
 <img src="http://img.cdn.guoshuyu.cn/thanks.jpg" width="426px"/>
 
 
+https://deepwiki.com/CarGuo/GSYGithubAppCompose
 
 ### LICENSE
 ```
