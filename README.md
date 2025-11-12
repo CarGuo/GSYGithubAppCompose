@@ -24,6 +24,11 @@
 -----
 
 
+|  |  |
+|------|------|
+|![](1.gif) | ![](2.gif) | 
+
+
 
 [![Github Actions](https://github.com/CarGuo/GSYGithubAppCompose/workflows/CI/badge.svg)](https://github.com/CarGuo/GSYGithubAppCompose/actions)
 [![GitHub stars](https://img.shields.io/github/stars/CarGuo/GSYGithubAppCompose.svg)](https://github.com/CarGuo/GSYGithubAppCompose/stargazers)
