@@ -267,7 +267,7 @@ import com.shuyu.gsygithubappcompose.data.repository.vm.BaseViewModel
 
 ## 注意：需要特别注意的问题
 - 工作时注意当前是 windows 环境还是 macOS 环境
-- D:\workspace\project\GSYGithubAppCompose\data\src\main\java\com\shuyu\gsygithubappcompose\data\repository\EventRepository.kt 是正确的路径方式 ，D:\workspace\project\GSYGithubAppCompose\data\src\main\java\com\shuyu.gsygithubappcompose\data\repository\EventRepository.kt 是错误的路径方式，不应该有 shuyu.gsygithubappcompose 这样的路径
+- src\main\java\com\shuyu\gsygithubappcompose\data\repository\EventRepository.kt 是正确的路径方式 ，src\main\java\com\shuyu.gsygithubappcompose\data\repository\EventRepository.kt 是错误的路径方式，不应该有类似 shuyu.gsygithubappcompose 这样的路径
 - 不允许随意删除我的注释和无用代码
 - 所有显示类型的文本内容都要多语言,不能写死,多语言在 core/common模块的 /res/values/ 和 /res/values-zh-rCN 下，需要注意中文和英文两个
 - 所有模块内代码都是在  src/main/java/packageName/ 下
