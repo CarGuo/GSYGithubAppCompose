@@ -21,13 +21,6 @@
 
 随着项目的使用情况和反馈，将时不时根据更新并完善用户体验与功能优化吗，欢迎提出问题。
 ```
------
-
-
-|  |  |
-|------|------|
-|![](1.gif) | ![](2.gif) | 
-
 
 
 [![Github Actions](https://github.com/CarGuo/GSYGithubAppCompose/workflows/CI/badge.svg)](https://github.com/CarGuo/GSYGithubAppCompose/actions)
@@ -35,6 +28,12 @@
 [![GitHub forks](https://img.shields.io/github/forks/CarGuo/GSYGithubAppCompose.svg)](https://github.com/CarGuo/GSYGithubAppCompose/network)
 [![GitHub issues](https://img.shields.io/github/issues/CarGuo/GSYGithubAppCompose.svg)](https://github.com/CarGuo/GSYGithubAppCompose/issues)
 [![GitHub license](https://img.shields.io/github/license/CarGuo/GSYGithubAppCompose.svg)](https://github.com/CarGuo/GSYGithubAppCompose/blob/master/LICENSE)
+
+
+|  |  |
+|------|------|
+|![](1.gif) | ![](2.gif) | 
+
 
 ## 编译运行流程
 
