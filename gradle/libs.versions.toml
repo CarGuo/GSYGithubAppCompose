@@ -25,6 +25,7 @@ gson = "2.13.2"
 twain = "0.3.2"
 appcompat = "1.7.1" # Added
 composeRuntime = "1.9.4" # Added
+lottie = "6.1.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -85,6 +86,9 @@ gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 
 # MarkdownTwain
 twain = { group = "com.colintheshots", name = "twain", version.ref = "twain" }
+
+# Lottie
+lottie-compose = { group = "com.airbnb.android", name = "lottie-compose", version.ref = "lottie" }
 
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" } # Added
 androidx-compose-runtime = { group = "androidx.compose.runtime", name = "runtime", version.ref = "composeRuntime" } # Added

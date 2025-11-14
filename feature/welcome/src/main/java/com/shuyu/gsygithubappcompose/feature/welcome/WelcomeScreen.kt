@@ -7,6 +7,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -15,7 +16,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.shuyu.gsygithubappcompose.core.common.R
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.shuyu.gsygithubappcompose.core.ui.LocalNavigator
 import kotlinx.coroutines.delay
 
@@ -41,7 +45,7 @@ fun WelcomeScreen(
             modifier = Modifier.fillMaxSize()
         ) {
             Image(
-                painter = painterResource(id = R.mipmap.launch_image),
+                painter = painterResource(id = R.drawable.welcome),
                 contentDescription = "GSY GitHub Logo",
                 contentScale = ContentScale.Inside,
                 modifier = Modifier.fillMaxSize()
@@ -50,6 +54,19 @@ fun WelcomeScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.align(Alignment.BottomCenter).padding(32.dp)
             ) {
+                // Lottie Animation
+                val composition by rememberLottieComposition(
+                    LottieCompositionSpec.Asset("launcher-lottie.json")
+                )
+                LottieAnimation(
+                    composition = composition,
+                    restartOnPlay = false,
+                    speed = 4f,
+                    modifier = Modifier
+                        .size(300.dp)
+                        .padding(bottom = 16.dp)
+                )
+
                 // App Title
                 Text(
                     text = "",
