@@ -8,9 +8,9 @@
 * ### 同款 Weex 版 （ https://github.com/CarGuo/GSYGithubAppWeex ）
 * ### [如果克隆太慢或者图片看不到，可尝试从码云地址下载](https://gitee.com/CarGuo/GSYGithubAppCompose)
 
-| 公众号   | 掘金                                                          |  知乎    |  CSDN   |   简书   
-|---------|-------------------------------------------------------------|--------- |---------|---------|
-| GSYTech  | [点我](https://juejin.cn/user/582aca2ba22b9d006b59ae68/posts) |   [点我](https://www.zhihu.com/people/carguo)       |   [点我](https://blog.csdn.net/ZuoYueLiang)  |   [点我](https://www.jianshu.com/u/6e613846e1ea)  
+| 公众号     | 掘金                                                          | 知乎                                        | CSDN                                    | 简书                                           
+|---------|-------------------------------------------------------------|-------------------------------------------|-----------------------------------------|----------------------------------------------|
+| GSYTech | [点我](https://juejin.cn/user/582aca2ba22b9d006b59ae68/posts) | [点我](https://www.zhihu.com/people/carguo) | [点我](https://blog.csdn.net/ZuoYueLiang) | [点我](https://www.jianshu.com/u/6e613846e1ea) 
 
 ![公众号](http://img.cdn.guoshuyu.cn/WeChat-Code)
 
@@ -22,21 +22,17 @@
 随着项目的使用情况和反馈，将时不时根据更新并完善用户体验与功能优化吗，欢迎提出问题。
 ```
 
-
 [![Github Actions](https://github.com/CarGuo/GSYGithubAppCompose/workflows/CI/badge.svg)](https://github.com/CarGuo/GSYGithubAppCompose/actions)
 [![GitHub stars](https://img.shields.io/github/stars/CarGuo/GSYGithubAppCompose.svg)](https://github.com/CarGuo/GSYGithubAppCompose/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/CarGuo/GSYGithubAppCompose.svg)](https://github.com/CarGuo/GSYGithubAppCompose/network)
 [![GitHub issues](https://img.shields.io/github/issues/CarGuo/GSYGithubAppCompose.svg)](https://github.com/CarGuo/GSYGithubAppCompose/issues)
 [![GitHub license](https://img.shields.io/github/license/CarGuo/GSYGithubAppCompose.svg)](https://github.com/CarGuo/GSYGithubAppCompose/blob/master/LICENSE)
 
-
-|  |  |
-|------|------|
-|![](1.gif) | ![](2.gif) | 
-
+|            |            |            |            |
+|------------|------------|------------|------------|
+| ![](3.gif) | ![](4.gif) | ![](1.gif) | ![](2.gif) | 
 
 ## 编译运行流程
-
 
 > ### 重点：你需要项目根目录下，配置 `local.properties` 文件，然后输入你申请的Github client_id 和 client_secret。
 
@@ -44,15 +40,17 @@
     CLIENT_ID = "xxxxxx"
     CLIENT_SECRET = "xxxxxx"
 
-[      注册 Github APP 传送门](https://github.com/settings/applications/new)，当然，前提是你现有一个github账号(～￣▽￣)～ 。
+[      注册 Github APP 传送门](https://github.com/settings/applications/new)
+，当然，前提是你现有一个github账号(～￣▽￣)～ 。
 
-### 3、现在 Github API 需要使用安全登录（授权登录），那么在上述注册 Github App 的 Authorization callback URL 一栏必须填入 `gsygithubapp://authed`
+### 3、现在 Github API 需要使用安全登录（授权登录），那么在上述注册 Github App 的 Authorization callback URL 一栏必须填入
+
+`gsygithubapp://authed`
 
 <div>
 <img src="http://img.cdn.guoshuyu.cn/register0.png" width="426px"/>
 <img src="http://img.cdn.guoshuyu.cn/register1.jpg" width="426px"/>
 </div>
-
 
 ## 项目结构图
 
@@ -68,7 +66,6 @@
 
 ![](./doc/LayerStructure.png)
 
-
 ### Technology Stack
 
 ![](./doc/TechnologyStack.png)
@@ -77,12 +74,9 @@
 
 ![](./doc/NavigationFlow.png)
 
-
 ### Data Flow Architecture
 
 ![](./doc/DataFlowArchitecture.png)
-
-
 
 ### 整体架构图
 
@@ -368,24 +362,20 @@ GSYGithubAppCompose/
 
 ### 分层职责
 
-| 层级 | 模块 | 职责 | 主要技术 |
-|------|------|------|----------|
-| **表现层** | feature/* | UI渲染、用户交互、状态展示 | Jetpack Compose、Navigation |
-| **业务层** | data (ViewModel) | 业务逻辑、状态管理、数据编排 | StateFlow、Coroutines |
-| **数据层** | data (Repository) | 数据访问、缓存策略、数据映射 | Repository Pattern |
-| **网络层** | core/network | API调用、网络请求、数据模型 | Retrofit、Apollo、OkHttp |
-| **存储层** | core/database | 本地缓存、数据持久化 | Room、DataStore |
-| **基础层** | core/common、core/ui | 公共工具、UI组件、资源 | 多语言、主题、工具类 |
-
+| 层级      | 模块                  | 职责              | 主要技术                       |
+|---------|---------------------|-----------------|----------------------------|
+| **表现层** | feature/*           | UI渲染、用户交互、状态展示  | Jetpack Compose、Navigation |
+| **业务层** | data (ViewModel)    | 业务逻辑、状态管理、数据编排  | StateFlow、Coroutines       |
+| **数据层** | data (Repository)   | 数据访问、缓存策略、数据映射  | Repository Pattern         |
+| **网络层** | core/network        | API调用、网络请求、数据模型 | Retrofit、Apollo、OkHttp     |
+| **存储层** | core/database       | 本地缓存、数据持久化      | Room、DataStore             |
+| **基础层** | core/common、core/ui | 公共工具、UI组件、资源    | 多语言、主题、工具类                 |
 
 ## 下载
 
 #### Apk下载链接： [Apk下载链接](https://github.com/CarGuo/GSYGithubAppCompose/releases)
 
-
-
 ### 示例图片（截图并非完全对应）
-
 
 <img src="http://img.cdn.guoshuyu.cn/showapp1.jpg" width="426px"/>
 
@@ -393,9 +383,7 @@ GSYGithubAppCompose/
 
 <img src="http://img.cdn.guoshuyu.cn/showapp3.jpg" width="426px"/>
 
-
 ### 感谢
-
 
 <img src="http://img.cdn.guoshuyu.cn/thanks.jpg" width="426px"/>
 
@@ -403,6 +391,7 @@ GSYGithubAppCompose/
 https://deepwiki.com/CarGuo/GSYGithubAppCompose
 
 ### LICENSE
+
 ```
 CarGuo/GSYGithubAppFlutter is licensed under the
 Apache License 2.0
