@@ -1,6 +1,8 @@
 package com.shuyu.gsygithubappcompose.feature.login
 
 import android.widget.Toast
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -11,6 +13,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.ContentScale.Companion
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -19,10 +24,88 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.shuyu.gsygithubappcompose.core.common.R
 import com.shuyu.gsygithubappcompose.core.ui.LocalNavigator
 import com.shuyu.gsygithubappcompose.core.ui.components.LanguageSelectDialog
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
+
+@Composable
+fun AnimatedLogoSwitcher(modifier: Modifier = Modifier) {
+    // 状态管理：false = 显示 Image，true = 显示 Lottie
+    var showLottie by remember { mutableStateOf(false) }
+    var targetAlpha by remember { mutableFloatStateOf(1f) }
+
+    // 动画透明度
+    val alpha by animateFloatAsState(
+        targetValue = targetAlpha, animationSpec = tween(durationMillis = 1000), // 1秒渐变
+        label = "alpha"
+    )
+
+    // Lottie composition
+    val composition by rememberLottieComposition(
+        LottieCompositionSpec.Asset("login_animi.json")
+    )
+
+    // 循环控制
+    LaunchedEffect(Unit) {
+        while (true) {
+            // 阶段 1: 显示 Image 1秒
+            showLottie = false
+            targetAlpha = 1f
+            delay(1000)
+
+            // 阶段 2: Image 渐变透明 1秒
+            targetAlpha = 0f
+            delay(1000)
+
+            // 阶段 3: 切换到 Lottie 动画
+            showLottie = true
+            targetAlpha = 1f
+
+            // 等待 Lottie 动画播放完成（假设动画时长约 3 秒）
+            // 可以根据实际 Lottie 动画时长调整
+            delay(5000)
+
+            // 阶段 4: Lottie 渐变透明 1秒
+            targetAlpha = 0f
+            delay(1000)
+        }
+    }
+
+
+    if (!showLottie) {
+        // 显示 Image
+        Box(
+            modifier = modifier, contentAlignment = Alignment.Center
+        ) {
+            Image(
+                painter = painterResource(id = R.mipmap.ic_launcher),
+                contentDescription = stringResource(id = R.string.app_name),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .alpha(alpha)
+            )
+        }
+    } else {
+        Box(
+            modifier = Modifier.size(width = 200.dp, height = 130.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            // 显示 Lottie 动画
+            LottieAnimation(
+                composition = composition, iterations = 1, // 播放一次
+                contentScale = ContentScale.Crop, modifier = Modifier
+                    .fillMaxSize()
+                    .alpha(alpha)
+            )
+        }
+    }
+}
+
 
 @Composable
 fun LoginScreen(viewModel: LoginViewModel = hiltViewModel()) {
@@ -50,8 +133,7 @@ fun LoginScreen(viewModel: LoginViewModel = hiltViewModel()) {
             },
             onDismissRequest = {
                 viewModel.dismissLanguageSelectionDialog()
-            }
-        )
+            })
     }
 
     if (uiState.showOAuthWebView) {
@@ -66,8 +148,7 @@ fun LoginScreen(viewModel: LoginViewModel = hiltViewModel()) {
             onTokenChange = { viewModel.onTokenChange(it) },
             onLoginClick = { viewModel.login() },
             onOAuthClick = { viewModel.startOAuthFlow() },
-            onLanguageClick = { viewModel.showLanguageSelectionDialog() }
-        )
+            onLanguageClick = { viewModel.showLanguageSelectionDialog() })
     }
 }
 
@@ -103,12 +184,8 @@ fun LoginContent(
                         .fillMaxWidth()
                         .padding(30.dp)
                 ) {
-                    // Logo
-                    Image(
-                        painter = painterResource(id = R.mipmap.ic_launcher),
-                        contentDescription = stringResource(id = R.string.app_name),
-                        modifier = Modifier.size(90.dp)
-                    )
+                    // Logo Animation Switcher
+                    AnimatedLogoSwitcher(modifier = Modifier.size(130.dp))
 
                     Spacer(modifier = Modifier.height(24.dp))
 
@@ -228,8 +305,7 @@ fun LoginContent(
                             .padding(vertical = 8.dp),
                         textAlign = TextAlign.Center,
                         color = MaterialTheme.colorScheme.primary,
-                        style = MaterialTheme.typography.bodyLarge
-                    )
+                        style = MaterialTheme.typography.bodyLarge)
                 }
             }
         }
