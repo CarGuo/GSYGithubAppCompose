@@ -713,7 +713,7 @@ fun Organization.toUser(): User {
         login = login,
         id = id,
         nodeId = nodeId,
-        avatarUrl = avatarUrl ?:"",
+        avatarUrl = avatarUrl ?: "",
         gravatarId = null,
         url = url,
         htmlUrl = null,
@@ -776,5 +776,28 @@ fun RepositoryDetailModel.toHistoryEntity(): HistoryEntity {
 }
 
 fun HistoryEntity.toRepositoryModel(): Repository {
-    return Gson().fromJson(data, Repository::class.java)
+    val detail = Gson().fromJson(data, RepositoryDetailModel::class.java)
+    return detail.toRepository()
+}
+
+fun RepositoryDetailModel.toRepository(): Repository {
+    return Repository(
+        id = id.hashCode().toLong(),
+        name = name,
+        fullName = nameWithOwner,
+        description = shortDescriptionHTML,
+        owner = User.toMiniUserModel(
+            id = 0, login = owner, avatarUrl = ownerAvatarUrl ?: ""
+        ),
+        private = false,
+        htmlUrl = "https://github.com/$nameWithOwner",
+        language = languages?.firstOrNull(),
+        stargazersCount = stargazersCount,
+        watchersCount = watchersCount,
+        forksCount = forkCount,
+        openIssuesCount = issuesOpen,
+        createdAt = createdAt,
+        updatedAt = pushedAt ?: "",
+        pushedAt = pushedAt
+    )
 }

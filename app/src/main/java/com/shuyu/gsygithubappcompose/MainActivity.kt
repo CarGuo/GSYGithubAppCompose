@@ -31,6 +31,7 @@ import com.shuyu.gsygithubappcompose.feature.info.InfoScreen
 import dagger.hilt.android.AndroidEntryPoint
 import com.shuyu.gsygithubappcompose.core.common.manager.LanguageManager
 import com.shuyu.gsygithubappcompose.core.ui.util.ProvideLocalizedResources
+import com.shuyu.gsygithubappcompose.feature.history.HistoryScreen
 import jakarta.inject.Inject
 
 
@@ -144,6 +145,10 @@ class MainActivity : ComponentActivity() {
 
                         composable("info") {
                             InfoScreen()
+                        }
+
+                        composable("history") {
+                            HistoryScreen()
                         }
                     }
                 }

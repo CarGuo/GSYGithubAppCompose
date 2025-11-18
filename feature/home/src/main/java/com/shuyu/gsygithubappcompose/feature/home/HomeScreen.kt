@@ -199,6 +199,9 @@ fun HomeScreen(
                         "check_update" -> {
                             homeViewModel.checkUpdate(versionName, true)
                         }
+                        "history" -> {
+                            navigator.navigate("history")
+                        }
                     }
                     coroutineScope.launch {
                         drawerState.close()
@@ -305,6 +308,12 @@ fun DrawerContent(
 
             // Menu Items
             Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(id = R.string.history),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onItemSelected("history") }
+                        .padding(16.dp))
                 Text(
                     text = stringResource(id = R.string.menu_feedback),
                     modifier = Modifier
