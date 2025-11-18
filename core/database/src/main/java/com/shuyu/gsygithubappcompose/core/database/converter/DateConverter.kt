@@ -1,4 +1,4 @@
-package com.shuyu.gsygithubappcompose.core.database
+package com.shuyu.gsygithubappcompose.core.database.converter
 
 import androidx.room.TypeConverter
 import java.util.Date

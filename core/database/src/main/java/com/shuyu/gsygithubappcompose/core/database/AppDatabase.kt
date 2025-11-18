@@ -4,9 +4,11 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.shuyu.gsygithubappcompose.core.database.converter.Converters
+import com.shuyu.gsygithubappcompose.core.database.converter.DateConverter
 import com.shuyu.gsygithubappcompose.core.database.dao.CommitDao
 import com.shuyu.gsygithubappcompose.core.database.dao.EventDao
 import com.shuyu.gsygithubappcompose.core.database.dao.FileContentDao
+import com.shuyu.gsygithubappcompose.core.database.dao.HistoryDao
 import com.shuyu.gsygithubappcompose.core.database.dao.IssueDao
 import com.shuyu.gsygithubappcompose.core.database.dao.IssueCommentDao
 import com.shuyu.gsygithubappcompose.core.database.dao.PushCommitDao
@@ -19,6 +21,7 @@ import com.shuyu.gsygithubappcompose.core.database.dao.UserDao
 import com.shuyu.gsygithubappcompose.core.database.entity.CommitEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.EventEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.FileContentEntity
+import com.shuyu.gsygithubappcompose.core.database.entity.HistoryEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.IssueEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.IssueCommentEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.PushCommitEntity
@@ -42,9 +45,10 @@ import com.shuyu.gsygithubappcompose.core.database.entity.UserEntity
         IssueEntity::class,
         IssueCommentEntity::class,
         ReadmeEntity::class,
-        PushCommitEntity::class
+        PushCommitEntity::class,
+        HistoryEntity::class
     ],
-    version = 54,
+    version = 56,
     exportSchema = false
 )
 @TypeConverters(DateConverter::class, Converters::class)
@@ -61,6 +65,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun issueCommentDao(): IssueCommentDao
     abstract fun readmeDao(): ReadmeDao
     abstract fun pushCommitDao(): PushCommitDao
+    abstract fun historyDao(): HistoryDao
 
     fun clearAllData() {
         clearAllTables()

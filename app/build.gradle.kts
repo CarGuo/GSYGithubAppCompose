@@ -77,6 +77,7 @@ dependencies {
     implementation(projects.feature.list)
     implementation(projects.feature.notification)
     implementation(projects.feature.info)
+    implementation(projects.feature.history)
 
     // Core modules
     implementation(projects.core.ui)

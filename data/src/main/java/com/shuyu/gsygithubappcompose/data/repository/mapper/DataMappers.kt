@@ -10,6 +10,7 @@ import com.shuyu.gsygithubappcompose.core.database.entity.CommitTreeEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.CommitUserEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.EventEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.FileContentEntity
+import com.shuyu.gsygithubappcompose.core.database.entity.HistoryEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.IssueCommentEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.IssueEntity
 import com.shuyu.gsygithubappcompose.core.database.entity.PushCommitEntity
@@ -36,6 +37,7 @@ import com.shuyu.gsygithubappcompose.core.network.model.Repository
 import com.shuyu.gsygithubappcompose.core.network.model.RepositoryDetailModel
 import com.shuyu.gsygithubappcompose.core.network.model.TrendingRepoModel
 import com.shuyu.gsygithubappcompose.core.network.model.User
+import java.util.Date
 
 
 fun User.toEntity(): UserEntity {
@@ -746,4 +748,33 @@ fun Organization.toUser(): User {
         collaborators = null,
         twoFactorAuthentication = false
     )
+}
+
+fun RepositoryDetailModel.toHistoryEntity(): HistoryEntity {
+    return HistoryEntity(
+        id = id,
+        fullName = nameWithOwner,
+        name = name,
+        owner = owner,
+        ownerName = owner,
+        description = shortDescriptionHTML,
+        language = languages?.joinToString(),
+        starCount = stargazersCount,
+        forkCount = forkCount,
+        watcherCount = watchersCount,
+        openIssuesCount = issuesOpen,
+        subscribersCount = 0,
+        pushAt = Date(),
+        createAt = Date(),
+        updateAt = Date(),
+        license = license,
+        fork = isFork,
+        topics = topics,
+        data = Gson().toJson(this),
+        insertDate = Date().time
+    )
+}
+
+fun HistoryEntity.toRepositoryModel(): Repository {
+    return Gson().fromJson(data, Repository::class.java)
 }

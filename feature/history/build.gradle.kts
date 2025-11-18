@@ -7,7 +7,7 @@ plugins {
 }
 
 android {
-    namespace = "com.shuyu.gsygithubappcompose.data"
+    namespace = "com.shuyu.gsygithubappcompose.feature.history"
     compileSdk = 36
 
     defaultConfig {
@@ -28,28 +28,31 @@ android {
 }
 
 dependencies {
-    api(projects.core.network)
-    implementation(projects.core.database)
+    implementation(projects.core.ui)
     implementation(projects.core.common)
-
-    implementation(libs.room.runtime)
+    implementation(projects.data)
+    
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
-
+    
+    // Compose
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
-
-    // Gson
-    implementation(libs.gson)
+    implementation(libs.androidx.compose.ui.graphics)
+    implementation(libs.androidx.compose.ui.tooling.preview)
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.navigation.compose)
 
     // Hilt
     implementation(libs.hilt.android)
+    implementation(libs.hilt.navigation.compose)
     ksp(libs.hilt.compiler)
 
     // Paging
     implementation(libs.androidx.paging.runtime.ktx)
     implementation(libs.androidx.paging.compose)
     
+    debugImplementation(libs.androidx.compose.ui.tooling)
     testImplementation(libs.junit)
 }

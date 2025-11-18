@@ -16,6 +16,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import com.shuyu.gsygithubappcompose.core.common.R
 import com.shuyu.gsygithubappcompose.data.repository.EventRepository
+import com.shuyu.gsygithubappcompose.data.repository.HistoryRepository
 import kotlinx.coroutines.CoroutineName
 import com.shuyu.gsygithubappcompose.data.repository.RepositoryResult
 import kotlinx.coroutines.flow.Flow
@@ -60,6 +61,7 @@ sealed class RepoDetailInfoEvent {
 class RepoDetailInfoViewModel @Inject constructor(
     private val repositoryRepository: RepositoryRepository,
     private val eventRepository: EventRepository, // Inject EventRepository
+    private val historyRepository: HistoryRepository,
     preferencesDataStore: UserPreferencesDataStore,
     private val stringResourceProvider: StringResourceProvider
 ) : BaseViewModel<RepoDetailInfoUiState>(
@@ -138,6 +140,11 @@ class RepoDetailInfoViewModel @Inject constructor(
                                 selectedBranch = currentState.selectedBranch ?: fetchedRepoDetail.defaultBranchRef
                             )
                         }
+                        // Save to history
+                        scopeForAsync.launch {
+                            historyRepository.saveHistory(fetchedRepoDetail)
+                        }
+
                         // Fetch branches
                         scopeForAsync.launch {
                             repositoryRepository.getRepositoryBranches(owner, repoName)
