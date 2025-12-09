@@ -16,15 +16,26 @@ android {
         minSdk = 24
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // Read CLIENT_ID and CLIENT_SECRET from local.properties
+        // Read CLIENT_ID and CLIENT_SECRET from local.properties or environment variables
         val properties = Properties()
         val localPropertiesFile = rootProject.file("local.properties")
+        var clientId = ""
+        var clientSecret = ""
         if (localPropertiesFile.exists()) {
             properties.load(localPropertiesFile.inputStream())
+            clientId = properties.getProperty("CLIENT_ID", "")
+            clientSecret = properties.getProperty("CLIENT_SECRET", "")
         }
 
-        buildConfigField("String", "CLIENT_ID", "${properties.getProperty("CLIENT_ID", "")}")
-        buildConfigField("String", "CLIENT_SECRET", "${properties.getProperty("CLIENT_SECRET", "")}")
+        if (clientId.isBlank()) {
+            clientId = System.getenv("CLIENT_ID") ?: ""
+        }
+        if (clientSecret.isBlank()) {
+            clientSecret = System.getenv("CLIENT_SECRET") ?: ""
+        }
+
+        buildConfigField("String", "CLIENT_ID", "\"$clientId\"")
+        buildConfigField("String", "CLIENT_SECRET", "\"$clientSecret\"")
     }
 
     compileOptions {
