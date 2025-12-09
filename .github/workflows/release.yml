@@ -27,6 +27,8 @@ jobs:
         with:
           artifacts: "app/build/outputs/apk/release/app-release.apk"
           token: ${{ secrets.GITHUB_TOKEN }}
+          generateReleaseNotes: true
+          makeLatest: true
 
   publish:
     name: Publish To Github Packages
