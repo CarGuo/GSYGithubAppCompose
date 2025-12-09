@@ -9,6 +9,8 @@ jobs:
   release:
     name: Github Release
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     env:
       CLIENT_ID: ${{ secrets.CLIENT_ID }}
       CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
