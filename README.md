@@ -50,6 +50,7 @@
 
 `gsygithubapp://authed`
 
+
 <div>
 <img src="http://img.cdn.guoshuyu.cn/register0.png" width="426px"/>
 <img src="http://img.cdn.guoshuyu.cn/register1.jpg" width="426px"/>
