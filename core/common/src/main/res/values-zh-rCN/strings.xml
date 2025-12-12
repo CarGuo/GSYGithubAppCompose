@@ -10,7 +10,7 @@
     <string name="login_title">GSYGitHubAPP</string>
     <string name="login_subtitle">Compose 版本</string>
     <string name="login_token_label">访问令牌</string>
-    <string name="login_token_hint">输入您的 GitHub 令牌</string>
+    <string name="login_token_hint">输入你的 GitHub 令牌</string>
     <string name="login_token_helper">在 github.com/settings/tokens 获取令牌，也可以直接 OAuth 登录</string>
     <string name="login_button">登录</string>
     <string name="oauth_button">OAuth</string>
@@ -30,7 +30,7 @@
     <string name="menu_personal_info">个人信息</string>
     <string name="menu_language">语言切换</string>
     <string name="menu_check_update">检查更新</string>
-    <string name="feedback_hint">您输入的反馈会变成 issue 提交到 GitHub 仓库，请尽量详细描述您遇到的问题或建议，谢谢！</string>
+    <string name="feedback_hint">你输入的反馈会变成 issue 提交到 GitHub 仓库，请尽量详细描述你遇到的问题或建议，谢谢！</string>
     <string name="app_not_new_version">当前已是最新版本。</string>
     <string name="update_dialog_title">发现新版本</string>
     <string name="update_dialog_message">版本：%1$s\n\n%2$s</string>
