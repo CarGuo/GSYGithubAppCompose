@@ -1,7 +1,5 @@
 package com.shuyu.gsygithubappcompose
 
-import android.content.Context
-import android.content.res.Configuration
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -47,9 +45,6 @@ class MainActivity : ComponentActivity() {
 
         enableEdgeToEdge()
         setContent {
-            val viewModel: MainViewModel = hiltViewModel()
-            val isLoggedIn by viewModel.isLoggedIn.collectAsState(initial = false)
-
             // Observe the current language from LanguageManager
             val appLanguage by languageManager.appLanguage.collectAsState(languageManager.getAppLanguageSync())
             val currentLocale = remember(appLanguage) {
@@ -63,7 +58,7 @@ class MainActivity : ComponentActivity() {
                         startDestination = "welcome"
                     ) {
                         composable("welcome") {
-                            WelcomeScreen(isLoggedIn = isLoggedIn)
+                            WelcomeScreen()
                         }
 
                         composable("login") {
