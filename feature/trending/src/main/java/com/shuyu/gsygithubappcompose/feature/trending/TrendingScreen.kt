@@ -8,7 +8,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.shuyu.gsygithubappcompose.data.repository.vm.BaseScreen
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYGeneralLoadState
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYPullRefresh

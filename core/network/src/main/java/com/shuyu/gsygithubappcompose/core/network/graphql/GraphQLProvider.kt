@@ -1,8 +1,8 @@
 package com.shuyu.gsygithubappcompose.core.network.graphql
 
-import com.apollographql.apollo3.ApolloClient
-import com.apollographql.apollo3.network.http.LoggingInterceptor
-import com.apollographql.apollo3.network.okHttpClient
+import com.apollographql.apollo.ApolloClient
+import com.apollographql.apollo.network.http.LoggingInterceptor
+import com.apollographql.apollo.network.okHttpClient
 import com.shuyu.gsygithubappcompose.core.network.config.NetworkConfig
 import com.shuyu.gsygithubappcompose.core.network.interceptor.TokenInterceptor
 import dagger.Module

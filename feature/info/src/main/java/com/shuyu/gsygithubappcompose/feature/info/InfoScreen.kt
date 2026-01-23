@@ -18,7 +18,7 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Message
 import androidx.compose.material.icons.filled.Group
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYPullRefresh
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYGeneralLoadState
 import com.shuyu.gsygithubappcompose.data.repository.vm.BaseScreen

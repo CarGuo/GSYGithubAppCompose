@@ -7,7 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.composable
 import com.shuyu.gsygithubappcompose.core.ui.GSYNavHost
 import com.shuyu.gsygithubappcompose.core.ui.theme.GSYGithubAppComposeTheme

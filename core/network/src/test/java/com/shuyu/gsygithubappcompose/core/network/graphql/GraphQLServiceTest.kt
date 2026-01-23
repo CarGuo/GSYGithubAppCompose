@@ -1,7 +1,7 @@
 package com.shuyu.gsygithubappcompose.core.network.graphql
 
-import com.apollographql.apollo3.ApolloClient
-import com.apollographql.apollo3.network.okHttpClient
+import com.apollographql.apollo.ApolloClient
+import com.apollographql.apollo.network.okHttpClient
 import com.shuyu.gsygithubappcompose.core.common.datastore.IUserPreferencesDataStore
 import com.shuyu.gsygithubappcompose.core.network.interceptor.TokenInterceptor
 import kotlinx.coroutines.flow.Flow

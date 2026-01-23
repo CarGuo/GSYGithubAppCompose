@@ -1,6 +1,6 @@
 package com.shuyu.gsygithubappcompose.data.repository
 
-import com.apollographql.apollo3.ApolloClient
+import com.apollographql.apollo.ApolloClient
 import com.shuyu.gsygithubappcompose.core.database.dao.CommitDao
 import com.shuyu.gsygithubappcompose.core.database.dao.RepositoryDao
 import com.shuyu.gsygithubappcompose.core.database.dao.RepositoryDetailDao

@@ -12,7 +12,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYGeneralLoadState
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYPullRefresh
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYTopAppBar

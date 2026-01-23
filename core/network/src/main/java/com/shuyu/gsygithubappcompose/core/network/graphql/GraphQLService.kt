@@ -1,6 +1,6 @@
 package com.shuyu.gsygithubappcompose.core.network.graphql
 
-import com.apollographql.apollo3.ApolloClient
+import com.apollographql.apollo.ApolloClient
 import javax.inject.Inject
 
 class GraphQLService @Inject constructor(private val apolloClient: ApolloClient) {
