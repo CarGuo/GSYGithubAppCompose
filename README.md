@@ -37,6 +37,8 @@
 
 ## 编译运行流程
 
+环境要求:项目使用了 AGP 9,至少需要 Android Studio Otter (2025.1.1) Feature Drop 或更高版本才能正常编译运行。
+
 > ### 重点：你需要项目根目录下，配置 `local.properties` 文件，然后输入你申请的Github client_id 和 client_secret。
 
     ndk.dir="xxxxxxxx"
@@ -49,6 +51,9 @@
 ### 3、现在 Github API 需要使用安全登录（授权登录），那么在上述注册 Github App 的 Authorization callback URL 一栏必须填入
 
 `gsygithubapp://authed`
+
+
+
 
 
 <div>

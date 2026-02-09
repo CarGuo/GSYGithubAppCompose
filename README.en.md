@@ -36,6 +36,8 @@ Based on usage and feedback, the user experience and features will be updated an
 
 ## How to Compile and Run
 
+Environment Requirements: This project uses AGP 9, so you need at least Android Studio Otter (2025.1.1) Feature Drop or higher to compile and run the project successfully.
+
 > ### Important: You need to configure the `local.properties` file in the project's root directory and enter your registered Github client_id and client_secret.
 
     ndk.dir="xxxxxxxx"
