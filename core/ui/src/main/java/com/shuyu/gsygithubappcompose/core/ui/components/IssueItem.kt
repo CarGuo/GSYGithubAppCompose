@@ -8,9 +8,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.shuyu.gsygithubappcompose.core.common.R
 import com.shuyu.gsygithubappcompose.core.network.model.Issue
 
 @Composable
@@ -28,7 +30,7 @@ fun IssueItem(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     imageVector = Icons.Default.BugReport,
-                    contentDescription = "Issue",
+                    contentDescription = stringResource(id = R.string.issue_content_description),
                     modifier = Modifier.size(24.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
@@ -57,7 +59,7 @@ fun IssueItem(
             ) {
                 issue.user?.login.let {
                     Text(
-                        text = "Opened by $it",
+                        text = stringResource(id = R.string.issue_opened_by, it ?: stringResource(id = R.string.error_unknown)),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

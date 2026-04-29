@@ -17,7 +17,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.shuyu.gsygithubappcompose.core.network.model.Repository
 import com.shuyu.gsygithubappcompose.core.network.model.TrendingRepoModel
-import com.shuyu.gsygithubappcompose.core.ui.LocalNavigator
 
 sealed interface RepoItemDisplayData {
     val fullName: String
@@ -56,15 +55,12 @@ data class TrendingDisplayData(
 @Composable
 fun RepositoryItem(
     repoItem: RepoItemDisplayData,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    onClick: (() -> Unit)? = null
 ) {
-    val navigator = LocalNavigator.current
     GSYCardItem(
         modifier = modifier
-            .clickable {
-                onClick?.invoke() ?: navigator.navigate("repo_detail/${repoItem.ownerName}/${repoItem.name}")
-            }
+            .clickable(onClick = onClick)
     ) {
         Column(
             modifier = Modifier

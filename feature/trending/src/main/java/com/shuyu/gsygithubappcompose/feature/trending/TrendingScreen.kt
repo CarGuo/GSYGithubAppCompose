@@ -9,6 +9,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.shuyu.gsygithubappcompose.core.ui.LocalNavigator
 import com.shuyu.gsygithubappcompose.data.repository.vm.BaseScreen
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYGeneralLoadState
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYPullRefresh
@@ -20,6 +21,7 @@ fun TrendingScreen(
     viewModel: TrendingViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val navigator = LocalNavigator.current
 
     LaunchedEffect(Unit) {
         viewModel.doInitialLoad()
@@ -46,7 +48,13 @@ fun TrendingScreen(
                     items = uiState.repositories,
                     key = { index, repo -> repo.url ?: repo.fullName ?: "${repo.name}/${repo.reposName}:$index" }
                 ) { _, repo ->
-                    RepositoryItem(repoItem = repo.toTrendingDisplayData())
+                    val repoItem = repo.toTrendingDisplayData()
+                    RepositoryItem(
+                        repoItem = repoItem,
+                        onClick = {
+                            navigator.navigate("repo_detail/${repoItem.ownerName}/${repoItem.name}")
+                        }
+                    )
                 }
             }
         }

@@ -22,16 +22,21 @@ fun GSYTopAppBar(
     title: @Composable () -> Unit,
     navigationIcon: @Composable (() -> Unit)? = null,
     showBackButton: Boolean = false,
+    onBackClick: (() -> Unit)? = null,
     actions: @Composable (RowScope.() -> Unit)? = null
 ) {
-    val navigator = LocalNavigator.current
+    val navigator = if (showBackButton && navigationIcon == null && onBackClick == null) {
+        LocalNavigator.current
+    } else {
+        null
+    }
     TopAppBar(
         title = title,
         navigationIcon = {
             if (navigationIcon != null) {
                 navigationIcon()
             } else if (showBackButton) {
-                IconButton(onClick = { navigator.back() }) {
+                IconButton(onClick = { onBackClick?.invoke() ?: navigator?.back() }) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = stringResource(id = R.string.nav_back)

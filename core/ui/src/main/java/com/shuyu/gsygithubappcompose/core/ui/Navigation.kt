@@ -2,6 +2,7 @@ package com.shuyu.gsygithubappcompose.core.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
@@ -18,7 +19,7 @@ fun GSYNavHost(
     navController: NavHostController = rememberNavController(),
     builder: NavGraphBuilder.() -> Unit
 ) {
-    val navigator = GSYNavigator(navController)
+    val navigator = remember(navController) { GSYNavigator(navController) }
     CompositionLocalProvider(
         LocalNavigator provides navigator
     ) {

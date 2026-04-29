@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.shuyu.gsygithubappcompose.core.common.R
+import com.shuyu.gsygithubappcompose.core.ui.LocalNavigator
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYTopAppBar
 import com.shuyu.gsygithubappcompose.core.ui.components.RepositoryItem
 import com.shuyu.gsygithubappcompose.core.ui.components.toRepositoryDisplayData
@@ -24,6 +25,7 @@ fun HistoryScreen(
     historyViewModel: HistoryViewModel = hiltViewModel()
 ) {
     val lazyPagingItems = historyViewModel.historyList.collectAsLazyPagingItems()
+    val navigator = LocalNavigator.current
 
     Scaffold(
         topBar = {
@@ -48,8 +50,12 @@ fun HistoryScreen(
                     key = { index -> lazyPagingItems.peek(index)?.id ?: "placeholder:$index" }
                 ) { it ->
                     lazyPagingItems[it]?.let {
+                        val repoItem = it.toRepositoryDisplayData()
                         RepositoryItem(
-                            repoItem = it.toRepositoryDisplayData()
+                            repoItem = repoItem,
+                            onClick = {
+                                navigator.navigate("repo_detail/${repoItem.ownerName}/${repoItem.name}")
+                            }
                         )
                     }
                 }

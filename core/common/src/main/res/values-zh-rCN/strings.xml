@@ -112,6 +112,8 @@
     <string name="issue_edit_title_hint">Issue 标题</string>
     <string name="issue_edit_body_hint">Issue 内容</string>
     <string name="issue_locked">已锁定</string>
+    <string name="issue_content_description">Issue</string>
+    <string name="issue_opened_by">由 %s 打开</string>
     <string name="edit">编辑</string>
     <string name="delete">删除</string>
 

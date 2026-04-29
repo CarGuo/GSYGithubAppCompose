@@ -93,7 +93,10 @@ fun ListScreen(
                         when (item) {
                             is RepoItemDisplayData -> {
                                 RepositoryItem(
-                                    repoItem = item
+                                    repoItem = item,
+                                    onClick = {
+                                        navigator.navigate("repo_detail/${item.ownerName}/${item.name}")
+                                    }
                                 )
                             }
 

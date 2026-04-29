@@ -169,7 +169,13 @@ fun SearchScreen(
                                     items = repositoryResults,
                                     key = { repository -> repository.id }
                                 ) {
-                                    RepositoryItem(it.toRepositoryDisplayData())
+                                    val repoItem = it.toRepositoryDisplayData()
+                                    RepositoryItem(
+                                        repoItem = repoItem,
+                                        onClick = {
+                                            navigator.navigate("repo_detail/${repoItem.ownerName}/${repoItem.name}")
+                                        }
+                                    )
                                 }
                             }
 

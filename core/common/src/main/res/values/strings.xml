@@ -112,6 +112,8 @@
     <string name="issue_edit_title_hint">Issue Title</string>
     <string name="issue_edit_body_hint">Issue Body</string>
     <string name="issue_locked">Locked</string>
+    <string name="issue_content_description">Issue</string>
+    <string name="issue_opened_by">Opened by %s</string>
     <string name="edit">Edit</string>
     <string name="delete">Delete</string>
 
