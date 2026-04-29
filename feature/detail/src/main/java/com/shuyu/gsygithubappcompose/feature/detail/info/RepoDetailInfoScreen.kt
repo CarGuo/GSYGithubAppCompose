@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -24,12 +23,13 @@ import com.shuyu.gsygithubappcompose.data.repository.vm.BaseScreen
 import com.shuyu.gsygithubappcompose.feature.detail.LocalRepoOwner
 import com.shuyu.gsygithubappcompose.feature.detail.LocalRepoName
 import com.shuyu.gsygithubappcompose.feature.detail.LocalRepoDetailInfoViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @Composable
 fun RepoDetailInfoScreen(
 ) {
     val viewModel = LocalRepoDetailInfoViewModel.current
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val owner = LocalRepoOwner.current
     val name = LocalRepoName.current
     val navigator = LocalNavigator.current
@@ -88,7 +88,15 @@ fun RepoDetailInfoScreen(
                     )
                 }
 
-                items(uiState.repoDetailList) { item ->
+                items(
+                    items = uiState.repoDetailList,
+                    key = { item ->
+                        when (item) {
+                            is RepoDetailListItem.EventItem -> "event:${item.event.id}"
+                            is RepoDetailListItem.CommitItem -> "commit:${item.commit.sha}"
+                        }
+                    }
+                ) { item ->
                     when (item) {
                         is RepoDetailListItem.EventItem -> {
                             if (uiState.selectedItemType == RepoDetailItemType.EVENT) {

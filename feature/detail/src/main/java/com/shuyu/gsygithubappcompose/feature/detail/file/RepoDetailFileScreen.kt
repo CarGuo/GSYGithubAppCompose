@@ -3,6 +3,8 @@ package com.shuyu.gsygithubappcompose.feature.detail.file
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Description
@@ -10,7 +12,6 @@ import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,18 +27,19 @@ import com.shuyu.gsygithubappcompose.feature.detail.LocalRepoOwner
 import com.shuyu.gsygithubappcompose.feature.detail.LocalRepoName
 import com.shuyu.gsygithubappcompose.feature.detail.LocalRepoDetailFileViewModel
 import com.shuyu.gsygithubappcompose.feature.detail.LocalRepoDetailInfoViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @Composable
 fun RepoDetailFileScreen(
 ) {
     val viewModel = LocalRepoDetailFileViewModel.current
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val navigator = LocalNavigator.current
     val owner = LocalRepoOwner.current
     val repoName = LocalRepoName.current
 
     val repoDetailInfoViewModel = LocalRepoDetailInfoViewModel.current
-    val repoDetailInfoUiState by repoDetailInfoViewModel.uiState.collectAsState()
+    val repoDetailInfoUiState by repoDetailInfoViewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(owner, repoName, repoDetailInfoUiState.selectedBranch, repoDetailInfoUiState.repoDetail?.defaultBranchRef) {
         viewModel.setRepoInfo(owner, repoName, repoDetailInfoUiState.selectedBranch, repoDetailInfoUiState.repoDetail?.defaultBranchRef)
@@ -68,8 +70,10 @@ fun RepoDetailFileScreen(
                     itemCount = uiState.fileContents.size,
                     loadMoreError = false
                 ) {
-                    items(uiState.fileContents.size) { index ->
-                        val file = uiState.fileContents[index]
+                    items(
+                        items = uiState.fileContents,
+                        key = { file -> file.path }
+                    ) { file ->
                         FileItem(file = file, onClick = {
                             if (file.type == "dir") {
                                 viewModel.navigateToPath(file.path)
@@ -204,8 +208,10 @@ fun PathNavigator(
                             Text(text = ">")
                         }
                     }
-                    items(pathSegments.size) { index ->
-                        val segment = pathSegments[index]
+                    itemsIndexed(
+                        items = pathSegments,
+                        key = { index, segment -> "$index:$segment" }
+                    ) { index, segment ->
                         Text(
                             text = segment,
                             modifier = Modifier

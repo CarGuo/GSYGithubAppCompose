@@ -14,6 +14,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.shuyu.gsygithubappcompose.core.common.R
 import com.shuyu.gsygithubappcompose.core.ui.LocalNavigator
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYTopAppBar
@@ -31,19 +32,19 @@ fun SearchScreen(
     searchViewModel: SearchViewModel = hiltViewModel()
 ) {
     val navigator = LocalNavigator.current
-    val searchQuery by searchViewModel.searchQuery.collectAsState()
-    val searchType by searchViewModel.searchType.collectAsState()
-    val repositoryResults by searchViewModel.repositoryResults.collectAsState()
-    val userResults by searchViewModel.userResults.collectAsState()
-    val isPageLoading by searchViewModel.isPageLoading.collectAsState()
-    val error by searchViewModel.error.collectAsState()
-    val isRefreshing by searchViewModel.isRefreshing.collectAsState()
-    val isLoadingMore by searchViewModel.isLoadingMore.collectAsState()
-    val hasMoreRepo by searchViewModel.hasMoreRepo.collectAsState()
-    val hasMoreUser by searchViewModel.hasMoreUser.collectAsState()
-    val loadMoreErrorRepo by searchViewModel.loadMoreErrorRepo.collectAsState()
-    val loadMoreErrorUser by searchViewModel.loadMoreErrorUser.collectAsState()
-    val searchHistory by searchViewModel.searchHistory.collectAsState(initial = emptyList<SearchHistoryEntity>())
+    val searchQuery by searchViewModel.searchQuery.collectAsStateWithLifecycle()
+    val searchType by searchViewModel.searchType.collectAsStateWithLifecycle()
+    val repositoryResults by searchViewModel.repositoryResults.collectAsStateWithLifecycle()
+    val userResults by searchViewModel.userResults.collectAsStateWithLifecycle()
+    val isPageLoading by searchViewModel.isPageLoading.collectAsStateWithLifecycle()
+    val error by searchViewModel.error.collectAsStateWithLifecycle()
+    val isRefreshing by searchViewModel.isRefreshing.collectAsStateWithLifecycle()
+    val isLoadingMore by searchViewModel.isLoadingMore.collectAsStateWithLifecycle()
+    val hasMoreRepo by searchViewModel.hasMoreRepo.collectAsStateWithLifecycle()
+    val hasMoreUser by searchViewModel.hasMoreUser.collectAsStateWithLifecycle()
+    val loadMoreErrorRepo by searchViewModel.loadMoreErrorRepo.collectAsStateWithLifecycle()
+    val loadMoreErrorUser by searchViewModel.loadMoreErrorUser.collectAsStateWithLifecycle()
+    val searchHistory by searchViewModel.searchHistory.collectAsStateWithLifecycle(initialValue = emptyList<SearchHistoryEntity>())
 
     val focusManager = LocalFocusManager.current
     var isSearchFieldFocused by remember { mutableStateOf(false) }
@@ -86,7 +87,10 @@ fun SearchScreen(
                 LazyColumn(
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    items(items = searchHistory) { historyItem: SearchHistoryEntity ->
+                    items(
+                        items = searchHistory,
+                        key = { historyItem: SearchHistoryEntity -> historyItem.query }
+                    ) { historyItem: SearchHistoryEntity ->
                         Text(
                             text = historyItem.query,
                             modifier = Modifier
@@ -161,13 +165,19 @@ fun SearchScreen(
                     ) {
                         when (searchType) {
                             SearchType.REPOSITORY -> {
-                                items(repositoryResults) {
+                                items(
+                                    items = repositoryResults,
+                                    key = { repository -> repository.id }
+                                ) {
                                     RepositoryItem(it.toRepositoryDisplayData())
                                 }
                             }
 
                             SearchType.USER -> {
-                                items(userResults) {
+                                items(
+                                    items = userResults,
+                                    key = { user -> user.login }
+                                ) {
                                     UserItem(user = it) { user ->
                                         navigator.navigate("person/${user.login}")
                                     }

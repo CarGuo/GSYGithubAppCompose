@@ -31,7 +31,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,6 +46,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.shuyu.gsygithubappcompose.core.network.model.Comment
 import com.shuyu.gsygithubappcompose.core.network.model.Issue
@@ -67,7 +67,7 @@ import com.shuyu.gsygithubappcompose.data.repository.vm.BaseScreen
 fun IssueScreen(
     owner: String, repoName: String, issueNumber: Int, viewModel: IssueViewModel = hiltViewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val clipboardManager = LocalClipboardManager.current
 
     LaunchedEffect(owner, repoName, issueNumber) {
@@ -152,7 +152,10 @@ fun IssueScreen(
                                 })
                             }
                         }
-                        items(uiState.comments) { comment ->
+                        items(
+                            items = uiState.comments,
+                            key = { comment -> comment.id }
+                        ) { comment ->
                             IssueCommentItem(comment = comment, onClick = {
                                 viewModel.showOptionDialog(true, comment)
                             }, onLongPress = {

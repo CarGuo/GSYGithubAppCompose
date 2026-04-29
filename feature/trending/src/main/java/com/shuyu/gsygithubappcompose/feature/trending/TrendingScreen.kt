@@ -2,13 +2,13 @@ package com.shuyu.gsygithubappcompose.feature.trending
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.shuyu.gsygithubappcompose.data.repository.vm.BaseScreen
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYGeneralLoadState
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYPullRefresh
@@ -19,7 +19,7 @@ import com.shuyu.gsygithubappcompose.core.ui.components.toTrendingDisplayData
 fun TrendingScreen(
     viewModel: TrendingViewModel = hiltViewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
         viewModel.doInitialLoad()
@@ -42,7 +42,10 @@ fun TrendingScreen(
                 contentPadding = PaddingValues(5.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(uiState.repositories) { repo ->
+                itemsIndexed(
+                    items = uiState.repositories,
+                    key = { index, repo -> repo.url ?: repo.fullName ?: "${repo.name}/${repo.reposName}:$index" }
+                ) { _, repo ->
                     RepositoryItem(repoItem = repo.toTrendingDisplayData())
                 }
             }

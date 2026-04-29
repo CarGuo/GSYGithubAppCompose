@@ -4,9 +4,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.shuyu.gsygithubappcompose.core.ui.components.EventItem
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYGeneralLoadState
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYPullRefresh
@@ -16,7 +16,7 @@ import com.shuyu.gsygithubappcompose.data.repository.vm.BaseScreen
 fun DynamicScreen(
     viewModel: DynamicViewModel = hiltViewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val listState = rememberLazyListState()
 
     LaunchedEffect(Unit) {
@@ -39,7 +39,10 @@ fun DynamicScreen(
                 itemCount = uiState.events.size,
                 loadMoreError = uiState.loadMoreError
             ) {
-                items(uiState.events) { event ->
+                items(
+                    items = uiState.events,
+                    key = { event -> event.id }
+                ) { event ->
                     EventItem(event = event)
                 }
             }

@@ -8,8 +8,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import okhttp3.OkHttpClient
-import org.junit.Test
 import org.junit.Assert.*
+import org.junit.Assume.assumeTrue
+import org.junit.Test
 
 // Fake UserPreferencesDataStore for testing
 class FakeUserPreferencesDataStore(private val token: String?) : IUserPreferencesDataStore {
@@ -31,7 +32,8 @@ class GraphQLServiceTest {
         // Given
         val owner = "octocat"
         val name = "Hello-World"
-        val fakeToken = "YOUR_TOKEN" // Replace with a valid token for testing if needed
+        val fakeToken = System.getenv("GITHUB_TOKEN") ?: System.getenv("GH_TOKEN")
+        assumeTrue("Set GITHUB_TOKEN or GH_TOKEN to run GitHub GraphQL integration tests.", !fakeToken.isNullOrBlank())
 
         val fakeUserPreferencesDataStore = FakeUserPreferencesDataStore(fakeToken)
 

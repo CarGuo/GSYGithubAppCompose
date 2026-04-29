@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -21,7 +22,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,6 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.shuyu.gsygithubappcompose.core.common.R
 import com.shuyu.gsygithubappcompose.core.network.model.CommitFile
@@ -47,7 +48,7 @@ import com.shuyu.gsygithubappcompose.data.repository.vm.BaseScreen
 
 @Composable
 fun PushDetailScreen(pushDetailViewModel: PushDetailViewModel = hiltViewModel()) {
-    val uiState by pushDetailViewModel.uiState.collectAsState()
+    val uiState by pushDetailViewModel.uiState.collectAsStateWithLifecycle()
 
     BaseScreen(
         viewModel = pushDetailViewModel,
@@ -79,7 +80,10 @@ fun PushDetailScreen(pushDetailViewModel: PushDetailViewModel = hiltViewModel())
                                 PushDetailHeader(pushCommit = pushCommit)
                             }
                             pushCommit.files?.let { files ->
-                                items(files) { file ->
+                                itemsIndexed(
+                                    items = files,
+                                    key = { index, file -> file.filename ?: file.sha ?: "${file.status}:$index" }
+                                ) { _, file ->
                                     CommitFileItem(
                                         file = file,
                                         owner = uiState.owner ?: "",

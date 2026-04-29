@@ -10,13 +10,14 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.shuyu.gsygithubappcompose.core.common.R
 import com.shuyu.gsygithubappcompose.core.network.model.User
 import com.shuyu.gsygithubappcompose.core.ui.LocalNavigator
@@ -33,10 +34,12 @@ fun ListScreen(
     listType: String,
     listViewModel: ListViewModel = hiltViewModel()
 ) {
-    val uiState by listViewModel.uiState.collectAsState()
+    val uiState by listViewModel.uiState.collectAsStateWithLifecycle()
     val navigator = LocalNavigator.current
 
-    listViewModel.loadData(userName, repoName, listType)
+    LaunchedEffect(userName, repoName, listType) {
+        listViewModel.loadData(userName, repoName, listType)
+    }
 
     Scaffold(
         topBar = {
@@ -69,7 +72,16 @@ fun ListScreen(
                     contentPadding = PaddingValues(5.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    items(uiState.list.size) { index ->
+                    items(
+                        count = uiState.list.size,
+                        key = { index ->
+                            when (val item = uiState.list[index]) {
+                                is RepoItemDisplayData -> "repo:${item.fullName}"
+                                is User -> "user:${item.id}"
+                                else -> "item:$index"
+                            }
+                        }
+                    ) { index ->
                         val item = uiState.list[index]
                         when (item) {
                             is RepoItemDisplayData -> {

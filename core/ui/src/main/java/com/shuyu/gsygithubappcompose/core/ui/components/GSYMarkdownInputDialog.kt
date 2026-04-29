@@ -26,6 +26,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -66,8 +67,26 @@ fun GSYMarkdownInputDialog(
     onTitleChange: (String) -> Unit = {},
     onTextChange: (String) -> Unit = {}
 ) {
-    var currentTitle by remember { mutableStateOf(TextFieldValue(initialTitle ?: "")) }
-    var currentText by remember { mutableStateOf(TextFieldValue(initialText ?: "")) }
+    val initialTitleText = initialTitle ?: ""
+    val initialBodyText = initialText ?: ""
+    var currentTitle by remember { mutableStateOf(TextFieldValue(initialTitleText)) }
+    var currentText by remember { mutableStateOf(TextFieldValue(initialBodyText)) }
+    var lastInitialTitle by remember { mutableStateOf(initialTitleText) }
+    var lastInitialText by remember { mutableStateOf(initialBodyText) }
+
+    LaunchedEffect(initialTitleText) {
+        if (currentTitle.text == lastInitialTitle) {
+            currentTitle = TextFieldValue(initialTitleText)
+        }
+        lastInitialTitle = initialTitleText
+    }
+
+    LaunchedEffect(initialBodyText) {
+        if (currentText.text == lastInitialText) {
+            currentText = TextFieldValue(initialBodyText)
+        }
+        lastInitialText = initialBodyText
+    }
 
     val markdownActions = remember {
         listOf(

@@ -69,7 +69,10 @@ fun ProfileContent(
             }
             if (uiState.user?.type == "Organization") {
                 uiState.orgMembers?.let {
-                    items(it) { member ->
+                    items(
+                        items = it,
+                        key = { member -> member.id }
+                    ) { member ->
                         UserItem(user = member) { user ->
                             navigator.navigate("person/${user.login}")
                         }
@@ -77,7 +80,10 @@ fun ProfileContent(
                 }
             } else {
                 uiState.userEvents?.let {
-                    items(it) { event ->
+                    items(
+                        items = it,
+                        key = { event -> event.id }
+                    ) { event ->
                         EventItem(event = event)
                     }
                 }

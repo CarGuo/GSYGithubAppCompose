@@ -5,7 +5,6 @@ import android.webkit.WebView
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
@@ -16,18 +15,19 @@ import com.shuyu.gsygithubappcompose.feature.detail.LocalRepoOwner
 import com.shuyu.gsygithubappcompose.feature.detail.LocalRepoName
 import com.shuyu.gsygithubappcompose.feature.detail.LocalRepoDetailReadmeViewModel
 import com.shuyu.gsygithubappcompose.feature.detail.LocalRepoDetailInfoViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
 fun RepoDetailReadmeScreen(
 ) {
     val viewModel = LocalRepoDetailReadmeViewModel.current
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val owner = LocalRepoOwner.current
     val repo = LocalRepoName.current
 
     val repoDetailInfoViewModel = LocalRepoDetailInfoViewModel.current
-    val repoDetailInfoUiState by repoDetailInfoViewModel.uiState.collectAsState()
+    val repoDetailInfoUiState by repoDetailInfoViewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(owner, repo, repoDetailInfoUiState.selectedBranch, repoDetailInfoUiState.repoDetail?.defaultBranchRef) {
         viewModel.loadReadme(owner, repo, repoDetailInfoUiState.selectedBranch, repoDetailInfoUiState.repoDetail?.defaultBranchRef)

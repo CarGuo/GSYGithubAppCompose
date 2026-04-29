@@ -4,10 +4,10 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.composable
 import com.shuyu.gsygithubappcompose.core.ui.GSYNavHost
 import com.shuyu.gsygithubappcompose.core.ui.theme.GSYGithubAppComposeTheme
@@ -46,7 +46,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             // Observe the current language from LanguageManager
-            val appLanguage by languageManager.appLanguage.collectAsState(languageManager.getAppLanguageSync())
+            val appLanguage by languageManager.appLanguage.collectAsStateWithLifecycle(languageManager.getAppLanguageSync())
             val currentLocale = remember(appLanguage) {
                 languageManager.appLanguageToLocale(appLanguage)
             }

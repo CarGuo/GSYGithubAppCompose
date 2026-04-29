@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.Message
 import androidx.compose.material.icons.filled.Group
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYPullRefresh
 import com.shuyu.gsygithubappcompose.core.ui.components.GSYGeneralLoadState
 import com.shuyu.gsygithubappcompose.data.repository.vm.BaseScreen
@@ -26,7 +27,7 @@ import com.shuyu.gsygithubappcompose.core.common.R
 
 @Composable
 fun InfoScreen(viewModel: InfoViewModel = hiltViewModel()) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     var showEditDialog by remember { mutableStateOf(false) }
     var editingField by remember { mutableStateOf("") }

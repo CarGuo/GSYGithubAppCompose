@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -22,12 +21,13 @@ import com.shuyu.gsygithubappcompose.feature.detail.LocalRepoOwner
 import com.shuyu.gsygithubappcompose.feature.detail.LocalRepoName
 import com.shuyu.gsygithubappcompose.feature.detail.LocalRepoDetailIssueViewModel
 import com.shuyu.gsygithubappcompose.core.ui.LocalNavigator
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @Composable
 fun RepoDetailIssueScreen(
 ) {
     val viewModel = LocalRepoDetailIssueViewModel.current
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val owner = LocalRepoOwner.current
     val repoName = LocalRepoName.current
     val navigator = LocalNavigator.current
@@ -93,7 +93,10 @@ fun RepoDetailIssueScreen(
                     itemCount = uiState.issues.size,
                     loadMoreError = uiState.loadMoreError
                 ) {
-                    items(uiState.issues) { issue ->
+                    items(
+                        items = uiState.issues,
+                        key = { issue -> issue.id }
+                    ) { issue ->
                         IssueItem(issue = issue, onClick = {
                             navigator.navigate("issue_detail/${owner}/${repoName}/${issue.number}")
                         })

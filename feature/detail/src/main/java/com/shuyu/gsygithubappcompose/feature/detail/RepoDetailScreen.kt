@@ -25,7 +25,6 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -68,6 +67,7 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material.icons.outlined.VisibilityOff
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 
 val LocalRepoOwner = staticCompositionLocalOf<String> { error("No Repo Owner provided") }
@@ -103,7 +103,7 @@ fun RepoDetailScreen(
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
 
-    val uiState by repoDetailInfoViewModel.uiState.collectAsState()
+    val uiState by repoDetailInfoViewModel.uiState.collectAsStateWithLifecycle()
 
     // Unified refresh function for all tabs
     val refreshAllTabs: (String?, String?) -> Unit = { selectedBranch, defaultBranch ->
