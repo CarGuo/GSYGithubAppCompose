@@ -45,7 +45,7 @@ fun HistoryScreen(
             ) {
                 items(
                     count = lazyPagingItems.itemCount,
-                    key = { lazyPagingItems.peek(it)?.id ?: "" }
+                    key = { index -> lazyPagingItems.peek(index)?.id ?: "placeholder:$index" }
                 ) { it ->
                     lazyPagingItems[it]?.let {
                         RepositoryItem(

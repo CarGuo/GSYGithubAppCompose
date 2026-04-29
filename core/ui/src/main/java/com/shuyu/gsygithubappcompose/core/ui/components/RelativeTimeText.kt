@@ -3,6 +3,7 @@ package com.shuyu.gsygithubappcompose.core.ui.components
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -31,9 +32,12 @@ fun RelativeTimeText(
 
 @Composable
 fun getRelativeTimeSpanString(dateString: String): String {
-    val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault())
-    sdf.timeZone = java.util.TimeZone.getTimeZone("UTC")
-    val date = sdf.parse(dateString)
+    val locale = Locale.getDefault()
+    val date = remember(dateString, locale) {
+        SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", locale).apply {
+            timeZone = java.util.TimeZone.getTimeZone("UTC")
+        }.parse(dateString)
+    }
 
     if (date == null) {
         return dateString

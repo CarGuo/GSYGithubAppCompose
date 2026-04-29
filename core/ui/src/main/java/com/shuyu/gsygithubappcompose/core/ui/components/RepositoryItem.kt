@@ -55,13 +55,15 @@ data class TrendingDisplayData(
 
 @Composable
 fun RepositoryItem(
-    repoItem: RepoItemDisplayData
+    repoItem: RepoItemDisplayData,
+    modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null
 ) {
     val navigator = LocalNavigator.current
     GSYCardItem(
-        modifier = Modifier
+        modifier = modifier
             .clickable {
-                navigator.navigate("repo_detail/${repoItem.ownerName}/${repoItem.name}")
+                onClick?.invoke() ?: navigator.navigate("repo_detail/${repoItem.ownerName}/${repoItem.name}")
             }
     ) {
         Column(

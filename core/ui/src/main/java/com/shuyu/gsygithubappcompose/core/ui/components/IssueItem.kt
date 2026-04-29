@@ -14,9 +14,13 @@ import androidx.compose.ui.unit.dp
 import com.shuyu.gsygithubappcompose.core.network.model.Issue
 
 @Composable
-fun IssueItem(issue: Issue, onClick: () -> Unit) {
+fun IssueItem(
+    issue: Issue,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
     GSYCardItem(
-        modifier = Modifier.clickable { onClick() }
+        modifier = modifier.clickable { onClick() }
     ) {
         Column(
             modifier = Modifier.padding(16.dp)

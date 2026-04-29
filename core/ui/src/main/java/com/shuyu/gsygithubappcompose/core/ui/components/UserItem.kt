@@ -17,10 +17,11 @@ import com.shuyu.gsygithubappcompose.core.network.model.User
 @Composable
 fun UserItem(
     user: User,
+    modifier: Modifier = Modifier,
     onClick: (User) -> Unit
 ) {
     GSYCardItem(
-        modifier = Modifier
+        modifier = modifier
             .clickable { onClick(user) }
     ) {
         Row(

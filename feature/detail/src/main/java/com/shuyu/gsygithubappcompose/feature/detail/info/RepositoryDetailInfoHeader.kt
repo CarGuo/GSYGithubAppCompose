@@ -34,6 +34,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
@@ -54,6 +55,8 @@ import java.util.Locale
 import java.util.Date
 import com.shuyu.gsygithubappcompose.core.common.R
 import com.shuyu.gsygithubappcompose.core.ui.LocalNavigator
+
+private const val INVALID_DATE_TEXT = "Invalid Date"
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -200,86 +203,41 @@ fun RepositoryDetailInfoHeader(
                 Column(
                     modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.End
                 ) {
-                    val inputDateFormatIso8601WithMillis =
-                        SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
-                    val inputDateFormatIso8601NoMillis =
-                        SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US)
-                    val outputDateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-
-                    val createdAtDate: Date? = try {
-                        inputDateFormatIso8601WithMillis.parse(repositoryDetailModel.createdAt)
-                    } catch (e: Exception) {
-                        try {
-                            inputDateFormatIso8601NoMillis.parse(repositoryDetailModel.createdAt)
-                        } catch (e2: Exception) {
-                            null
-                        }
+                    val locale = Locale.getDefault()
+                    val createdAtText = remember(repositoryDetailModel.createdAt, locale) {
+                        formatRepositoryDate(repositoryDetailModel.createdAt, locale) ?: INVALID_DATE_TEXT
                     }
 
-                    if (createdAtDate != null) {
-                        Text(
-                            text = stringResource(
-                                id = R.string.repo_detail_created,
-                                outputDateFormat.format(createdAtDate)
-                            ), style = TextStyle(
-                                color = Color.White.copy(alpha = 0.6f),
-                                fontSize = 12.sp,
-                                shadow = Shadow(
-                                    color = Color.Black, blurRadius = 8f
-                                )
+                    Text(
+                        text = stringResource(
+                            id = R.string.repo_detail_created,
+                            createdAtText
+                        ), style = TextStyle(
+                            color = Color.White.copy(alpha = 0.6f),
+                            fontSize = 12.sp,
+                            shadow = Shadow(
+                                color = Color.Black, blurRadius = 8f
                             )
                         )
-                    } else {
-                        Text(
-                            text = stringResource(
-                                id = R.string.repo_detail_created, "Invalid Date"
-                            ), style = TextStyle(
-                                color = Color.White.copy(alpha = 0.6f),
-                                fontSize = 12.sp,
-                                shadow = Shadow(
-                                    color = Color.Black, blurRadius = 8f
-                                )
-                            )
-                        )
-                    }
+                    )
 
                     repositoryDetailModel.pushedAt?.let { pushedAtString ->
-                        val pushedAtDate: Date? = try {
-                            inputDateFormatIso8601WithMillis.parse(pushedAtString)
-                        } catch (e: Exception) {
-                            try {
-                                inputDateFormatIso8601NoMillis.parse(pushedAtString)
-                            } catch (e2: Exception) {
-                                null
-                            }
+                        val pushedAtText = remember(pushedAtString, locale) {
+                            formatRepositoryDate(pushedAtString, locale) ?: INVALID_DATE_TEXT
                         }
 
-                        if (pushedAtDate != null) {
-                            Text(
-                                text = stringResource(
-                                    id = R.string.repo_detail_last_commit,
-                                    outputDateFormat.format(pushedAtDate)
-                                ), style = TextStyle(
-                                    color = Color.White.copy(alpha = 0.6f),
-                                    fontSize = 12.sp,
-                                    shadow = Shadow(
-                                        color = Color.Black, blurRadius = 8f
-                                    )
-                                ), modifier = Modifier.padding(top = 4.dp)
-                            )
-                        } else {
-                            Text(
-                                text = stringResource(
-                                    id = R.string.repo_detail_last_commit, "Invalid Date"
-                                ), style = TextStyle(
-                                    color = Color.White.copy(alpha = 0.6f),
-                                    fontSize = 12.sp,
-                                    shadow = Shadow(
-                                        color = Color.Black, blurRadius = 8f
-                                    )
+                        Text(
+                            text = stringResource(
+                                id = R.string.repo_detail_last_commit,
+                                pushedAtText
+                            ), style = TextStyle(
+                                color = Color.White.copy(alpha = 0.6f),
+                                fontSize = 12.sp,
+                                shadow = Shadow(
+                                    color = Color.Black, blurRadius = 8f
                                 )
-                            )
-                        }
+                            ), modifier = Modifier.padding(top = 4.dp)
+                        )
                     }
                 }
 
@@ -361,6 +319,26 @@ fun RepositoryDetailInfoHeader(
             }
         }
     }
+}
+
+private fun formatRepositoryDate(dateString: String?, locale: Locale): String? {
+    if (dateString.isNullOrBlank()) return null
+
+    val inputDateFormatIso8601WithMillis = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
+    val inputDateFormatIso8601NoMillis = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US)
+    val outputDateFormat = SimpleDateFormat("yyyy-MM-dd", locale)
+
+    val date: Date = try {
+        inputDateFormatIso8601WithMillis.parse(dateString)
+    } catch (e: Exception) {
+        try {
+            inputDateFormatIso8601NoMillis.parse(dateString)
+        } catch (e2: Exception) {
+            null
+        }
+    } ?: return null
+
+    return outputDateFormat.format(date)
 }
 
 @Composable

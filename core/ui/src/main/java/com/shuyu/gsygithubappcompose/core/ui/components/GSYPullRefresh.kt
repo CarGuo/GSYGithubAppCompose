@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.shuyu.gsygithubappcompose.core.common.R
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 /**
  * 下拉刷新和上拉加载更多
@@ -56,6 +57,13 @@ fun GSYPullRefresh(
     loadMoreError: Boolean = false,
     content: LazyListScope.() -> Unit
 ) {
+    val currentOnLoadMore by rememberUpdatedState(onLoadMore)
+    val currentItemCount by rememberUpdatedState(itemCount)
+    val currentIsLoadMore by rememberUpdatedState(isLoadMore)
+    val currentIsRefreshing by rememberUpdatedState(isRefreshing)
+    val currentHasMore by rememberUpdatedState(hasMore)
+    val currentLoadMoreError by rememberUpdatedState(loadMoreError)
+
     PullToRefreshBox(
         modifier = modifier,
         isRefreshing = isRefreshing,
@@ -92,7 +100,7 @@ fun GSYPullRefresh(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(8.dp)
-                                .clickable { onLoadMore() }, // Click to retry
+                                .clickable { currentOnLoadMore() }, // Click to retry
                             contentAlignment = Alignment.Center
                         ) {
                             Text(text = stringResource(id = R.string.load_failed_click_to_retry)) // Assuming you'll add this string resource
@@ -127,30 +135,45 @@ fun GSYPullRefresh(
         ///判断滚动位置: 代码中有一个 shouldLoadMore 的状态，它会持续观察列表的滚动状态：
         ///当用户滚动列表，即将看到倒数第二个 item 时，shouldLoadMore 的值就会变为 true。
 
-        val shouldLoadMore by remember {
-            derivedStateOf {
+        LaunchedEffect(listState) {
+            snapshotFlow {
                 val lastVisibleItem = listState.layoutInfo.visibleItemsInfo.lastOrNull()
-                if (lastVisibleItem == null || listState.layoutInfo.totalItemsCount == 0) {
+                val shouldLoadMore = if (lastVisibleItem == null || listState.layoutInfo.totalItemsCount == 0) {
                     false
                 } else {
                     lastVisibleItem.index >= listState.layoutInfo.totalItemsCount - 2
                 }
+                LoadMoreSnapshot(
+                    shouldLoadMore = shouldLoadMore,
+                    itemCount = currentItemCount,
+                    isLoadMore = currentIsLoadMore,
+                    isRefreshing = currentIsRefreshing,
+                    hasMore = currentHasMore,
+                    loadMoreError = currentLoadMoreError
+                )
             }
-        }
-
-        /// LaunchedEffect 会观察 shouldLoadMore 的变化：
-        ///当 shouldLoadMore 变为 true 时，这个 LaunchedEffect 会执行。
-
-        // 它会进行一系列判断：◦shouldLoadMore: 是否滚动到了底部？◦
-        // !isLoadMore: 当前是否没有正在加载更多？（防止重复触发）◦
-        // !isRefreshing: 当前是否没有在下拉刷新？（防止冲突）◦
-        // hasMore: 是否还有更多数据可供加载？
-        // 如果所有条件都满足，就会调用您传入的 onLoadMore() 回调函数，从而触发加载更多的逻辑。
-
-        LaunchedEffect(shouldLoadMore) {
-            if (itemCount > 0 && shouldLoadMore && !isLoadMore && !isRefreshing && hasMore && !loadMoreError) {
-                onLoadMore()
-            }
+                .distinctUntilChanged()
+                .collect { snapshot ->
+                    if (
+                        snapshot.itemCount > 0 &&
+                        snapshot.shouldLoadMore &&
+                        !snapshot.isLoadMore &&
+                        !snapshot.isRefreshing &&
+                        snapshot.hasMore &&
+                        !snapshot.loadMoreError
+                    ) {
+                        currentOnLoadMore()
+                    }
+                }
         }
     }
 }
+
+private data class LoadMoreSnapshot(
+    val shouldLoadMore: Boolean,
+    val itemCount: Int,
+    val isLoadMore: Boolean,
+    val isRefreshing: Boolean,
+    val hasMore: Boolean,
+    val loadMoreError: Boolean
+)

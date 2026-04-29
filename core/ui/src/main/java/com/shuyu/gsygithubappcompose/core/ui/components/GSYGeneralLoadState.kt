@@ -21,10 +21,11 @@ fun GSYGeneralLoadState(
     isLoading: Boolean,
     error: String?,
     retry: () -> Unit,
+    modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
     Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
         when {

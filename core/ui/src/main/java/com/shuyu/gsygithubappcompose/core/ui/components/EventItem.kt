@@ -33,7 +33,8 @@ import java.util.TimeZone
 
 @Composable
 fun EventItem(
-    event: Event
+    event: Event,
+    modifier: Modifier = Modifier
 ) {
     var showDialog by remember { mutableStateOf(false) }
 
@@ -41,7 +42,7 @@ fun EventItem(
     val context = LocalContext.current
 
     GSYCardItem(
-        modifier = Modifier.clickable {
+        modifier = modifier.clickable {
             val repoNameArray = event.repo.name.split("/")
             val owner = repoNameArray.getOrNull(0)
             val repoName = repoNameArray.getOrNull(1)

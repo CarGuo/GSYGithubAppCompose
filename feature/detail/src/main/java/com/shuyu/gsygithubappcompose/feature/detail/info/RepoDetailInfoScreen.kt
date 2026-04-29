@@ -95,6 +95,12 @@ fun RepoDetailInfoScreen(
                             is RepoDetailListItem.EventItem -> "event:${item.event.id}"
                             is RepoDetailListItem.CommitItem -> "commit:${item.commit.sha}"
                         }
+                    },
+                    contentType = { item ->
+                        when (item) {
+                            is RepoDetailListItem.EventItem -> "event"
+                            is RepoDetailListItem.CommitItem -> "commit"
+                        }
                     }
                 ) { item ->
                     when (item) {

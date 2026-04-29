@@ -11,6 +11,8 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import com.shuyu.gsygithubappcompose.core.common.R
 import com.shuyu.gsygithubappcompose.core.ui.LocalNavigator
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -32,7 +34,7 @@ fun GSYTopAppBar(
                 IconButton(onClick = { navigator.back() }) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back"
+                        contentDescription = stringResource(id = R.string.nav_back)
                     )
                 }
             }

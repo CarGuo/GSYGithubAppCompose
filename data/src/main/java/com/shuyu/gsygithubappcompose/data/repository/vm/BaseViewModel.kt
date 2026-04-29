@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -132,8 +133,8 @@ abstract class BaseViewModel<UiState : BaseUiState>(
         isRefresh: Boolean,
         isLoadMore: Boolean,
         dataLoad: suspend CoroutineScope.(pageToLoad: Int) -> Unit
-    ) {
-        viewModelScope.launch {
+    ): Job {
+        return viewModelScope.launch {
             updateLoadingState(initialLoad, isRefresh, isLoadMore)
             val pageToLoad = if (isRefresh) 1 else _uiState.value.currentPage
             this.dataLoad(pageToLoad)
@@ -251,6 +252,11 @@ abstract class BaseViewModel<UiState : BaseUiState>(
             isInitialLoadStarted = true
             loadData(initialLoad = true)
         }
+    }
+
+    fun reload() {
+        isInitialLoadStarted = true
+        loadData(initialLoad = true)
     }
 
     fun refresh() {

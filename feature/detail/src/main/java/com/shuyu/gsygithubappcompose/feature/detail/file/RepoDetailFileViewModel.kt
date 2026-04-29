@@ -8,6 +8,7 @@ import com.shuyu.gsygithubappcompose.data.repository.vm.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import com.shuyu.gsygithubappcompose.core.common.util.StringResourceProvider
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.update
 
 data class RepoDetailFileUiState(
@@ -47,6 +48,7 @@ class RepoDetailFileViewModel @Inject constructor(
         )
     }
 ) {
+    private var fileContentLoadJob: Job? = null
 
     private val _owner = savedStateHandle.getStateFlow<String?>("userName", null)
     private val _repoName = savedStateHandle.getStateFlow<String?>("repoName", null)
@@ -55,7 +57,6 @@ class RepoDetailFileViewModel @Inject constructor(
         _owner.value?.let { owner ->
             _repoName.value?.let { repoName ->
                 _uiState.update { it.copy(owner = owner, repoName = repoName) }
-                doInitialLoad() // Use public method
             }
         }
     }
@@ -67,9 +68,20 @@ class RepoDetailFileViewModel @Inject constructor(
         val currentDefaultBranch = uiState.value.defaultBranch
         val currentPath = uiState.value.currentPath
 
-        launchDataLoad(initialLoad, isRefresh, isLoadMore) { pageToLoad ->
+        fileContentLoadJob?.cancel()
+        fileContentLoadJob = launchDataLoad(initialLoad, isRefresh, isLoadMore) { pageToLoad ->
             fileContentRepository.getRepositoryContents(currentOwner, currentRepoName, currentPath, currentBranch, currentDefaultBranch)
                 .collect {
+                    val latestState = uiState.value
+                    if (latestState.owner != currentOwner ||
+                        latestState.repoName != currentRepoName ||
+                        latestState.branch != currentBranch ||
+                        latestState.defaultBranch != currentDefaultBranch ||
+                        latestState.currentPath != currentPath
+                    ) {
+                        return@collect
+                    }
+
                     _uiState.update { uiState ->
                         uiState.copy(
                             isPageLoading = initialLoad,
@@ -126,6 +138,21 @@ class RepoDetailFileViewModel @Inject constructor(
     }
 
     fun setRepoInfo(owner: String, repoName: String, branch: String?, defaultBranch: String?) {
-        _uiState.update { it.copy(owner = owner, repoName = repoName, branch = branch, defaultBranch = defaultBranch) }
+        _uiState.update { currentState ->
+            val repoInfoChanged = currentState.owner != owner ||
+                currentState.repoName != repoName ||
+                currentState.branch != branch ||
+                currentState.defaultBranch != defaultBranch
+
+            currentState.copy(
+                owner = owner,
+                repoName = repoName,
+                branch = branch,
+                defaultBranch = defaultBranch,
+                currentPath = if (currentState.owner != owner || currentState.repoName != repoName) "" else currentState.currentPath,
+                pathSegments = if (currentState.owner != owner || currentState.repoName != repoName) emptyList() else currentState.pathSegments,
+                fileContents = if (repoInfoChanged) emptyList() else currentState.fileContents
+            )
+        }
     }
 }

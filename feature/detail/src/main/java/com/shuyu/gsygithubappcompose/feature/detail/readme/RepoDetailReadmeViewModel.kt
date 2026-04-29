@@ -6,6 +6,7 @@ import com.shuyu.gsygithubappcompose.data.repository.ReadmeRepository
 import com.shuyu.gsygithubappcompose.data.repository.vm.BaseUiState
 import com.shuyu.gsygithubappcompose.data.repository.vm.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
@@ -45,15 +46,42 @@ class RepoDetailReadmeViewModel @Inject constructor(
         )
     }
 ) {
+    private var readmeLoadJob: Job? = null
 
     fun loadReadme(owner: String, repo: String, branch: String?, defaultBranch: String?) {
-        _uiState.update {
-            it.copy(owner = owner, repo = repo, branch = branch, defaultBranch = defaultBranch)
+        val currentState = uiState.value
+        val repoInfoChanged = currentState.owner != owner ||
+            currentState.repo != repo ||
+            currentState.branch != branch ||
+            currentState.defaultBranch != defaultBranch
+        val shouldReload = repoInfoChanged ||
+            (
+                currentState.readme == null &&
+                    !currentState.isPageLoading &&
+                    !currentState.isRefreshing &&
+                    currentState.error == null
+                )
+
+        _uiState.update { currentState ->
+            currentState.copy(
+                owner = owner,
+                repo = repo,
+                branch = branch,
+                defaultBranch = defaultBranch,
+                readme = if (repoInfoChanged) null else currentState.readme
+            )
         }
-        doInitialLoad()
+        if (shouldReload) {
+            reload()
+        }
     }
 
     override fun loadData(initialLoad: Boolean, isRefresh: Boolean, isLoadMore: Boolean) {
+        val requestOwner = uiState.value.owner
+        val requestRepo = uiState.value.repo
+        val requestBranch = uiState.value.branch
+        val requestDefaultBranch = uiState.value.defaultBranch
+
         // Update loading state first
         _uiState.update {
             when {
@@ -63,8 +91,17 @@ class RepoDetailReadmeViewModel @Inject constructor(
             }
         }
 
-        readmeRepository.getReadme(uiState.value.owner, uiState.value.repo, uiState.value.branch, uiState.value.defaultBranch)
+        readmeLoadJob?.cancel()
+        readmeLoadJob = readmeRepository.getReadme(requestOwner, requestRepo, requestBranch, requestDefaultBranch)
             .onEach { result ->
+                if (uiState.value.owner != requestOwner ||
+                    uiState.value.repo != requestRepo ||
+                    uiState.value.branch != requestBranch ||
+                    uiState.value.defaultBranch != requestDefaultBranch
+                ) {
+                    return@onEach
+                }
+
                 _uiState.update {
                     if (result.data.isSuccess) {
                         it.copy(

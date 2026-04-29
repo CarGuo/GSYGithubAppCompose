@@ -43,7 +43,7 @@ fun RepoDetailFileScreen(
 
     LaunchedEffect(owner, repoName, repoDetailInfoUiState.selectedBranch, repoDetailInfoUiState.repoDetail?.defaultBranchRef) {
         viewModel.setRepoInfo(owner, repoName, repoDetailInfoUiState.selectedBranch, repoDetailInfoUiState.repoDetail?.defaultBranchRef)
-        viewModel.doInitialLoad()
+        viewModel.reload()
     }
 
     BaseScreen(viewModel = viewModel) {

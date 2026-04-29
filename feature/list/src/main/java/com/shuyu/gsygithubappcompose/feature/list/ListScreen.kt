@@ -80,6 +80,13 @@ fun ListScreen(
                                 is User -> "user:${item.id}"
                                 else -> "item:$index"
                             }
+                        },
+                        contentType = { index ->
+                            when (uiState.list[index]) {
+                                is RepoItemDisplayData -> "repo"
+                                is User -> "user"
+                                else -> "unknown"
+                            }
                         }
                     ) { index ->
                         val item = uiState.list[index]

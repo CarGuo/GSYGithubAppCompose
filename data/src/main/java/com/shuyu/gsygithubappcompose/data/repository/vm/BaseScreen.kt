@@ -18,10 +18,10 @@ fun <VM : BaseViewModel<*>> BaseScreen(
     viewModel: VM,
     content: @Composable () -> Unit
 ) {
-    val context = LocalContext.current
+    val context = LocalContext.current.applicationContext
 
     // 监听来自 ViewModel 的 Toast 消息
-    LaunchedEffect(Unit) {
+    LaunchedEffect(viewModel, context) {
         viewModel.toastMessage.collectLatest { message ->
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
         }
