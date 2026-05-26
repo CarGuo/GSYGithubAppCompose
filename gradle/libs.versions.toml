@@ -8,8 +8,8 @@ junitVersion = "1.2.1"
 espressoCore = "3.6.1"
 lifecycleRuntimeKtx = "2.8.7"
 activityCompose = "1.9.3"
-composeBom = "2024.12.01"
-hilt = "2.59"
+composeBom = "2025.05.00"
+hilt = "2.59.1"
 hiltNavigation = "1.2.0"
 retrofit = "2.11.0"
 okhttp = "4.12.0"
@@ -24,8 +24,8 @@ accompanist = "0.36.0"
 apollo = "4.4.0"
 gson = "2.11.0"
 twain = "0.3.2"
-appcompat = "1.7.0" # Added
-composeRuntime = "1.7.6" # Added
+appcompat = "1.7.0"
+composeRuntime = "1.7.6"
 lottie = "6.6.2"
 
 [libraries]
