@@ -4,6 +4,7 @@
 
 ## An open-source native Android Github client App, providing richer features and a better experience. It aims to better manage and maintain personal Github projects daily, offering a more convenient "driving" experience～～Σ(￣。￣ﾉ)ﾉ. The project is developed with Jetpack Compose and offers a variety of counterparts for comparison:
 
+* ### Compose Multiplatform Version ( https://github.com/CarGuo/GSYGithubAppCMP )
 * ### Flutter Version ( https://github.com/CarGuo/GSYGithubAppFlutter )
 * ### Kotlin View Version ( https://github.com/CarGuo/GSYGithubAppKotlin )
 * ### ReactNative Version ( https://github.com/CarGuo/GSYGithubApp )

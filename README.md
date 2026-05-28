@@ -4,6 +4,7 @@
 
 ## 一款 Android 原生的开源 Github 客户端 App，提供更丰富的功能，更好体验，旨在更好的日常管理和维护个人 Github，提供更好更方便的驾车体验～～Σ(￣。￣ﾉ)ﾉ，项目采用 Jetpack Compose 开发，并提供丰富的同款对比：
 
+* ### 同款 Compose Multiplatform 版 （ https://github.com/CarGuo/GSYGithubAppCMP ）
 * ### 同款 Flutter 版 （ https://github.com/CarGuo/GSYGithubAppFlutter ）
 * ### 同款 Kotlin View 版 （ https://github.com/CarGuo/GSYGithubAppKotlin ）
 * ### 同款 ReactNative 版 （ https://github.com/CarGuo/GSYGithubApp ）
